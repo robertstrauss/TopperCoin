@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <title>TopperCoin</title>
+    <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
     <link href="style.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
@@ -11,7 +12,7 @@
     <table id="topbar">
       <td><span id="address">
         <button onclick="document.getElementById('login').style.display = 'inline-block';">
-          login/register
+          log in/register
         </button>
       </span></td>
       <td><h1><center>
@@ -25,7 +26,7 @@
     <div id="dash">
 
         <!-- info blocks -->
-        <div style="flex-shrink:1">
+        <div>
             <!-- balance -->
             <div class="cell infoblock">
               <span id="tpcbalance">0</span> TPC<br>
@@ -37,8 +38,8 @@
             <div class="cell infoblock">
               <form id="makepaymentform" onsubmit="maketransaction(); return false"> <!-- method="GET" action="payment.php" target="emptyframe"> <!- -  onsubmit="makepayment();return false" -->
                 <table style="display:flex">
-                  <tr><td>send</td><td><input type="number" name="amount" step="0.0001" min="0" style="width:50px"/> TPC</td></tr>
-                  <tr><td>to</td><td><input type="text" name="recipient" style="width:100%;"/></td></tr>
+                  <tr><td>send</td><td><input type="number" id="amount" step="0.0001" min="0" style="max-width:50px"/> TPC</td></tr>
+                  <tr><td>to</td><td><input type="text" id="recipient" style="max-width:90px"/></td></tr>
                 </table>
                 <button style="width:100%">send</button>
               </form>
@@ -112,19 +113,20 @@
 
 
 
-    <!-- modal of about section -->
+    <!-- modal of login -->
     <div id="login" class="modal">
       <div class="modal-content">
         <div style="text-align:right;"><button onclick="document.getElementById('login').style.display='none'">X</button></div>
-        <h2>Login</h2>
+        <h2>Log in</h2>
         <form onsubmit="login(); return false">
-          username: <input name="address"/><br>
+          username: <input id="loginaddress"/><br>
           private key:<br>
-          <input type="text" name="privatekeytext"/> or <input type="file" name="privatekeyfile"/><br>
+          <input type="text" id="privatekeytext"/> or <input type="file" id="privatekeyfile"/><br>
+          <button>log in</button>
         </form>
         <h2>Register</h2>
         <form onsubmit="register(); return false">
-          create a username: <input type="text" name="address"/><br>
+          create a username: <input type="text" id="registeraddress"/><button>submit</button><br>
           <span id="privatekeycopy"></span><br>
           <a id="privatekeylink"></a>
         </form>
@@ -132,7 +134,7 @@
     </div>
 
     <!-- the javascript that loads the blockchain, make the blockchain preview, and calculates balance. -->
-    <script src="blockchain.json"></script>
+    <!-- <script src="blockchain.json"></script> -->
     <script src="script.js"></script>
   </body>
 </html>

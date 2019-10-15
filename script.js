@@ -1,11 +1,51 @@
-var re = new RegExp("tpcaddress=([^;]+)");
+var blockchain;
+
+var req = new XMLHttpRequest();
+req.onreadystatechange = function() {
+  if (req.readyState == 4 && req.status == 200)
+    blockchain = req.responseText.split('\n');
+}
+req.open('GET', '/TopperCoin/blockchain.txt', true); // true for asynchronous 
+req.send(null);
+
+var re = new RegExp('tpcaddress=([^;]+)');
 var myaddress = re.exec(document.cookie);
 
+// function getPubKeyAndMod(address) {
+//   var pubkey, pubmod;
+//   var re = new RegExp(addr'>0>pubkey:([a-f,0-9])pubmod:([a-f,0-9])');
+//   blockchain.forEach(function(block, i){
+//     pubkey, pubmod = re.exec(block);
+//     if (pubkey != null && pubmod != null) break;
+//   });
+//   return pubkey, pubmod;
+// }
 
+// function login() {
+//   let addr = document.getElementById('loginaddress').value;
+//   let privkey = document.getElementById('privatekeytext').value;
+//   if (addr == null || privkey == null) {
+//     return false;
+//   }
+//   var pubkey, pubmod = getPubKeyAndMod(addr);
+//   if (pubkey == null || pubmod == null) {
+//     alert('that address has not been registered in the network.');
+//   }
+//   else if (RSAdecrypt(RSAencrypt('testmessage', pubkey, mubmod), privkey, pubmod) == 'testmessage'){
+//     document.cookie = 'tpcaddress='+addr;
+//     document.cookie = 'privkey='+privkey;
+//     document.cookie = 'pubmod='+pubmod;
+//     alert('success!');
+//     window.location.reload();
+//   } else {
+//     alert('invalid login.');
+//   }
+//   return false;
+// }
 
-function maketransaction() {
-  var sendername = document.getElementByName('sendername');
-}
+// function maketransaction() {
+
+// }
 
 
 function calcBalance(address) {

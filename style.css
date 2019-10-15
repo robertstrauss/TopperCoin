@@ -1,41 +1,48 @@
+:root {
+  --dry-blue: #78a6f0;
+  --main-bg-dark: #212121;
+  --cell-bg-dark: #303030;
+  --text-clr-dark: #ddd;
+  --main-bg-light: #ddd;
+  --cell-bg-light: #fff;
+  --text-clr-light: #222;
+  --main-bg: var(--main-bg-light);
+  --cell-bg: var(--cell-bg-light);
+  --text-clr: var(--text-clr-light);
+  --accent: #32a;
+}
 body {
-  font-family: Arial;
+  font-family: 'Montserrat';
   padding: 0;
   margin: 0;
-  color: #ddd;
-  background-color: #212121;
+  color: var(--text-clr);
+  background-color: var(--main-bg);
 }
 button {
-  /* border: 1px solid lightgrey; */
-  /* border: none; */
-  /* border-width: 2px; */
-  background-color: #00000060;
+  background-color: var(--main-bg);
   color: inherit;
   border-radius: 2px;
-  border: 1px solid #eee;
-  /* border: 2px solid black; */
-  /* box-shadow: 0px 0px 10px black; */
+  border: 1px solid var(--text-clr);
 }
 button:hover {
+  border-color: var(--accent);
   cursor: pointer;
   background-color: #00000040;
-  border: 1px solid #ddd;
 }
 input {
-  border: 1px solid #eee;
+  border: 1px solid var(--text-clr);
   border-radius: 2px;
-  background-color: #666;
-  color: #fff;
+  background-color: var(--main-bg);
+  color: var(--text-clr);
 }
 input:hover {
-  background-color: #5d5d5d;
+  border: 1px solid var(--accent);
 }
 input:focus {
-  background-color: #444;
+  background-color: var(--cell-bg);
 }
 h1 {
-  font-family: "Impact", Impact, sans-serif;
-  color: #4a7dee;
+  color: var(--dry-blue);
   font-size: 36px;
   line-height: 0;
 }
@@ -58,19 +65,18 @@ tr {
   width: 100%; /* Full width */
   height: 100%; /* Full height */
   overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  background-color: #000d; /* Black w/ opacity */
 }
 .modal-content {
-  background-color: #303030;
+  background-color: var(--cell-bg);
   margin: 10vh auto; /* 10% from the top and centered */
   padding: 20px;
-  border: 1px solid #888;
+  border: 1px solid var(--cell-bg);
   max-width: 500px;
 }
 .cell {
   flex-grow: 1;
-  background-color: #303030;
+  background-color: var(--cell-bg);
   color:inherit;
   /* align-content: stretch; */
   margin: 10px;
@@ -86,7 +92,7 @@ tr {
 
 
 #topbar {
-  background-color: #303030;
+  background-color: var(--cell-bg);
   margin: 0;
   width: 100%;
   position: sticky;
@@ -142,6 +148,8 @@ tr {
 #blockchainpreview .block .proofofwork, .block .prevhash {
   text-overflow: ellipsis;
   overflow-x: hidden;
+}
+#blockchainpreview .block .prevhash {
   color: lightblue;
 }
 #blockchainpreview .block .proofofwork {
