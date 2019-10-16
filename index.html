@@ -118,23 +118,26 @@
       <div class="modal-content">
         <div style="text-align:right;"><button onclick="document.getElementById('login').style.display='none'">X</button></div>
         <h2>Log in</h2>
-        <form onsubmit="login(); return false">
+        <form onsubmit="login()">
           username: <input id="loginaddress"/><br>
-          private key:<br>
-          <input type="text" id="privatekeytext"/> or <input type="file" id="privatekeyfile"/><br>
+          password: <input type="password" id="loginpassword"/><br>
           <button>log in</button>
         </form>
         <h2>Register</h2>
-        <form onsubmit="register(); return false">
-          create a username: <input type="text" id="registeraddress"/><button>submit</button><br>
-          <span id="privatekeycopy"></span><br>
-          <a id="privatekeylink"></a>
+        <form onsubmit="register()">
+          create username: <input type="text" id="registeraddress" pattern="[a-zA-Z0-9]+"
+                            oninvalid="setCustomValidity('must be numbers/letters only')"
+                            onchange="try{setCustomValidity('')}catch(e){}"/><br>
+          create password: <input type="password" id="registerpassword1"/><br>
+          verify password: <input type="password" id="registerpassword2"/><br>
+          <button>submit</button>
         </form>
       </div>
     </div>
 
     <!-- the javascript that loads the blockchain, make the blockchain preview, and calculates balance. -->
     <!-- <script src="blockchain.json"></script> -->
+    <script src="cryptico/cryptico.min.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
