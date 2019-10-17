@@ -11,6 +11,10 @@ thisNode.privkey = RegExp('privkey=([^;]+)').exec(document.cookie);
 thisNode.pubkey = RegExp('pubkey=([^;]+)').exec(document.cookie);
 
 
+indexedDB.open('blockchain').onsuccess = function(event) {
+  let blockchainobjectstore = event.target.result.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+  previewBlockChain(blockchainobjectstore);
+}
 
 
 
@@ -45,9 +49,9 @@ function syncblockchain() {
   request.onsuccess = function(event) {
     let db = event.target.result;
     let blockchain = db.transaction(['blockchain'], 'readwrite').objectStore('blockchain');
-    let request = blockchain.count();
-    request.onsuccess = function() {
-      console.log('length: '+request.result);
+    let crequest = blockchain.count();
+    crequest.onsuccess = function() {
+      console.log('length: '+crequest.result);
       fetch('/blockchain.txt')
         .then(resp => console.log(resp.text()));//.split('\n').forEach(block => blockchain.put(block, block.split(';')[0])));
     }
@@ -55,11 +59,6 @@ function syncblockchain() {
 
   return 0;
 }
-
-
-
-
-
 
 
 function getPubKey(address) { // get the public key of an address in the blockchain
@@ -86,7 +85,35 @@ function broadcasttransaction(amount, recipient) {
 
 
 
+function previewBlockChain(blockchainobjectstore) {
+  // fill the blockchain preview div
+  blockchainpreviewdiv = document.getElementById('blockchainpreview');
 
+  blockchainobjectstore.openCursor().onsuccess = function(e) {
+    let cursor = e.target.result;
+    if(cursor) {
+      console.log('indexdbcursor: ' + cursor.value);
+
+      let block = cursor.value.block.split(';');
+
+      let blockdiv = document.createElement('a'); // create an element for this block
+      blockdiv.className = 'block'; // of class block
+      blockdiv.href = '/blockchain/'+i; // that links to a page on the block
+      // create individual divs for the previous hash, transactions, and proofofwork of the block
+      ['prevhash', 'transactions', 'proofofwork'].forEach(function(thing, i){
+        let element = document.createElement('div');
+        element.className = thing;
+        element.innerHTML = block[i];
+        blockdiv.appendChild(element);
+      })
+      blockchainpreviewdiv.appendChild(blockdiv); // add created html block to the document
+
+      cursor.continue();
+    } else {
+      console.log('all blocks displayed');
+    }
+  }
+}
 
 
 
