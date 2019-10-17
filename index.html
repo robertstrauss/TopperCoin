@@ -135,8 +135,20 @@
       </div>
     </div>
 
+
+    <!-- syncing modal -->
+    <div id="syncingmodal" class="modal">
+      <div class="modal-content">
+        <div style="text-align:right;"><button onclick="document.getElementById('syncingmodal').style.display='none'">X</button></div>
+        <h2>Syncing Blockchain</h2>
+        <p>This may take a few minutes. Please be patient.</p>
+      </div>
+    </div>
+
     <!-- the javascript that loads the blockchain, make the blockchain preview, and calculates balance. -->
     <!-- <script src="blockchain.json"></script> -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="jsencrypt/bin/jsencrypt.min.js"></script>
     <script src="cryptico/cryptico.min.js"></script>
     <script src="script.js"></script>
   </body>
