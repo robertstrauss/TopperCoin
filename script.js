@@ -1,63 +1,58 @@
+let socket = io();
 
-var socket = io();
-
-class Node {};
-
-const thisNode = new Node();
+const thisNode = {};
 
 thisNode.blockchain;
 thisNode.address = RegExp('address=([^;]+)').exec(document.cookie);
 thisNode.privkey = RegExp('privkey=([^;]+)').exec(document.cookie);
 thisNode.pubkey = RegExp('pubkey=([^;]+)').exec(document.cookie);
 
+syncBlockchain();
+useBlockchain(previewBlockChain);
 
-indexedDB.open('blockchain').onsuccess = function(event) {
-  let blockchainobjectstore = event.target.result.transaction(['blockchain'], 'readonly').objectStore('blockchain');
-  previewBlockChain(blockchainobjectstore);
+function useBlockchain(func, access='readonly') {
+  let blockchainrequest = indexedDB.open('blockchain');
+  // db doesn't exist yet
+  blockchainrequest.onupgradeneeded = function() {
+    alert('syncing blockchain');
+    let db = event.target.result;
+    // Create an objectStore
+    let objectStore = db.createObjectStore('blockchain', { keyPath: 'previoushash' });
+    objectStore.createIndex('previoushash', 'previoushash', { unique: true });
+    objectStore.createIndex('transactions', 'transactions', { unique: false });
+    objectStore.createIndex('proofofwork', 'proofofwork', { unique: false });
+    // fetch('/blockchain.txt')
+    //   .then(resp => console.log(resp.text()));
+  }
+  blockchainrequest.onsuccess = function(event) {
+    alert('success opening blockchian indexeddb');
+    let blockchainobjectstore = event.target.result
+                  .transaction(['blockchain'], access)
+                  .objectStore('blockchain');
+    func(blockchainobjectstore);
+  }
 }
 
 
-
-
-function syncblockchain() {
-  if (!indexedDB) {
-    alert('an error occurred.');
-    console.error('ERROR: This browser doesn\'t support IndexedDB');
-    return 1;
-  }
-
-  var request = indexedDB.open('blockchain');
-
-  // sync blockchain if it doesn't exist
-  request.onupgradeneeded = function(event) {
-    var db = event.target.result;
-
-    // Create an objectStore, use prevhash as keypath because it is unique and identifies block
-    var objectStore = db.createObjectStore("blockchain", { keyPath: "previoushash" });
-
-    // Create an index to search blocks by transactinos. might not be unique
-    objectStore.createIndex("transactions", "transactions", { unique: false });
-
-    // Create an index to search blocks by POW. might not be unique
-    objectStore.createIndex("proofofwork", "proofofwork", { unique: false });
-  };
-  request.onerror = function(event) {
-    alert('an error occurred');
-    console.error('IndexedDB error', request.error);
-    return 1;
-  };
-  request.onsuccess = function(event) {
-    let db = event.target.result;
-    let blockchain = db.transaction(['blockchain'], 'readwrite').objectStore('blockchain');
-    let crequest = blockchain.count();
-    crequest.onsuccess = function() {
-      console.log('length: '+crequest.result);
-      fetch('/blockchain.txt')
-        .then(resp => console.log(resp.text()));//.split('\n').forEach(block => blockchain.put(block, block.split(';')[0])));
-    }
-  }
-
-  return 0;
+function syncBlockchain() {
+  let blockchaintext;
+  fetch('/blockchain.txt').then(function(blockchainfile){
+    blockchainfile.text().then(function(bctext){
+      useBlockchain(function(blockchainobjectstore) {
+        alert('transaction with objectstore');
+        alert(bctext);
+        bctext.split('\n').forEach(function(block, i){
+          alert(i+': '+block);
+          try{
+          blockchainobjectstore.put(block, block.split(';')[0]);
+          } catch(error) {
+            alert('error:'+error);
+          }
+        });
+      }, 'readwrite');
+    });
+  });
+  alert('synced blockchain');
 }
 
 
@@ -70,9 +65,9 @@ function getPubKey(address) { // get the public key of an address in the blockch
 
 function broadcasttransaction(amount, recipient) {
   let transactionstring = `${thisNode.address}>${amount}>${recipient}`;
-  var sign = new JSEncrypt();
+  let sign = new JSEncrypt();
   sign.setPrivateKey(thisNode.privkey);
-  var signature = sign.sign(transactionstring);
+  let signature = sign.sign(transactionstring);
   // cryptico doesn't work with signing, that's why the other package is implemented too
   // let signature = cryptico.decrypt(transactionstring, thisNode.privkey); // encrypting with private key is signing
   console.log(signature);
@@ -86,13 +81,14 @@ function broadcasttransaction(amount, recipient) {
 
 
 function previewBlockChain(blockchainobjectstore) {
+  alert('previewing blockchain');
   // fill the blockchain preview div
   blockchainpreviewdiv = document.getElementById('blockchainpreview');
 
   blockchainobjectstore.openCursor().onsuccess = function(e) {
     let cursor = e.target.result;
     if(cursor) {
-      console.log('indexdbcursor: ' + cursor.value);
+      alert('indexdbcursor: ' + cursor.value);
 
       let block = cursor.value.block.split(';');
 
@@ -110,7 +106,7 @@ function previewBlockChain(blockchainobjectstore) {
 
       cursor.continue();
     } else {
-      console.log('all blocks displayed');
+      alert('all blocks displayed');
     }
   }
 }
@@ -126,7 +122,7 @@ function register() {
   let password1 = document.getElementById('registerpassword1').value;
   let password2 = document.getElementById('registerpassword2').value;
   if (password1 != password2) {
-    alert('passwords do not match');
+    console.log('passwords do not match');
     return false;
   }
 
@@ -137,7 +133,7 @@ function register() {
   let address = document.getElementById('registeraddress').value;
   console.log(address);
   if (getPubKey(address) != null) {
-    alert('That username is not available');
+    console.log('That username is not available');
     return false;
   }
 
@@ -166,7 +162,7 @@ function register() {
 
 function login() {
   // sync blockchain
-  alert('The blockchain will be synced to verify your username. This might take a few minutes.');
+  console.log('The blockchain will be synced to verify your username. This might take a few minutes.');
   syncblockchain();
 
   // get values from form
@@ -179,7 +175,7 @@ function login() {
 
   // check password
   if (getPubKey(address) != publicKeyString) {
-    alert('invalid login');
+    console.log('invalid login');
     return false;
   }
 
