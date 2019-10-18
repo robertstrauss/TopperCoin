@@ -8,6 +8,8 @@ thisNode.address = RegExp('address=([^;]+)').exec(document.cookie);
 thisNode.privkey = RegExp('privkey=([^;]+)').exec(document.cookie);
 thisNode.pubkey = RegExp('pubkey=([^;]+)').exec(document.cookie);
 
+const difficulty = 4; // how many zeros (hex) block hash must start with
+
 
 // initial set up of using the blockchain
 let blockchaindb; // global used for accessing blockchain
@@ -39,7 +41,7 @@ request.onsuccess = function() {
   // when it is returned send a request for the rest
   blockchainobjectstore.count().onsuccess = function(event){
     // length of local blockchain: event.target.result
-    // send a request for the blocks since where we are at
+    // send a request for the blocks after what we have
     console.log('requesting blockchain');
     socket.emit('request', `blockchainsince${event.target.result}`);
   };
@@ -51,8 +53,27 @@ socket.on('transaction', function(transactionstring){
   console.log('received transaction: ', transactionstring);
 });
 socket.on('block', function(blockstring){
-  // TODO
   console.log('received block: ', blockstring);
+
+  if (!SHA256(blockstring).startsWith(Array(difficulty+1).join('0'))) // check if hash of block starts with zeros according to difficulty
+    return false; // if not, reject
+
+  console.log('Block matches difficulty');
+
+  let prevhash = blockstring.split(';')[0]; // the head of the block linking it to the last block
+  // go through the last 10 blocks to check if it appends to any of them
+  let blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+  blockchainos.openCursor('index', 'prev').onsuccess = function(event) { // iterate backwards by index
+    let cursor = event.target.result;
+    if (cursor.value < 10) { // if within the last 10 blocks
+      if(SHA256(blockchainos.get(cursor.value)) === prevhash){ // if the block says it comes after this one
+        console.log('block can be inserted at index: ' + (parseInt(cursor.value)+1)); // save the index of the block it comes after
+        return; // exit
+      }
+      else cursor.continue(); // otherwise continue search
+    }
+  }
+
 });
 
 
@@ -70,7 +91,7 @@ socket.on('block', function(blockstring){
 
 
 function maketransaction() {
-  
+
 }
 
 

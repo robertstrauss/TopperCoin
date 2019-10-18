@@ -5,7 +5,7 @@ var io = require('socket.io')(http);
 var path = require('path');
 var fs = require('fs');
 
-var tstream = fs.createWriteStream("unminedtransactions", {flags:'a'});
+var tstream = fs.createWriteStream('unminedtransactions', {flags:'a'});
 var bstream = fs.createWriteStream('blockchain', {flags:'a'});
 
 __dirname = path.resolve(path.dirname('')); // root directory
@@ -20,14 +20,14 @@ io.on('connection', function(socket){
   console.log('node connected');
   socket.on('transaction', function(transactionstring){
     /* first need to verify transaction */
-    io.emit('transaction', transactionstring); // forward message to other nodes
+    io.emit('transaction', transactionstring); // forward message to all nodes
     /*
     tstream.write(transactionstring + '\n');
     */
   });
   socket.on('block', function(blockstring){
     /* first should verify block */
-    io.emit('block', blockstring); // forward message to other nodes
+    io.emit('block', blockstring); // forward message to all nodes
     /*
     bstream.write(blockstring + '\n');
     */
@@ -41,6 +41,12 @@ io.on('connection', function(socket){
       //   b  l  o  c  k  c  h  a  i  n  s  i  n  c  e  X  X  X
       //   0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15<---- where to start with .substr()
       var startindex = parseInt(requeststring.substr(15)); // 15 = charachters in 'blockchainsinceXXX' to XXX
+      fs.readFile('blockchain.txt', function(err, buf){
+        buf.split('\n').slice(startindex).forEach(function(block){ // split file contents into single blocks and iterate over blocks
+          socket.emit('block', block); // socket.emit rather than io.emit => respond to sender with block
+        });
+        console.log('blockchaintxt buf:'+buf);
+      })
       // respond to single node with blocks since startindex (inclusive)
     }
   });
