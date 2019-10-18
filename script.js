@@ -1,67 +1,97 @@
+// socket to communicate with server
 let socket = io();
 
+// object containing info specific to the client's node
 const thisNode = {};
-
-thisNode.blockchain;
+// get user info from cookies. if this is null ???
 thisNode.address = RegExp('address=([^;]+)').exec(document.cookie);
 thisNode.privkey = RegExp('privkey=([^;]+)').exec(document.cookie);
 thisNode.pubkey = RegExp('pubkey=([^;]+)').exec(document.cookie);
 
-syncBlockchain();
-useBlockchain(previewBlockChain);
 
-function useBlockchain(func, access='readonly') {
-  let blockchainrequest = indexedDB.open('blockchain');
-  // db doesn't exist yet
-  blockchainrequest.onupgradeneeded = function() {
-    alert('syncing blockchain');
-    let db = event.target.result;
-    // Create an objectStore
-    let objectStore = db.createObjectStore('blockchain', { keyPath: 'previoushash' });
-    objectStore.createIndex('previoushash', 'previoushash', { unique: true });
-    objectStore.createIndex('transactions', 'transactions', { unique: false });
-    objectStore.createIndex('proofofwork', 'proofofwork', { unique: false });
-    // fetch('/blockchain.txt')
-    //   .then(resp => console.log(resp.text()));
-  }
-  blockchainrequest.onsuccess = function(event) {
-    alert('success opening blockchian indexeddb');
-    let blockchainobjectstore = event.target.result
-                  .transaction(['blockchain'], access)
-                  .objectStore('blockchain');
-    func(blockchainobjectstore);
-  }
+// initial set up of using the blockchain
+let blockchaindb; // global used for accessing blockchain
+let request = indexedDB.open('blockchain');
+request.onupgradeneeded = function(e) { // called if the user doesn't have a blockchain database yet
+  console.log('initializing blockchain database');
+  blockchaindb = request.result; // global way of accessing blockchain
+
+  // create a 'objectstore' in the database - where all the data actually is
+  let objectStore = db.createObjectStore('blockchain', { keyPath: 'index' });
+  objectStore.createIndex('index', 'index', { unique: true });
+  objectStore.createIndex('previoushash', 'previoushash', { unique: true });
+  objectStore.createIndex('transactions', 'transactions', { unique: false });
+  objectStore.createIndex('proofofwork', 'proofofwork', { unique: false });
+
+  console.log('created object store');
+  console.log('database initialization complete');
+  // blockchain objectstore should be empty
+  // right now, but it will be filled
+  // when onsuccess is called after this
+}
+request.onsuccess = function() {
+  blockchaindb = request.result; // set the global variable for accessing blockchain
+
+  // open the database for writing
+  blockchainobjectstore = blockchaindb.transaction(['blockchain'], 'readwrite').objectStore('blockchain');
+
+  // request the count (length) of the blockchain,
+  // when it is returned send a request for the rest
+  blockchainobjectstore.count().onsuccess = function(event){
+    // length of local blockchain: event.target.result
+    // send a request for the blocks since where we are at
+    console.log('requesting blockchain');
+    socket.emit('request', `blockchainsince${event.target.result}`);
+  };
 }
 
 
-function syncBlockchain() {
-  let blockchaintext;
-  fetch('/blockchain.txt').then(function(blockchainfile){
-    blockchainfile.text().then(function(bctext){
-      useBlockchain(function(blockchainobjectstore) {
-        alert('transaction with objectstore');
-        alert(bctext);
-        bctext.split('\n').forEach(function(block, i){
-          alert(i+': '+block);
-          try{
-          blockchainobjectstore.put(block, block.split(';')[0]);
-          } catch(error) {
-            alert('error:'+error);
-          }
-        });
-      }, 'readwrite');
-    });
-  });
-  alert('synced blockchain');
+socket.on('transaction', function(transactionstring){
+  // TODO verify transaction, mine it (optional), add it to local blockchain
+  console.log('received transaction: ', transactionstring);
+});
+socket.on('block', function(blockstring){
+  // TODO
+  console.log('received block: ', blockstring);
+});
+
+
+
+
+
+
+
+
+
+
+
+// FUNCTIONS
+
+
+
+function maketransaction() {
+  
 }
+
 
 
 function getPubKey(address) { // get the public key of an address in the blockchain
   // syncblockchain();
-  return RegExp(address+'>0>mypublickeyis([a-zA-Z0-9]+)').exec(thisNode.blockchain);
+  // make regexp for finding publickey
+  let re = new RegExp(address+'>0>mypublickeyis([a-zA-Z0-9]+)');
+  // request the blockchain for reading
+  blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+  blockchainos.openCursor().onsuccess = function(e) { // iterate through blockchain to find publickey announcement
+    let cursor = e.target.result; // cursor holds current block
+    if (cursor) { // if still in the blockchain
+      if ((pk = re.exec(cursor.value.transactions)) != null) { // check for regexp match, and return it if so
+        return pk;
+      }
+      // advance to next block
+      cursor.continue();
+    }
+  }
 }
-
-
 
 function broadcasttransaction(amount, recipient) {
   let transactionstring = `${thisNode.address}>${amount}>${recipient}`;
@@ -81,14 +111,14 @@ function broadcasttransaction(amount, recipient) {
 
 
 function previewBlockChain(blockchainobjectstore) {
-  alert('previewing blockchain');
+  console.log('previewing blockchain');
   // fill the blockchain preview div
   blockchainpreviewdiv = document.getElementById('blockchainpreview');
 
   blockchainobjectstore.openCursor().onsuccess = function(e) {
     let cursor = e.target.result;
     if(cursor) {
-      alert('indexdbcursor: ' + cursor.value);
+      console.log('indexdbcursor: ' + cursor.value);
 
       let block = cursor.value.block.split(';');
 
@@ -106,7 +136,7 @@ function previewBlockChain(blockchainobjectstore) {
 
       cursor.continue();
     } else {
-      alert('all blocks displayed');
+      console.log('all blocks displayed');
     }
   }
 }
@@ -187,15 +217,3 @@ function login() {
   thisNode.pubkey = publicKeyString;
   document.cookie = 'pubkey='+thisNode.pubkey;
 }
-
-
-
-
-
-
-
-
-socket.on('transaction', function(transactionstring){
-  // TODO verify transaction
-  console.log('received transaction:', transactionstring);
-});
