@@ -139,7 +139,7 @@ function previewBlockChain(blockchainobjectstore) {
   blockchainobjectstore.openCursor().onsuccess = function(e) {
     let cursor = e.target.result;
     if(cursor) {
-      console.log('indexdbcursor: ' + cursor.value);
+      alert('indexdbcursor: ' + cursor.value);
 
       let block = cursor.value.block.split(';');
 
@@ -157,7 +157,7 @@ function previewBlockChain(blockchainobjectstore) {
 
       cursor.continue();
     } else {
-      console.log('all blocks displayed');
+      alert('all blocks displayed');
     }
   }
 }
