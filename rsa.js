@@ -42,7 +42,7 @@ RSA.generate = function(keysize) {
   do {
     p = randomPrime(keysize / 2);
     q = randomPrime(keysize / 2);
-    lambda = bigInt.lcm(p.minus(1), q.minus(1));
+    lambda = p.minus(1).times(q.minus(1)); //bigInt.lcm(p.minus(1), q.minus(1));
   } while (bigInt.gcd(e, lambda).notEquals(1) || p.minus(q).abs().shiftRight(
       keysize / 2 - 100).isZero());
 

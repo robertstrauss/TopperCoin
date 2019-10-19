@@ -1,3 +1,9 @@
+let hue = 85;
+setInterval(function(){
+  hue = (hue-1)%360;
+  document.documentElement.style.setProperty('--main-bg',  `hsl(${hue}, 50%, 60%)`);
+}, 50);
+
 // socket to communicate with server
 let socket = io();
 
@@ -19,7 +25,7 @@ request.onupgradeneeded = function(e) { // called if the user doesn't have a blo
   blockchaindb = request.result; // global way of accessing blockchain
 
   // create a 'objectstore' in the database - where all the data actually is
-  let objectStore = db.createObjectStore('blockchain', { keyPath: 'index' });
+  let objectStore = blockchaindb.createObjectStore('blockchain', { keyPath: 'index' });
   objectStore.createIndex('index', 'index', { unique: true });
   objectStore.createIndex('previoushash', 'previoushash', { unique: true });
   objectStore.createIndex('transactions', 'transactions', { unique: false });
@@ -63,7 +69,7 @@ socket.on('block', function(blockstring){
   let prevhash = blockstring.split(';')[0]; // the head of the block linking it to the last block
   // go through the last 10 blocks to check if it appends to any of them
   let blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
-  blockchainos.openCursor('index', 'prev').onsuccess = function(event) { // iterate backwards by index
+  blockchainos.openCursor(null, 'prev').onsuccess = function(event) { // iterate backwards by index
     let cursor = event.target.result;
     if (cursor.value < 10) { // if within the last 10 blocks
       if(SHA256(blockchainos.get(cursor.value)) === prevhash){ // if the block says it comes after this one
@@ -77,11 +83,7 @@ socket.on('block', function(blockstring){
 });
 
 
-
-
-
-
-
+setTimeout(previewBlockChain, 1000);
 
 
 
@@ -131,35 +133,40 @@ function broadcasttransaction(amount, recipient) {
 
 
 
-function previewBlockChain(blockchainobjectstore) {
-  console.log('previewing blockchain');
+function previewBlockChain() {
+
+  let blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+
   // fill the blockchain preview div
   blockchainpreviewdiv = document.getElementById('blockchainpreview');
 
-  blockchainobjectstore.openCursor().onsuccess = function(e) {
-    let cursor = e.target.result;
-    if(cursor) {
-      alert('indexdbcursor: ' + cursor.value);
+  let cursorrequest = blockchainos.openCursor(null, 'prev'); // iterate in backwards direction (prev) to show last blocks
 
-      let block = cursor.value.block.split(';');
+  let count = 0; // count of how many blocks back to preview
+  cursorrequest.onsuccess = function(e) {
+    let cursor = e.target.result;
+    if (count < 10 && cursor) {
+
+      let block = cursor.value;
 
       let blockdiv = document.createElement('a'); // create an element for this block
       blockdiv.className = 'block'; // of class block
-      blockdiv.href = '/blockchain/'+i; // that links to a page on the block
+      blockdiv.href = '/blockchain/'+block.index; // that links to a page on the block
+
       // create individual divs for the previous hash, transactions, and proofofwork of the block
-      ['prevhash', 'transactions', 'proofofwork'].forEach(function(thing, i){
+      Object.keys(block).forEach(function(key){
         let element = document.createElement('div');
-        element.className = thing;
-        element.innerHTML = block[i];
+        element.className = key;
+        element.innerHTML = block[key];
         blockdiv.appendChild(element);
-      })
+      });
+
       blockchainpreviewdiv.appendChild(blockdiv); // add created html block to the document
 
+      count++;
       cursor.continue();
-    } else {
-      alert('all blocks displayed');
     }
-  }
+  };
 }
 
 

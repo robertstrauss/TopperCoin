@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width">
     <title>TopperCoin</title>
     <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
+    <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
     <link href="style.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
@@ -26,41 +27,43 @@
     <div id="dash">
 
         <!-- info blocks -->
-        <div>
+        <div class="flex">
             <!-- balance -->
-            <div class="cell infoblock">
+            <div class="flex cell infoblock">
               <span id="tpcbalance">0</span> TPC<br>
               ~ $<span id="usdbalance">0.00</span><br>
               <button onclick="document.getElementById('tpcbalance').innerHTML = calcBalance(myaddress);">check balance</button>
             </div>
 
             <!-- send TPC -->
-            <div class="cell infoblock">
+            <div class="flex cell infoblock">
               <form id="makepaymentform" onsubmit="maketransaction(); return false"> <!-- method="GET" action="payment.php" target="emptyframe"> <!- -  onsubmit="makepayment();return false" -->
-                <table style="display:flex">
+                <table style="width:100%;max-width:150px;" align="center">
                   <tr><td>send</td><td><input type="number" id="amount" step="0.0001" min="0" style="max-width:50px"/> TPC</td></tr>
                   <tr><td>to</td><td><input type="text" id="recipient" style="max-width:90px"/></td></tr>
+                  <tr><td colspan="2">
+                  <button style="width:100%;margin:0">send</button>
+                  </td></tr>
                 </table>
-                <button style="width:100%">send</button>
               </form>
             </div>
         </div>
 
         <!-- mining stats and graph -->
-        <div class="cell" style="width:50%">
+        <div class="flex cell" style="width:50%">
           <h2>Mining - <span id="hashrate">stopped</span></h2>
           <div id="mininggraph" style="display: table-cell">
-            <button onclick="startmining();">start mining</button>
+            <!--<button onclick="startmining();">start mining</button>-->
           </div>
         </div>
 
         <!-- transactions involving the user -->
-        <div class="cell" style="min-width:50px">
+        <div class="flex cell" style="min-width:50px">
           <h2>Relevant transactions</h2>
         </div>
 
         <!-- preview of the blockchain -->
-        <div class="cell">
+        <div class="flex cell">
           <h2>Blockchain Preview</h2>
           <div id="bcpreviewontainer">
             <div id="blockchainpreview"></div>
@@ -148,7 +151,6 @@
     <!-- the javascript that loads the blockchain, make the blockchain preview, and calculates balance. -->
     <!-- <script src="blockchain.json"></script> -->
     <script src="/socket.io/socket.io.js"></script> <!-- for communication with server -->
-    <script src="rsa.js"></script> <!-- for... rsa -->
     <script src="cryptico/cryptico.min.js"></script> <!-- for sha256 -->
     <script src="script.js"></script> <!-- TopperCoin! -->
   </body>

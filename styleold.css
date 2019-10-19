@@ -12,31 +12,29 @@
   --text-clr: var(--text-clr-light);
 }
 body {
-  font-family: 'Nunito', Sans-Serif;
+  font-family: 'Montserrat';
   padding: 0;
   margin: 0;
   color: var(--text-clr);
   background-color: var(--main-bg);
 }
 button {
-  /* box-shadow: inset 0px -2px 7px 1px #0002; */
+  /* color: var(--blue); */
   background-color: #f9f9fb;
+  /* box-shadow: inset 0 -5px 10px rgba(27,31,35,.075); */
   background-image: linear-gradient(0deg, #e9ebea, #faf9fb);
-  /* border: none; */
   border: 1px solid lightgrey;
   border-radius: 0.25em;
   padding: 5px;
   font-weight: 600;
   cursor: pointer;
-  margin: 10px;
 }
 button:hover {
-  /* box-shadow: inset 0px 2px 7px 1px #0002; */
+  /* background-color: #eee; */
   background-image: linear-gradient(180deg, #e9ebea, #faf9fb);
 }
 input {
   padding: 5px;
-  margin: 1px;
   border: 1px solid #d1d5da;
   border-radius: 3px;
   background-color: #fafbfc;
@@ -48,7 +46,7 @@ input:focus {
   background-color: var(--cell-bg);
 }
 h1 {
-  color: var(--main-bg);
+  color: var(--dry-blue);
   font-size: 36px;
   line-height: 0;
 }
@@ -80,19 +78,16 @@ tr {
   border: 1px solid var(--cell-bg);
   max-width: 500px;
 }
-.flex {
-  flex-grow: 1;
-  max-width: 100%;
-}
 .cell {
-  text-align: center;
+  flex-grow: 1;
   background-color: var(--cell-bg);
   color:inherit;
+  /* align-content: stretch; */
   margin: 10px;
-  padding: 25px;
-  border-radius: 10px;
+  padding: 5px;
+  border-radius: 5px;
+  max-width: 100%;
   overflow: hidden;
-  box-shadow: 5px 5px 10px 5px #0003;
 }
 .infoblock {
   text-align: center;
@@ -130,8 +125,6 @@ tr {
   display: inline-block;
   white-space: nowrap;
   width: 100%;
-  justify-content: left;
-  text-align: left;
   /* border: 5px solid grey; */
   border-radius: 5px;
   overflow-x: scroll;
@@ -143,32 +136,26 @@ tr {
   width: 200px;
   overflow: auto;
   margin: 15px;
-  border: none;
+  border: 2px solid white;
   text-decoration: none;
 }
 #blockchainpreview .block * {
   padding: 4px;
 }
-#blockchainpreview .block .index {
-  border: none;
-  color: white;
-}
 #blockchainpreview .block .transactions {
   height: 200px;
-  border: 2px solid white;
+  border-top: 2px solid white;
+  border-bottom: 2px solid white;
   overflow: auto;
-  color: yellow;
+  color: white;
 }
-#blockchainpreview .block .proofofwork, .block .previoushash {
+#blockchainpreview .block .proofofwork, .block .prevhash {
   text-overflow: ellipsis;
   overflow-x: hidden;
-  border: 2px solid white;
 }
-#blockchainpreview .block .previoushash {
+#blockchainpreview .block .prevhash {
   color: lightblue;
-  border-bottom: none;
 }
 #blockchainpreview .block .proofofwork {
   color: #9e7;
-  border-top: none;
 }
