@@ -27,21 +27,21 @@
     <div id="dash">
 
         <!-- info blocks -->
-        <div class="flex">
+        <div class="flex" style="flex: 1 1 10%;">
             <!-- balance -->
-            <div class="flex cell infoblock">
+            <div class="cell infoblock">
               <span id="tpcbalance">0</span> TPC<br>
               ~ $<span id="usdbalance">0.00</span><br>
               <button onclick="document.getElementById('tpcbalance').innerHTML = calcBalance(myaddress);">check balance</button>
             </div>
 
             <!-- send TPC -->
-            <div class="flex cell infoblock">
+            <div class="cell infoblock">
               <form id="makepaymentform" onsubmit="maketransaction(); return false"> <!-- method="GET" action="payment.php" target="emptyframe"> <!- -  onsubmit="makepayment();return false" -->
-                <table style="width:100%;max-width:150px;" align="center">
-                  <tr><td>send</td><td><input type="number" id="amount" step="0.0001" min="0" style="max-width:50px"/> TPC</td></tr>
-                  <tr><td>to</td><td><input type="text" id="recipient" style="max-width:90px"/></td></tr>
-                  <tr><td colspan="2">
+                <table align="center">
+                  <tr><td>send</td><td><input type="number" id="amount" step="0.0001" min="0"/></td><td>TPC</td></tr>
+                  <tr><td>to</td><td colspan="2"><input type="text" id="recipient"/></td></tr>
+                  <tr><td colspan="3">
                   <button style="width:100%;margin:0">send</button>
                   </td></tr>
                 </table>
@@ -50,7 +50,7 @@
         </div>
 
         <!-- mining stats and graph -->
-        <div class="flex cell" style="width:50%">
+        <div class="flex cell" style="flex: 4 1 50%;">
           <h2>Mining - <span id="hashrate">stopped</span></h2>
           <div id="mininggraph" style="display: table-cell">
             <!--<button onclick="startmining();">start mining</button>-->
@@ -58,12 +58,12 @@
         </div>
 
         <!-- transactions involving the user -->
-        <div class="flex cell" style="min-width:50px">
+        <div class="flex cell" style="flex: 2 1 30%;">
           <h2>Relevant transactions</h2>
         </div>
 
         <!-- preview of the blockchain -->
-        <div class="flex cell">
+        <div class="flex cell" style="flex: 5 1 50%;">
           <h2>Blockchain Preview</h2>
           <div id="bcpreviewontainer">
             <div id="blockchainpreview"></div>

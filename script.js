@@ -17,6 +17,10 @@ thisNode.pubkey = RegExp('pubkey=([^;]+)').exec(document.cookie);
 const difficulty = 4; // how many zeros (hex) block hash must start with
 
 
+
+
+
+
 // initial set up of using the blockchain
 let blockchaindb; // global used for accessing blockchain
 let request = indexedDB.open('blockchain');
@@ -54,6 +58,13 @@ request.onsuccess = function() {
 }
 
 
+
+
+
+
+
+
+
 socket.on('transaction', function(transactionstring){
   // TODO verify transaction, mine it (optional), add it to local blockchain
   console.log('received transaction: ', transactionstring);
@@ -69,21 +80,33 @@ socket.on('block', function(blockstring){
   let prevhash = blockstring.split(';')[0]; // the head of the block linking it to the last block
   // go through the last 10 blocks to check if it appends to any of them
   let blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+  let count = 0;
   blockchainos.openCursor(null, 'prev').onsuccess = function(event) { // iterate backwards by index
     let cursor = event.target.result;
-    if (cursor.value < 10) { // if within the last 10 blocks
-      if(SHA256(blockchainos.get(cursor.value)) === prevhash){ // if the block says it comes after this one
-        console.log('block can be inserted at index: ' + (parseInt(cursor.value)+1)); // save the index of the block it comes after
-        return; // exit
+    if (count < 10 && cursor) { // if within the last 10 blocks (after 10, no forks allowed)
+      if(cursor.value.previoushash === prevhash){ // if the block says it comes after this one
+        console.log('block can be inserted at index: ' + (parseInt(cursor.value.index)+1)); // save the index of the block it comes after
       }
-      else cursor.continue(); // otherwise continue search
+      else {
+        count++;
+        cursor.continue(); // otherwise continue search
+      }
     }
   }
 
 });
 
 
-setTimeout(previewBlockChain, 1000);
+
+
+// preview blockchain after 100ms to give async functions time to fill it
+setTimeout(previewBlockChain, 100);
+
+
+
+
+
+
 
 
 
@@ -183,9 +206,6 @@ function register() {
     console.log('passwords do not match');
     return false;
   }
-
-  // sync blockchain
-  syncblockchain();
 
   // verify entered address
   let address = document.getElementById('registeraddress').value;

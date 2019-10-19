@@ -42,10 +42,11 @@ io.on('connection', function(socket){
       //   0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15<---- where to start with .substr()
       var startindex = parseInt(requeststring.substr(15)); // 15 = charachters in 'blockchainsinceXXX' to XXX
       fs.readFile('blockchain.txt', function(err, buf){
-        buf.split('\n').slice(startindex).forEach(function(block){ // split file contents into single blocks and iterate over blocks
-          socket.emit('block', block); // socket.emit rather than io.emit => respond to sender with block
-        });
         console.log('blockchaintxt buf:'+buf);
+        buf.toString().split('\n').slice(startindex).forEach(function(block){ // split file contents into single blocks and iterate over blocks
+          socket.emit('block', block); // socket.emit rather than io.emit => respond to sender with block
+          console.log('emitted block: '+block);
+        });
       })
       // respond to single node with blocks since startindex (inclusive)
     }
