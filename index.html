@@ -13,14 +13,17 @@
     <table id="topbar">
       <td><span id="address">
         <button onclick="document.getElementById('login').style.display = 'inline-block';">
-          log in/register
+          Log in
+        </buton>
+        <button onclick="document.getElementById('register').style.display = 'inline-block';">
+          Register
         </button>
       </span></td>
       <td><h1><center>
         TopperCoin
       </center></h1></td>
       <td style="text-align:right;margin:0;">
-        <button onclick="document.getElementById('about').style.display='inline-block'">?</button>
+        <a onclick="document.getElementById('about').style.display='inline-block'">?</a>
       </td>
     </table>
 
@@ -32,7 +35,7 @@
             <div class="cell infoblock">
               <span id="tpcbalance">0</span> TPC<br>
               ~ $<span id="usdbalance">0.00</span><br>
-              <button onclick="document.getElementById('tpcbalance').innerHTML = calcBalance(myaddress);">check balance</button>
+              <button onclick="document.getElementById('tpcbalance').innerHTML = calcBalance(myaddress);">Check Balance</button>
             </div>
 
             <!-- send TPC -->
@@ -42,7 +45,7 @@
                   <tr><td>send</td><td><input type="number" id="amount" step="0.0001" min="0"/></td><td>TPC</td></tr>
                   <tr><td>to</td><td colspan="2"><input type="text" id="recipient"/></td></tr>
                   <tr><td colspan="3">
-                  <button style="width:100%;margin:0">send</button>
+                  <button style="width:100%;margin:0">Send</button>
                   </td></tr>
                 </table>
               </form>
@@ -75,7 +78,7 @@
     <!-- modal of about section -->
     <div id="about" class="modal">
       <div class="modal-content">
-        <div style="text-align:right;"><button onclick="document.getElementById('about').style.display='none'">X</button></div>
+        <!-- <div style="text-align:right;"><button onclick="document.getElementById('about').style.display='none'">X</button></div> -->
         <h2>About TopperCoin</h2>
         <p>
           TopperCoin is a cryptocurrency, like BitCoin, built by and for LAHS students (HillToppers, thus the name).
@@ -119,13 +122,17 @@
     <!-- modal of login -->
     <div id="login" class="modal">
       <div class="modal-content">
-        <div style="text-align:right;"><button onclick="document.getElementById('login').style.display='none'">X</button></div>
+        <!-- <div style="text-align:right;"><button onclick="document.getElementById('login').style.display='none'">X</button></div> -->
         <h2>Log in</h2>
         <form onsubmit="login()">
           username: <input id="loginaddress"/><br>
           password: <input type="password" id="loginpassword"/><br>
-          <button>log in</button>
+          <button>Log In</button>
         </form>
+      </div>
+    </div>
+    <div id="register" class="modal">
+      <div class="modal-content">
         <h2>Register</h2>
         <form onsubmit="register()">
           create username: <input type="text" id="registeraddress" pattern="[a-zA-Z0-9]+"
@@ -133,7 +140,7 @@
                             onchange="try{setCustomValidity('')}catch(e){}"/><br>
           create password: <input type="password" id="registerpassword1"/><br>
           verify password: <input type="password" id="registerpassword2"/><br>
-          <button>submit</button>
+          <button>Submit</button>
         </form>
       </div>
     </div>
@@ -142,7 +149,7 @@
     <!-- syncing modal -->
     <div id="syncingmodal" class="modal">
       <div class="modal-content">
-        <div style="text-align:right;"><button onclick="document.getElementById('syncingmodal').style.display='none'">X</button></div>
+        <!-- <div style="text-align:right;"><button onclick="document.getElementById('syncingmodal').style.display='none'">X</button></div> -->
         <h2>Syncing Blockchain</h2>
         <p>This may take a few minutes. Please be patient.</p>
       </div>

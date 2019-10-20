@@ -18,21 +18,36 @@ body {
   color: var(--text-clr);
   background-color: var(--main-bg);
 }
-button {
-  /* box-shadow: inset 0px -2px 7px 1px #0002; */
-  background-color: #f9f9fb;
-  background-image: linear-gradient(0deg, #e9ebea, #faf9fb);
-  /* border: none; */
-  border: 1px solid lightgrey;
-  border-radius: 0.25em;
-  padding: 5px;
+a {
+  color: var(--main-bg);
+  margin: 5px;
+  padding: 10px;
+  padding-top: 1px;
+  padding-bottom: 1px;
   font-weight: 600;
   cursor: pointer;
-  margin: 10px;
+  border: 1px solid var(--main-bg);
+}
+button {
+  /* box-shadow: 0px 1px 2px #0002; */
+  color: var(--main-bg);
+  background-color: white;
+  background-image: linear-gradient(0deg, #0000, #0000);
+  border: none;
+  border: 1px solid var(--main-bg);
+  border-radius: 100px;
+  padding: 5px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 5px;
+  transition: 0.5s;
 }
 button:hover {
+  background-color: #0001;
+  transition: 0.2s;
   /* box-shadow: inset 0px 2px 7px 1px #0002; */
-  background-image: linear-gradient(180deg, #e9ebea, #faf9fb);
+  /* background-image: linear-gradient(180deg, #e9ebea, #faf9fb); */
 }
 input {
   min-width: 50px;
@@ -56,6 +71,8 @@ h1 {
   line-height: 0;
 }
 h2 {
+  margin-top: 10px;
+  margin-bottom: 10px;
   color: grey;
 }
 tr {
@@ -81,6 +98,7 @@ tr {
   padding: 20px;
   border: 1px solid var(--cell-bg);
   max-width: 500px;
+  border-radius: 10px;
 }
 .flex {
   max-width: 100%;
