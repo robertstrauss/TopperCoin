@@ -23,6 +23,7 @@
         TopperCoin
       </center></h1></td>
       <td style="text-align:right;margin:0;">
+        <a id="lightdark">🌔</a>
         <a onclick="document.getElementById('about').style.display='inline-block'">?</a>
       </td>
     </table>
@@ -75,8 +76,8 @@
 
     </div>
 
-    <!-- modal of about section -->
-    <div id="about" class="modal">
+    <!-- window of about section -->
+    <div id="about" class="modal"><div class="modalc">
       <div class="modal-content">
         <!-- <div style="text-align:right;"><button onclick="document.getElementById('about').style.display='none'">X</button></div> -->
         <h2>About TopperCoin</h2>
@@ -92,22 +93,19 @@
               Payments are recorded securely on a computer, and it's effectively just as real as normal money.
             </p>
           <li>How do I use it?</li>
-            <p>To use the TopperCoin network, simply create a username and... that's it!
-              No, really, that's all you have to do to get started.
+            <p>First, register by create a username and password,
+              and just like that you're ready to send and recieve money, and <b>generate free money by mining.</b>
               Once you have done that, you can pay anyone else on the network in TPC (TopperCoins).
               Get others you know to join too, so you can pay and get payed by them.
-              <br><br>
-              Another way to use the network is to <u>"mine"</u> for it.
-              This uses the processing power of your computer for the network, and you <b>get payed for doing nothing!</b>
             </p>
-          <li>How is it different from BitCoin or other cryptocurrencies?</li>
+          <!-- <li>How is it different from BitCoin or other cryptocurrencies?</li>
             <p>TopperCoin is a very simple cryptocurrency, because it is meant only for LAHS.
               This meant simplifying things so to be best suited for the circumstances.
               It is distributed, rather than fully decentralized, for example.
               Also, the mining difficulty is extremely low, since it is meant to run on chromebooks.
-            </p>
+            </p> -->
           <li>What is "mining?"</li>
-          <p>"Mining" is exchanging your computer power for money, put simply.
+          <p>"Mining" means getting paid for your computer power.
             More centrally, mining is a key part of how the network works.
             Essentially, by mining your computer is doing many, many calculations very quickly to validate transactions.
             Normally, a hacker might fake a transaction from one user to themselves to take that user's money.
@@ -115,50 +113,64 @@
           </p>
         </ul>
       </div>
-    </div>
+    </div></div>
 
 
 
     <!-- modal of login -->
-    <div id="login" class="modal">
+    <div id="login" class="modal"><div class="modalc">
       <div class="modal-content">
         <!-- <div style="text-align:right;"><button onclick="document.getElementById('login').style.display='none'">X</button></div> -->
         <h2>Log in</h2>
         <form onsubmit="login()">
-          username: <input id="loginaddress"/><br>
-          password: <input type="password" id="loginpassword"/><br>
-          <button>Log In</button>
+          <table style="width:100%">
+            <tr>
+              <td>username:</td><td><input id="loginaddress"/></td>
+            </tr><tr>
+              <td>password:</td><td><input type="password" id="loginpassword"/></td>
+            </tr><tr>
+              <td colspan="2"><button style="width:100%">Log In</button></td>
+            </tr>
+          </table>
         </form>
       </div>
-    </div>
-    <div id="register" class="modal">
+    </div></div>
+    <div id="register" class="modal"><div class="modalc">
       <div class="modal-content">
         <h2>Register</h2>
         <form onsubmit="register()">
-          create username: <input type="text" id="registeraddress" pattern="[a-zA-Z0-9]+"
-                            oninvalid="setCustomValidity('must be numbers/letters only')"
-                            onchange="try{setCustomValidity('')}catch(e){}"/><br>
-          create password: <input type="password" id="registerpassword1"/><br>
-          verify password: <input type="password" id="registerpassword2"/><br>
-          <button>Submit</button>
+          <table style="width:100%">
+            <tr>
+              <td>create username:</td><td><input type="text" id="registeraddress" pattern="[^>|,;]+"
+                            oninvalid="setCustomValidity('cannot include '>', '|', ',', or ';')"
+                            onchange="try{setCustomValidity('')}catch(e){}"/></td>
+            </tr><tr>
+              <td>create password:</td><td><input type="password" id="registerpassword1"/></td>
+            </tr><tr>
+              <td>verify password:</td><td><input type="password" id="registerpassword2"/></td>
+            </tr><tr>
+              <td colspan="2"><button style="width:100%">Submit</button></td>
+            </tr>
+          </table>
         </form>
       </div>
-    </div>
+    </div></div>
 
 
-    <!-- syncing modal -->
-    <div id="syncingmodal" class="modal">
+    <!-- syncing window -->
+    <div id="syncingmodal" class="modal"><div class="modalc">
       <div class="modal-content">
         <!-- <div style="text-align:right;"><button onclick="document.getElementById('syncingmodal').style.display='none'">X</button></div> -->
         <h2>Syncing Blockchain</h2>
         <p>This may take a few minutes. Please be patient.</p>
       </div>
-    </div>
+    </div></div>
 
     <!-- the javascript that loads the blockchain, make the blockchain preview, and calculates balance. -->
     <!-- <script src="blockchain.json"></script> -->
     <script src="/socket.io/socket.io.js"></script> <!-- for communication with server -->
     <script src="cryptico/cryptico.min.js"></script> <!-- for sha256 -->
+    <script src="style.js"></script> <!-- fancy style things -->
     <script src="script.js"></script> <!-- TopperCoin! -->
   </body>
 </html>

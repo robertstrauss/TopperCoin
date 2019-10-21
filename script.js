@@ -1,32 +1,3 @@
-// rainbow background
-let hue = 210;
-setInterval(function(){
-  hue = (hue-1)%360;
-  document.documentElement.style.setProperty('--main-bg',  `hsl(${hue}, 50%, 60%)`);
-}, 100);
-
-// modals
-const query = document.querySelectorAll.bind(document);
-
-let modalRoot = query('.modal');
-let modals = query('.modal-content');
-
-modalRoot.forEach(modalr => modalr.addEventListener('click', function () {
-  modalr.style.display = 'none';
-}));
-
-modals.forEach(modal => modal.addEventListener('click', function (e) {
-  e.preventDefault();
-  e.stopPropagation();
-  e.stopImmediatePropagation();
-  return false;
-}));
-
-
-
-
-
-
 // socket to communicate with server
 let socket = io();
 
@@ -266,7 +237,6 @@ function previewBlockchain() {
 
 
 function register() {
-  event.preventDefault();
   // verify password
   let password1 = document.getElementById('registerpassword1').value;
   let password2 = document.getElementById('registerpassword2').value;
@@ -307,21 +277,19 @@ function register() {
 
 
 function login() {
-  // sync blockchain
-  console.log('The blockchain will be synced to verify your username. This might take a few minutes.');
-  syncblockchain();
+  console.log('attempting to log in')
 
   // get values from form
   let address = document.getElementById('loginaddress').value;
   let password = document.getElementById('loginpassword').value;
 
   // generate RSA key from password
-  let RSAKey = cryptico.generateRSAKey(password1, 1024);
+  let RSAKey = cryptico.generateRSAKey(password, 1024);
   let publicKeyString = cryptico.publicKeyString(RSAKey);
 
   // check password
   if (getPubKey(address) != publicKeyString) {
-    console.log('invalid login');
+    alert('invalid login');
     return false;
   }
 

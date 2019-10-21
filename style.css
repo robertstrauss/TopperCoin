@@ -1,13 +1,11 @@
 :root {
   --dry-blue: #78a6f0;
   --blue: #0366d6;
-  --main-bg-dark: #212121;
   --cell-bg-dark: #303030;
   --text-clr-dark: #ddd;
-  --main-bg-light: #ddd;
   --cell-bg-light: #fff;
   --text-clr-light: #222;
-  --main-bg: var(--main-bg-light);
+  --rainbow: #3399ff;
   --cell-bg: var(--cell-bg-light);
   --text-clr: var(--text-clr-light);
 }
@@ -16,25 +14,25 @@ body {
   padding: 0;
   margin: 0;
   color: var(--text-clr);
-  background-color: var(--main-bg);
+  background-color: var(--rainbow);
 }
 a {
-  color: var(--main-bg);
+  color: var(--rainbow);
   margin: 5px;
   padding: 10px;
   padding-top: 1px;
   padding-bottom: 1px;
   font-weight: 600;
   cursor: pointer;
-  border: 1px solid var(--main-bg);
+  border: 1px solid var(--rainbow);
 }
 button {
   /* box-shadow: 0px 1px 2px #0002; */
-  color: var(--main-bg);
-  background-color: white;
+  color: var(--rainbow);
+  background-color: var(--cell-bg);
   background-image: linear-gradient(0deg, #0000, #0000);
   border: none;
-  border: 1px solid var(--main-bg);
+  border: 1px solid var(--rainbow);
   border-radius: 100px;
   padding: 5px;
   font-family: 'Nunito', sans-serif;
@@ -42,6 +40,7 @@ button {
   cursor: pointer;
   margin: 5px;
   transition: 0.5s;
+  min-width: 100px;
 }
 button:hover {
   background-color: #0001;
@@ -55,7 +54,7 @@ input {
   margin: 1px;
   border: 1px solid #d1d5da;
   border-radius: 3px;
-  background-color: #fafbfc;
+  background-color: #0002;
   color: var(--text-clr);
   outline: none;
   box-shadow: inset 0 1px 2px rgba(27,31,35,.075);
@@ -63,10 +62,10 @@ input {
   box-sizing:border-box;
 }
 input:focus {
-  background-color: var(--cell-bg);
+  border-color: var(--rainbow);
 }
 h1 {
-  color: var(--main-bg);
+  color: var(--rainbow);
   font-size: 36px;
   line-height: 0;
 }
@@ -89,15 +88,21 @@ tr {
   top: 0;
   width: 100%; /* Full width */
   height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
+  overflow: auto; /* scroll down to see whole modal */
   background-color: #000a; /* Black w/ opacity */
 }
+/* .modalc {
+  display: table-cell;
+  vertical-align: middle;
+} */
 .modal-content {
   background-color: var(--cell-bg);
   margin: 10vh auto; /* 10% from the top and centered */
   padding: 20px;
   border: 1px solid var(--cell-bg);
-  max-width: 500px;
+  width: 50%;
+  min-width: 350px;
+  padding: 25px 50px 25px 50px;
   border-radius: 10px;
 }
 .flex {
