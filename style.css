@@ -101,8 +101,8 @@ tr {
   padding: 20px;
   border: 1px solid var(--cell-bg);
   width: 50%;
-  min-width: 350px;
-  padding: 25px 50px 25px 50px;
+  min-width: 320px;
+  /* padding: 25px 50px 25px 50px; */
   border-radius: 10px;
 }
 .flex {

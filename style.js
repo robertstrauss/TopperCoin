@@ -1,9 +1,9 @@
 const docelem = document.documentElement;
 
 // rainbow background
-let hue = 220;
+let hue = 120;
 setInterval(function(){
-  hue = (hue-1)%360;
+  hue = (hue+1)%360;
   document.documentElement.style.setProperty('--rainbow',  `hsl(${hue}, 70%, 60%)`);
 }, 50);
 
