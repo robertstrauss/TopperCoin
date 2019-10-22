@@ -99,12 +99,12 @@ socket.on('block', function(blockstring){
   let endblockos = transaction.objectStore('endblocks') // the most recent blocks
   console.log('created transacion');
   /*
-  #######################################################
-  #### the blockchain is self-organizing because     ####
-  #### each block has the hash of the previous block.####
-  #### we only need to determine if a block should   ####
-  #### be added, not where to put it.                ####
-  #######################################################
+  ###################################################
+  ## the blockchain is self-organizing because     ##
+  ## each block has the hash of the previous block.##
+  ## we only need to determine if a block should   ##
+  ## be added, not where to put it.                ##
+  ###################################################
   */
 
   // check if the new block connects to any previous block recent enough to allow forks
