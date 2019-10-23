@@ -1,16 +1,14 @@
 // socket to communicate with server
-let socket = io();
+const socket = io();
 
-// object containing info specific to the client's node
-const thisNode = {};
-// get user info from cookies. if this is null ???
-thisNode.address = RegExp('address=([^;]+)').exec(document.cookie);
-thisNode.privkey = RegExp('privkey=([^;]+)').exec(document.cookie);
-thisNode.pubkey = RegExp('pubkey=([^;]+)').exec(document.cookie);
+// object containing info specific to the client's node, stored in cookies
+const thisNode = JSON.parse(RegExp('nodeinfo=([^;]+)').exec(document.cookie));
 
-const difficulty = 4; // how many zeros (hex) block hash must start with
+// how many zeros (hex) block hash must start with
+const difficulty = 4;
 
-const maxbackfork = 20; // the furthest number of blocks back a fork can be started
+// the furthest number of blocks back a fork can be started
+const maxbackfork = 20;
 
 
 
@@ -82,8 +80,16 @@ socket.on('transaction', function(transactionstring){
   console.log('received transaction: ', transactionstring);
 });
 
+let blockqueue = [];
 // when a block is recieved
 socket.on('block', function(blockstring){
+  /*
+  blocks may be sent in very rapid series, it is possible slight deviation
+  in computation times may disorder the blocks, which would be rejected
+  because of the nature of their organization. To avoid this, recieved blocks
+  are added to a queue before calculation time, so the order is preserved.
+  */
+  blockqueue.push(blockstring);
   let split = blockstring.split(';');
   let newblock = {hash: SHA256(blockstring), prevhash: split[0], transactions: split[1], proofofwork: split[2]};
   console.log('received block: ', newblock);

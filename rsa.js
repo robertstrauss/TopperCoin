@@ -1,6 +1,6 @@
 'use strict';
 
-/** source: wikipedia.org
+/**
  * RSA hash function reference implementation.
  * Uses BigInteger.js https://github.com/peterolson/BigInteger.js
  * Code originally based on https://github.com/kubrickology/Bitcoin-explained/blob/master/RSA.js
@@ -8,30 +8,14 @@
 const RSA = {};
 
 /**
- * Generates a k-bit RSA public/private key pair
- * https://en.wikipedia.org/wiki/RSA_(cryptosystem)#Code
+ * Generates a 1024-bit RSA public/private key pair
+ * based on https://en.wikipedia.org/wiki/RSA_(cryptosystem)#Code
  *
- * @param   {keysize} int, bitlength of desired RSA modulus n (should be even)
+ * @param   {seed} string, seed to random number; gives reproducability
  * @returns {array} Result of RSA generation (object with three bigInt members: n, e, d)
  */
-RSA.generate = function(keysize) {
-  /**
-   * Generates a random k-bit prime greater than √2 × 2^(k-1)
-   *
-   * @param   {bits} int, bitlength of desired prime
-   * @returns {bigInt} a random generated prime
-   */
-  function randomPrime(bits) {
-    const min = bigInt(6074001000).shiftLeft(bits - 33);  // min ≈ √2 × 2^(bits - 1)
-    const max = bigInt.one.shiftLeft(bits).minus(1);  // max = 2^(bits) - 1
-    for (;;) {
-      const p = bigInt.randBetween(min, max);  // WARNING: not a cryptographically secure RNG!
-      if (p.isProbablePrime(256)) {
-        return p;
-      }
-    }
-  }
-
+RSA.generate = async function(seed) { // uses RNG functions from cryptorng.js
+  let seed2 = await hashHex(seed, 'SHA-384'); // multiple seeded primes are needed, only one seed.
   // set up variables for key generation
   const e = bigInt(65537);  // use fixed public exponent
   let p;
@@ -40,9 +24,9 @@ RSA.generate = function(keysize) {
 
   // generate p and q such that λ(n) = lcm(p − 1, q − 1) is coprime with e and |p-q| >= 2^(keysize/2 - 100)
   do {
-    p = randomPrime(keysize / 2);
-    q = randomPrime(keysize / 2);
-    lambda = p.minus(1).times(q.minus(1)); //bigInt.lcm(p.minus(1), q.minus(1));
+    p = await seededBigRandomPrime(seed);
+    q = await seededBigRandomPrime(seed2);
+    lambda = p.minus(1).times(q.minus(1)); //bigInt.lcm(p.minus(1), q.minus(1)); only ned product not lcm because p&q are prime
   } while (bigInt.gcd(e, lambda).notEquals(1) || p.minus(q).abs().shiftRight(
       keysize / 2 - 100).isZero());
 
