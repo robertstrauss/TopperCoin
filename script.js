@@ -80,6 +80,7 @@ socket.on('transaction', function(transactionstring){
   console.log('received transaction: ', transactionstring);
 });
 
+let wait;
 let blockqueue = [];
 // when a block is recieved
 socket.on('block', function(blockstring){
@@ -89,56 +90,67 @@ socket.on('block', function(blockstring){
   because of the nature of their organization. To avoid this, recieved blocks
   are added to a queue before calculation time, so the order is preserved.
   */
-  blockqueue.push(blockstring);
-  let split = blockstring.split(';');
-  let newblock = {hash: SHA256(blockstring), prevhash: split[0], transactions: split[1], proofofwork: split[2]};
-  console.log('received block: ', newblock);
-
-  if (!newblock.hash.startsWith(Array(difficulty+1).join('0'))) // check if hash of block starts with zeros according to difficulty
-    return; // if not, reject
-
-  console.log('Block matches difficulty');
-
-  // get the blockchain and endblocks ready to read from and write to
-  let transaction = blockchaindb.transaction(['blockchain', 'endblocks'], 'readwrite');
-  let blockchainos = transaction.objectStore('blockchain'); // full blockchain
-  let endblockos = transaction.objectStore('endblocks') // the most recent blocks
-  console.log('created transacion');
-  /*
-  ###################################################
-  ## the blockchain is self-organizing because     ##
-  ## each block has the hash of the previous block.##
-  ## we only need to determine if a block should   ##
-  ## be added, not where to put it.                ##
-  ###################################################
-  */
-
-  // check if the new block connects to any previous block recent enough to allow forks
-  endblockos.openCursor().onsuccess = function(e){
-    let endblock = e.target.result.value;
-    // check if the new block extends an endblock
-    if (newblock.prevhash === endblock.hash) {
-      console.log('accepting block ', newblock);
-      endblocks.delete(endblock); // end block is no longer end block
-      endplocks.add(newblock); // new block is
-      blockchainos.add(newblock); // add new block to blockchain
-      return true; // exit loop
-    }
-    // check if the new block extends any block within the last <maxbackfork> blocks, starting a new fork.
-    for (let backcount=0, lastblock=endblock; backcount < maxbackfork; backcount++) {
-      blockchainos.get(lastblock.prevhash).onsuccess = function(e) {
-        lastblock = e.target.result.value;
-        if (newblock.prevhash === lastblock.hash) {
-          console.log('accepting block ', newblock);
-          endblocks.add(newblock);
-          blockchainos.add(newblock); // add new block to blockchain
-          return true; // exit loop
-        }
-      };
-    }
-  };
-
+  clearTimeout(wait); // reset timer
+  blockqueue.push(blockstring); // add the block to the queue
+  wait = setTimeout(processblockqueue, 1000); // wait 1 second then process queue, unless interrupted by another block coming in
 });
+
+/**
+ * go through list blockqueue[] and add valid blocks to blockchain
+ */
+async function processblockqueue() {
+  for (let i = 0; i < blockqueue.length; i++) {
+    blockstring = blockqueue[i];
+    let split = blockstring.split(';');
+    const hash = await hashHex(blockstring, 'SHA-256'); // take sha256 hash of entire block
+    let newblock = {hash: hash, prevhash: split[0], transactions: split[1], proofofwork: split[2]};
+    console.log('received block: ', newblock);
+
+    if (!newblock.hash.startsWith(Array(difficulty+1).join('0'))) // check if hash of block starts with zeros according to difficulty
+      return; // if not, reject
+
+    console.log('Block matches difficulty');
+
+    // get the blockchain and endblocks ready to read from and write to
+    let transaction = blockchaindb.transaction(['blockchain', 'endblocks'], 'readwrite');
+    let blockchainos = transaction.objectStore('blockchain'); // full blockchain
+    let endblockos = transaction.objectStore('endblocks') // the most recent blocks
+    console.log('created transacion');
+    /*
+    ###################################################
+    ## the blockchain is self-organizing because     ##
+    ## each block has the hash of the previous block.##
+    ## we only need to determine if a block should   ##
+    ## be added, not where to put it.                ##
+    ###################################################
+    */
+
+    // check if the new block connects to any previous block recent enough to allow forks
+    endblockos.openCursor().onsuccess = function(e){
+      let endblock = e.target.result.value;
+      // check if the new block extends an endblock
+      if (newblock.prevhash === endblock.hash) {
+        console.log('accepting block ', newblock);
+        endblocks.delete(endblock); // end block is no longer end block
+        endplocks.add(newblock); // new block is
+        blockchainos.add(newblock); // add new block to blockchain
+        return true; // exit loop
+      }
+      // check if the new block extends any block within the last <maxbackfork> blocks, starting a new fork.
+      for (let backcount=0, lastblock=endblock; backcount < maxbackfork; backcount++) {
+        blockchainos.get(lastblock.prevhash).onsuccess = function(e) {
+          lastblock = e.target.result.value;
+          if (newblock.prevhash === lastblock.hash) {
+            console.log('accepting block ', newblock);
+            endblocks.add(newblock);
+            blockchainos.add(newblock); // add new block to blockchain
+            return true; // exit loop
+          }
+        };
+      }
+    };
+  }
+}
 
 
 

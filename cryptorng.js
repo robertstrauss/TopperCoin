@@ -13,25 +13,21 @@ async function hashHex(message, algorithim) {
   return hashHex;
 }
 
-function syncHashHex(message, algorithim) {
-  hashHex(message, algorithim).then(hh => return hh);
-}
-
-/**
- * generates a 1024-bit (crypto-secure) random bigint from a seed
- * @param   {seed} string seed
- * @returns {bigDec} bigInt 1024 bit integer, using bigInteger.js, not BigInt web API
- */
-async function seededBigIntRandom1024(seed) {
-  // use multiple algo's for more security: if one is ever broken, it remains secure
-  // total number of bits (256+512+256) sums to 1024: append them and convert, also just more entropy
-  const hash1 = await hashHex(seed,  'SHA-256');
-  const hash2 = await hashHex(hash1, 'SHA-512');
-  const hash3 = await hashHex(hash2, 'Sha-256');
-  const bigHex = ['0x', hash1, hash2, hash3].join('');
-  const bigDec = bigInt(bigHex); // using bigInteger.js, NOT BigInt web API
-  return bigDec;
-}
+// /**
+//  * generates a 1024-bit (crypto-secure) random bigint from a seed
+//  * @param   {seed} string seed
+//  * @returns {bigDec} BigInt 1024 bit integer, using BigInt web API
+//  */
+// async function seededBigIntRandom1024(seed) {
+//   // use multiple algo's for more security: if one is ever broken, it remains secure
+//   // total number of bits (256+512+256) sums to 1024: append them and convert, also just more entropy
+//   const hash1 = await hashHex(seed,  'SHA-256');
+//   const hash2 = await hashHex(hash1, 'SHA-512');
+//   const hash3 = await hashHex(hash2, 'Sha-256');
+//   const bigHex = ['0x', hash1, hash2, hash3].join('');
+//   const bigDec = BigInt(bigHex); // using BigInt web API
+//   return bigDec;
+// }
 
 /**
  * Generates a random 1024-bit prime from seed
@@ -40,13 +36,17 @@ async function seededBigIntRandom1024(seed) {
  * @returns {bigInt} a random generated prime
  */
 async function seededBigRandomPrime(seed) {
-  let input = seed; // input to RNG
+  let hash1, hash2, hash3 = seed, bigHex, bigDec; // input to RNG
   // const min = bigInt(6074001000).shiftLeft(bits - 33);  // min ≈ √2 × 2^(bits - 1)
   // const max = bigInt.one.shiftLeft(bits).minus(1);  // max = 2^(bits) - 1
   for (;;) {
-    input = await seededBigIntRandom1024(input);
-    if (input.isProbablePrime(256)) {
-      return input;
+    hash1 = await hashHex(hash3,  'SHA-256');
+    hash2 = await hashHex(hash1, 'SHA-512');
+    hash3 = await hashHex(hash2, 'Sha-256');
+    bigHex = ['0x', hash1, hash2, hash3].join('');
+    bigDec = bigInt(BigInt(bigHex)); // using BigInt web API, and bigInteger.js
+    if (bigDec.isProbablePrime(256)) {
+      return bigDec;
     }
   }
 }

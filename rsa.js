@@ -15,7 +15,7 @@ const RSA = {};
  * @returns {array} Result of RSA generation (object with three bigInt members: n, e, d)
  */
 RSA.generate = async function(seed) { // uses RNG functions from cryptorng.js
-  let seed2 = await hashHex(seed, 'SHA-384'); // multiple seeded primes are needed, only one seed.
+  let seed2 = await hashHex(seed, 'SHA-1'); // multiple seeded primes are needed, only one seed.
   // set up variables for key generation
   const e = bigInt(65537);  // use fixed public exponent
   let p;
