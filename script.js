@@ -41,6 +41,7 @@ request.onupgradeneeded = function(e) { // called if the user doesn't have a blo
   bcObjectStore.createIndex('prevhash',    'prevhash',    { unique: true  });
   bcObjectStore.createIndex('transactions','transactions',{ unique: false });
   bcObjectStore.createIndex('proofofwork', 'proofofwork', { unique: false });
+  bcObjectStore.createIndex('length',      'length',      { unique: false });
 
   console.log('created blockchain object store');
 
@@ -49,14 +50,15 @@ request.onupgradeneeded = function(e) { // called if the user doesn't have a blo
   ebObjectStore.createIndex('prevhash',    'prevhash',    { unique: true  });
   ebObjectStore.createIndex('transactions','transactions',{ unique: false });
   ebObjectStore.createIndex('proofofwork', 'proofofwork', { unique: false });
+  ebObjectStore.createIndex('length',      'length',      { unique: false });
 
   console.log('created endblocks object store');
 
   // genesis block
-  bcObjectStore.add({hash: '0000684b7c4cc4bd581d92f7be29d4830d3bd66e320f885900cc7f537e1408cc',
-                     prevhash: '', transactions:'strobertisawesome>100>strobert', proofofwork: '44124'});
-  ebObjectStore.add({hash: '0000684b7c4cc4bd581d92f7be29d4830d3bd66e320f885900cc7f537e1408cc',
-                     prevhash: '', transactions:'strobertisawesome>100>strobert', proofofwork: '44124'});
+  const genesis = {hash: '0000684b7c4cc4bd581d92f7be29d4830d3bd66e320f885900cc7f537e1408cc', prevhash: '',
+                     transactions:'strobertisawesome>100>strobert', proofofwork: '44124', length: 0};
+  bcObjectStore.add(genesis);
+  ebObjectStore.add(genesis);
   console.log('database initialization complete');
   /**
    * blockchain will be synced
@@ -142,6 +144,7 @@ async function processblockqueue() {
       let endblock = e.target.result.value;
       // check if the new block extends an endblock
       if (newblock.prevhash === endblock.hash) {
+        newblock.length = endblock.length+1; // one farther in the blockchain
         console.log('accepting block ', newblock);
         endblocks.delete(endblock); // end block is no longer end block
         endplocks.add(newblock); // new block is
@@ -153,6 +156,7 @@ async function processblockqueue() {
         blockchainos.get(lastblock.prevhash).onsuccess = function(e) {
           lastblock = e.target.result.value;
           if (newblock.prevhash === lastblock.hash) {
+            newblock.length = endblock.length+1;
             console.log('accepting block ', newblock);
             endblocks.add(newblock);
             blockchainos.add(newblock); // add new block to blockchain
@@ -220,8 +224,7 @@ function maketransaction() {
 
 
 
-function getPubKey(address) { // get the public key of an address in the blockchain
-  // syncblockchain();
+async function getPubKey(address) { // get the public key of an address in the blockchain
   // make regexp for finding publickey
   let re = new RegExp(address+'>0>mypublickeyis([a-zA-Z0-9]+)');
   // request the blockchain for reading
@@ -236,12 +239,13 @@ function getPubKey(address) { // get the public key of an address in the blockch
       cursor.continue();
     }
   }
+  return null; // not found
 }
 
 async function broadcasttransaction(amount, recipient) {
   let transactionstring = `${thisNode.address}>${amount}>${recipient}`;
   let hash = await hashHex(transactionstring, 'SHA-256');
-  hash = parseInt(hash, 16);
+  hash = bigInt(['0x', hash].join(''));
   let signature = RSA.encrypt(hash, thisNode.pubkey, thisNode.privkey).toString(); // sign by encrypting with priv key
   console.log(signature);
   socket.emit('transaction', transactionstring + '|' + signature);
@@ -271,7 +275,8 @@ async function register() {
 
   // verify entered address
   let address = document.getElementById('registeraddress').value;
-  if (getPubKey(address) != null) {
+  let pubkey = await getPubKey(address);
+  if (pubkey != null) {
     console.log('That username is not available');
     return false;
   }
@@ -300,7 +305,7 @@ async function register() {
 
 
 
-function login() {
+async function login() {
   alert('attempting to log in')
 
   // get values from form
@@ -313,7 +318,8 @@ function login() {
   // let publicKeyString = cryptico.publicKeyString(RSAKey);
 
   // check password
-  if (getPubKey(address) != keys.n) { // if announced in blockchain previously with different cred
+  let pubkey = await getPubKey(address);
+  if (pubkey != keys.n) { // if announced in blockchain previously with different cred
     alert('invalid login');
     return false;
   }

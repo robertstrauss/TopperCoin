@@ -6,7 +6,7 @@
  * Code originally based on https://github.com/kubrickology/Bitcoin-explained/blob/master/RSA.js
  */
 const RSA = {};
-
+RSA.e = bigInt(65537);
 /**
  * Generates a 1024-bit RSA public/private key pair
  * based on https://en.wikipedia.org/wiki/RSA_(cryptosystem)#Code
@@ -17,7 +17,7 @@ const RSA = {};
 RSA.generate = async function(seed) { // uses RNG functions from cryptorng.js
   let seed2 = await hashHex(seed, 'SHA-1'); // multiple seeded primes are needed, only one seed.
   // set up variables for key generation
-  const e = bigInt(65537);  // use fixed public exponent
+  const e = RSA.e;  // use fixed public exponent 65537
   let p;
   let q;
   let lambda;
