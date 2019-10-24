@@ -41,15 +41,15 @@
 
             <!-- send TPC -->
             <div class="cell infoblock">
-              <form id="makepaymentform" onsubmit="maketransaction(); return false"> <!-- method="GET" action="payment.php" target="emptyframe"> <!- -  onsubmit="makepayment();return false" -->
+              <!-- <form id="makepaymentform" onsubmit="maketransaction(); return false"> <!- - method="GET" action="payment.php" target="emptyframe"> <!- -  onsubmit="makepayment();return false" - -> -->
                 <table align="center">
                   <tr><td>send</td><td><input type="number" id="amount" step="0.0001" min="0"/></td><td>TPC</td></tr>
                   <tr><td>to</td><td colspan="2"><input type="text" id="recipient"/></td></tr>
                   <tr><td colspan="3">
-                  <button style="width:100%;margin:0">Send</button>
+                  <button style="width:100%;margin:0" onclick="makepayment()">Send</button>
                   </td></tr>
                 </table>
-              </form>
+              <!-- </form> -->
             </div>
         </div>
 
@@ -171,7 +171,8 @@
     <script src="rsa.js"></script> <!-- rsa -->
     <script src="style.js"></script> <!-- fancy style things -->
 
-    <!-- the javascript that loads the blockchain, make the blockchain preview, and calculates balance. -->
+    <!-- mostly blockchain stuff -->
     <script src="script.js"></script> <!-- TopperCoin! -->
+    <script src="autominer.js"></script> <!-- automatic miner -->
   </body>
 </html>

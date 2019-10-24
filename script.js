@@ -38,7 +38,7 @@ request.onupgradeneeded = function(e) { // called if the user doesn't have a blo
 
   // create objectstore for the full blockchain
   let bcObjectStore = blockchaindb.createObjectStore('blockchain', { keyPath: 'hash' });
-  bcObjectStore.createIndex('prevhash',    'prevhash',    { unique: true  });
+  bcObjectStore.createIndex('prevhash',    'prevhash',    { unique: false });
   bcObjectStore.createIndex('transactions','transactions',{ unique: false });
   bcObjectStore.createIndex('proofofwork', 'proofofwork', { unique: false });
   bcObjectStore.createIndex('length',      'length',      { unique: false });
@@ -47,7 +47,7 @@ request.onupgradeneeded = function(e) { // called if the user doesn't have a blo
 
   // object store for just the most recent blocks
   let ebObjectStore = blockchaindb.createObjectStore('endblocks', { keyPath: 'hash' });
-  ebObjectStore.createIndex('prevhash',    'prevhash',    { unique: true  });
+  ebObjectStore.createIndex('prevhash',    'prevhash',    { unique: false });
   ebObjectStore.createIndex('transactions','transactions',{ unique: false });
   ebObjectStore.createIndex('proofofwork', 'proofofwork', { unique: false });
   ebObjectStore.createIndex('length',      'length',      { unique: false });
@@ -141,28 +141,34 @@ async function processblockqueue() {
 
     // check if the new block connects to any previous block recent enough to allow forks
     endblockos.openCursor().onsuccess = function(e){
-      let endblock = e.target.result.value;
-      // check if the new block extends an endblock
-      if (newblock.prevhash === endblock.hash) {
-        newblock.length = endblock.length+1; // one farther in the blockchain
-        console.log('accepting block ', newblock);
-        endblocks.delete(endblock); // end block is no longer end block
-        endplocks.add(newblock); // new block is
-        blockchainos.add(newblock); // add new block to blockchain
-        return true; // exit loop
+      let cursor = e.target.result;
+      if (cursor) {
+        let endblock = cursor.value;
+        // check if the new block extends an endblock
+        if (newblock.prevhash === endblock.hash) {
+          newblock.length = endblock.length+1; // one farther in the blockchain
+          console.log('accepting block ', newblock);
+          endblocks.delete(endblock); // end block is no longer end block
+          endplocks.add(newblock); // new block is
+          blockchainos.add(newblock); // add new block to blockchain
+          return true; // exit loop
+        }
+        // check if the new block extends any block within the last <maxbackfork> blocks, starting a new fork.
+        for (let backcount=0, lastblock=endblock; backcount < maxbackfork; backcount++) {
+          blockchainos.get(lastblock.prevhash).onsuccess = function(e) {
+            lastblock = e.target.result.value;
+            if (newblock.prevhash === lastblock.hash) {
+              newblock.length = lastblock.length+1;
+              console.log('accepting block ', newblock);
+              endblocks.add(newblock);
+              blockchainos.add(newblock); // add new block to blockchain
+              return true; // exit loop
+            }
+          };
+        }
       }
-      // check if the new block extends any block within the last <maxbackfork> blocks, starting a new fork.
-      for (let backcount=0, lastblock=endblock; backcount < maxbackfork; backcount++) {
-        blockchainos.get(lastblock.prevhash).onsuccess = function(e) {
-          lastblock = e.target.result.value;
-          if (newblock.prevhash === lastblock.hash) {
-            newblock.length = endblock.length+1;
-            console.log('accepting block ', newblock);
-            endblocks.add(newblock);
-            blockchainos.add(newblock); // add new block to blockchain
-            return true; // exit loop
-          }
-        };
+      else { // finished iterating through endblocks
+        return false;
       }
     };
   }
@@ -218,11 +224,54 @@ function previewBlockchain() {
 
 
 
-function maketransaction() {
-
+async function maketransaction() {
+  const amount = document.getElementById('amount').value;
+  const recipient = document.getElementById('recipient').value;
+  const balprom = calcBalance(thisNode.address);
+  const recipPKprom = getPubKey(recipient);
+  const bal = await balprom;
+  const reciPK = await reciPKprom;
+  if (!amount || !recipient) { // left a field empty
+    alert('Fill out all fields.');
+    return false;
+  }
+  if (!thisNode.address) { // not logged in
+    alert('You are not logged in.');
+    return false;
+  }
+  if (bal < amount) { // not enough balance
+    alert('You do not have enough money to send that much.');
+    return false;
+  }
+  // if (!recipPK) {
+  // recipient not in network
+  if (!(recipPK || confirm(`${recipient} is not registered on the network yet. Continue?`))) return false;
+  // }
+  if(!confirm(`Send ${amount} TPC to ${recipient}?`)) return false; // stop unless they confirm affirmatively
+  broadcasttransaction(amount, recipient);
+  alert('Sent. Watch the blockchain for your transaction.');
+  return false;
 }
 
-
+// determine the block that is farthest in the blockchain
+async function getLongestBlock() {
+  let blockstring = '';
+  let endblockos = blockchaindb.transaction(['endblocks'], 'readonly').objectStore('endblocks' );
+  let longestblock= {};
+  endblockos.openCursor().onsuccess = function(e) {
+    // iterate through enblocks to find "longest" - one with most behind it
+    let cursor = e.target.result;
+    if (cursor) {
+      let block = cursor.value;
+      if (block.length > longestblock.length)
+        longestblock = block;
+      cursor.continue();
+    }
+    else { // done going through endblocks
+      return longestblock;
+    }
+  }
+}
 
 async function getPubKey(address) { // get the public key of an address in the blockchain
   // make regexp for finding publickey
@@ -239,7 +288,31 @@ async function getPubKey(address) { // get the public key of an address in the b
       cursor.continue();
     }
   }
-  return null; // not found
+}
+
+/** calculate balance of address */
+async function calcBalance(address) {
+  // request the blockchain for reading
+  let bal = 0;
+  blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+  blockchainos.openCursor().onsuccess = function(e) { // iterate through blockchain to find publickey announcement
+    let cursor = e.target.result; // cursor holds current block
+    if (cursor) { // if still in the blockchain
+
+      if (cursor.value.transactions.indexOf(address) >= 0) { // check for regexp match, and return it if so
+        let transactions = cursor.value.transactions.split(',');
+        for (let t = 0; t < transactions.length; t++) {
+          let transaction = transactions[t].split('>');
+          if (transaction[0] === address) bal-=parseFloat(transaction[1]);
+          if (transaction[1] === address) bal+=parseFloat(transaction[1]);
+        }
+      }
+      // advance to next block
+      cursor.continue();
+    } else { // finished looping through blockchain
+      return bal;
+    }
+  }
 }
 
 async function broadcasttransaction(amount, recipient) {
