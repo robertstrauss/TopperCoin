@@ -1,15 +1,13 @@
+// call compiled cpp function to mine block (wasm)
 async function mineBlock(blockstring) {
   return Module.ccal('mineBlock', 'string', ['string'], [blockstring]);
 }
 
-let blockstring = '';
-let transaction = blockchaindb.transaction(['blockchain', 'endblocks'], 'readonly');
-let blockchainos= transaction.objectStore('blockchain');
-let endblockos  = transaction.objectStore('endblocks' );
-
 // determine the block that is farthest in the blockchain
 async function getLongestBlock() {
-  let longestblock = {};
+  let blockstring = '';
+  let endblockos = blockchaindb.transaction(['endblocks'], 'readonly').objectStore('endblocks' );
+  let longestblock= {};
   endblockos.openCursor().onsuccess = function(e) {
     // iterate through enblocks to find "longest" - one with most behind it
     let cursor = e.target.result;
@@ -25,8 +23,11 @@ async function getLongestBlock() {
   }
 }
 
-let longestblock = await getLongestBlock();
-let block = longestblock.hash+';'; // start with previous block (longestblock) hash
+let longestblock = await getLongestBlock(); // find the farthest block in the chain
+let blockstring = longestblock.hash+';miningbonus>1>'+thisNode.address; // start with previous block (longestblock) hash
+
+// go ahead and start mining
+mineBlock(blockstring).then(minedblock => socket.emit('block', minedblock)); // mine and emit block when done (async)
 
 socket.on('transaction', async function(transactionstring){ // sender>amount>recipient|signature
   const split = transactionstring.split('|'); // transaction, signature
@@ -34,13 +35,15 @@ socket.on('transaction', async function(transactionstring){ // sender>amount>rec
   const sender = transaction[0], amount = transaction[1];
   const hashHex = await hashHex(split[0]);
   const hashDec = bigInt(['0x', hashHex].join(''));
-  // two long asynchronous processes
+  // two long asynchronous processes: start both with promises before awaiting
   const pubkeyprom = getPubKey(sender);
   const balprom = calcBalance(sender);
   const pubkey = await pubkeyprom;
   const bal = await balprom;
   if (RSA.decrypt(split[0], RSA.e, pubkey) === hashDec
-      && bal >= transaction[1]) {
-    blockstring.push(transactionstring);
+      && bal >= transaction[1]) { // check signature and balance
+    // valid transaction
+    blockstring += ','+transactionstring; // add transaction
+    mineBlock(blockstring).then(minedblock => socket.emit('block', minedblock)); // mine and emit block when done (async)
   }
 });
