@@ -1,8 +1,20 @@
 // socket to communicate with server
 const socket = io();
 
+// for getting cookies
+function getCookie(name)
+{
+  var re = new RegExp(name + "=([^;]+)");
+  var value = re.exec(document.cookie);
+  return (value != null) ? unescape(value[1]) : null;
+}
+
 // object containing info specific to the client's node, stored in cookies
-const thisNode = JSON.parse(RegExp('nodeinfo=([^;]+)').exec(document.cookie));
+const thisNode = {
+                   address : getCookie('address'),
+                   privkey : getCookie('privkey'),
+                   pubkey  : getCookie('pubkey' )
+                 }
 
 // how many zeros (hex) block hash must start with
 const difficulty = 4;
@@ -163,55 +175,6 @@ setTimeout(previewBlockchain, 100);
 
 
 
-
-
-
-
-// FUNCTIONS
-
-
-
-function maketransaction() {
-
-}
-
-
-
-function getPubKey(address) { // get the public key of an address in the blockchain
-  // syncblockchain();
-  // make regexp for finding publickey
-  let re = new RegExp(address+'>0>mypublickeyis([a-zA-Z0-9]+)');
-  // request the blockchain for reading
-  blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
-  blockchainos.openCursor().onsuccess = function(e) { // iterate through blockchain to find publickey announcement
-    let cursor = e.target.result; // cursor holds current block
-    if (cursor) { // if still in the blockchain
-      if ((pk = re.exec(cursor.value.transactions)) != null) { // check for regexp match, and return it if so
-        return pk;
-      }
-      // advance to next block
-      cursor.continue();
-    }
-  }
-}
-
-function broadcasttransaction(amount, recipient) {
-  let transactionstring = `${thisNode.address}>${amount}>${recipient}`;
-  let sign = new JSEncrypt();
-  sign.setPrivateKey(thisNode.privkey);
-  let signature = sign.sign(transactionstring);
-  // cryptico doesn't work with signing, that's why the other packalet cursorrequest = ge is implemented too
-  // let signature = cryptico.decrypt(transactionstring, thisNode.privkey); // encrypting with private key is signing
-  console.log(signature);
-  socket.emit('transaction', transactionstring + '|' + signature);
-}
-
-
-
-
-
-
-
 function previewBlockchain() {
   let transaction  = blockchaindb.transaction(['blockchain', 'endblocks'], 'readonly');
   let blockchainos =  transaction.objectStore('blockchain');
@@ -251,10 +214,53 @@ function previewBlockchain() {
 
 
 
+function maketransaction() {
+
+}
 
 
 
-function register() {
+function getPubKey(address) { // get the public key of an address in the blockchain
+  // syncblockchain();
+  // make regexp for finding publickey
+  let re = new RegExp(address+'>0>mypublickeyis([a-zA-Z0-9]+)');
+  // request the blockchain for reading
+  blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+  blockchainos.openCursor().onsuccess = function(e) { // iterate through blockchain to find publickey announcement
+    let cursor = e.target.result; // cursor holds current block
+    if (cursor) { // if still in the blockchain
+      if ((pk = re.exec(cursor.value.transactions)) != null) { // check for regexp match, and return it if so
+        return pk;
+      }
+      // advance to next block
+      cursor.continue();
+    }
+  }
+}
+
+async function broadcasttransaction(amount, recipient) {
+  let transactionstring = `${thisNode.address}>${amount}>${recipient}`;
+  let hash = await hashHex(transactionstring, 'SHA-256');
+  hash = parseInt(hash, 16);
+  let signature = RSA.encrypt(hash, thisNode.pubkey, thisNode.privkey).toString(); // sign by encrypting with priv key
+  console.log(signature);
+  socket.emit('transaction', transactionstring + '|' + signature);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+async function register() {
+  alert('Registering... This may take a minute.');
+
   // verify password
   let password1 = document.getElementById('registerpassword1').value;
   let password2 = document.getElementById('registerpassword2').value;
@@ -265,25 +271,25 @@ function register() {
 
   // verify entered address
   let address = document.getElementById('registeraddress').value;
-  console.log(address);
   if (getPubKey(address) != null) {
     console.log('That username is not available');
     return false;
   }
 
-  let RSAKey = cryptico.generateRSAKey(password1, 1024);
-  let publicKeyString = cryptico.publicKeyString(RSAKey);
+  let keys = await RSA.generate(password1); // start generation of RSA keypair seeded from password1 (1024 bit, secure, real)
+  // let RSAKey = cryptico.generateRSAKey(password1, 1024);
+  // let publicKeyString = cryptico.publicKeyString(RSAKey);
 
   // save info
   thisNode.address = address;
   document.cookie = 'address='+thisNode.address;
-  thisNode.privkey = RSAKey;
+  thisNode.privkey = keys.d; // keep secret!
   document.cookie = 'privkey='+thisNode.privkey;
-  thisNode.pubkey = publicKeyString;
+  thisNode.pubkey = keys.n; // fixed public exponenet of 65537 (see rsa.js), only need n
   document.cookie = 'pubkey='+thisNode.pubkey;
 
   // announce in blockchain
-  broadcasttransaction(0, 'mypublickeyis'+thisNode.pubkey);
+  broadcasttransaction(0, 'mypublickeyis'+thisNode.pubkey.toString()); // invoke tostring rather than built in to stop from converting to "infinity"
   return false;
 }
 
@@ -295,18 +301,19 @@ function register() {
 
 
 function login() {
-  console.log('attempting to log in')
+  alert('attempting to log in')
 
   // get values from form
   let address = document.getElementById('loginaddress').value;
   let password = document.getElementById('loginpassword').value;
 
   // generate RSA key from password
-  let RSAKey = cryptico.generateRSAKey(password, 1024);
-  let publicKeyString = cryptico.publicKeyString(RSAKey);
+  let keys = RSA.generate(password); // generate rsa keypair seeded by password, check keypair
+  // let RSAKey = cryptico.generateRSAKey(password, 1024);
+  // let publicKeyString = cryptico.publicKeyString(RSAKey);
 
   // check password
-  if (getPubKey(address) != publicKeyString) {
+  if (getPubKey(address) != keys.n) { // if announced in blockchain previously with different cred
     alert('invalid login');
     return false;
   }
@@ -314,8 +321,8 @@ function login() {
   // save info
   thisNode.address = address;
   document.cookie = 'address='+thisNode.address;
-  thisNode.privkey = RSAKey;
+  thisNode.privkey = keys.d; // secret!
   document.cookie = 'privkey='+thisNode.privkey;
-  thisNode.pubkey = publicKeyString;
+  thisNode.pubkey = keys.n; // fixed public exp. see rsa.js
   document.cookie = 'pubkey='+thisNode.pubkey;
 }

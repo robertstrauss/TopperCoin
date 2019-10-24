@@ -28,7 +28,7 @@ RSA.generate = async function(seed) { // uses RNG functions from cryptorng.js
     q = await seededBigRandomPrime(seed2);
     lambda = p.minus(1).times(q.minus(1)); //bigInt.lcm(p.minus(1), q.minus(1)); only ned product not lcm because p&q are prime
   } while (bigInt.gcd(e, lambda).notEquals(1) || p.minus(q).abs().shiftRight(
-      keysize / 2 - 100).isZero());
+      1024 / 2 - 100).isZero());
 
   return {
     n: p.multiply(q),  // public key (part I)

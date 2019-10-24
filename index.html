@@ -122,23 +122,20 @@
       <div class="modal-content">
         <!-- <div style="text-align:right;"><button onclick="document.getElementById('login').style.display='none'">X</button></div> -->
         <h2>Log in</h2>
-        <form onsubmit="login()">
           <table style="width:100%">
             <tr>
               <td>username:</td><td><input id="loginaddress"/></td>
             </tr><tr>
               <td>password:</td><td><input type="password" id="loginpassword"/></td>
             </tr><tr>
-              <td colspan="2"><button style="width:100%">Log In</button></td>
+              <td colspan="2"><button style="width:100%" onclick="login">Log In</button></td>
             </tr>
           </table>
-        </form>
       </div>
     </div></div>
     <div id="register" class="modal"><div class="modalc">
       <div class="modal-content">
         <h2>Register</h2>
-        <form onsubmit="register()">
           <table style="width:100%">
             <tr>
               <td>create username:</td><td><input type="text" id="registeraddress" pattern="[^>|,;]+"
@@ -149,10 +146,9 @@
             </tr><tr>
               <td>verify password:</td><td><input type="password" id="registerpassword2"/></td>
             </tr><tr>
-              <td colspan="2"><button style="width:100%">Submit</button></td>
+              <td colspan="2"><button style="width:100%" onclick="register()">Submit</button></td>
             </tr>
           </table>
-        </form>
       </div>
     </div></div>
 
@@ -166,13 +162,16 @@
       </div>
     </div></div>
 
-    <!-- the javascript that loads the blockchain, make the blockchain preview, and calculates balance. -->
-    <!-- <script src="blockchain.json"></script> -->
+
+    <!-- <script src="jquery.min.js"></script> <!- - jquery, a powerful utility - -> -->
     <script src="https://peterolson.github.io/BigInteger.js/BigInteger.min.js"></script> <!-- bigInt for doing fast calculations with large integers -->
     <script src="/socket.io/socket.io.js"></script> <!-- for communication with server -->
     <!-- <script src="cryptico/cryptico.min.js"></script> <!- - for generating rsa keypair -->
     <script src="cryptorng.js"></script> <!-- for generating cryptographically secure random numbers from a seed -->
+    <script src="rsa.js"></script> <!-- rsa -->
     <script src="style.js"></script> <!-- fancy style things -->
+
+    <!-- the javascript that loads the blockchain, make the blockchain preview, and calculates balance. -->
     <script src="script.js"></script> <!-- TopperCoin! -->
   </body>
 </html>
