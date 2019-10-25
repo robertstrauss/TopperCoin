@@ -287,21 +287,32 @@ async function getPubKey(address) { // get the public key of an address in the b
   }
 }
 
+/** calculate my balance and put it into DOM */
+async function getMyBalance() {
+  let bal = await calcBalance(thisNode.address);
+  console.log(bal, !bal);
+  if (!bal) {
+    alert('you are not logged in');
+    return false;
+  }
+  document.getElementById('tpcbalance').innerHTML = bal;
+}
+
 /** calculate balance of address */
 async function calcBalance(address) {
-  // request the blockchain for reading
   let bal = 0;
+  // request the blockchain for reading
   blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
-  blockchainos.openCursor().onsuccess = function(e) { // iterate through blockchain to find publickey announcement
+  let curreq = blockchainos.openCursor();
+  curreq.onsuccess = function(e) { // iterate through blockchain to find publickey announcement
     let cursor = e.target.result; // cursor holds current block
     if (cursor) { // if still in the blockchain
-
       if (cursor.value.transactions.indexOf(address) >= 0) { // check for regexp match, and return it if so
         let transactions = cursor.value.transactions.split(',');
         for (let t = 0; t < transactions.length; t++) {
           let transaction = transactions[t].split('>');
           if (transaction[0] === address) bal-=parseFloat(transaction[1]);
-          if (transaction[1] === address) bal+=parseFloat(transaction[1]);
+          if (transaction[2] === address) bal+=parseFloat(transaction[1]);
         }
       }
       // advance to next block
@@ -310,12 +321,14 @@ async function calcBalance(address) {
       return bal;
     }
   }
+  bal = await curreq.result;
+  return bal;
 }
 
 async function broadcasttransaction(amount, recipient) {
   let transactionstring = `${thisNode.address}>${amount}>${recipient}`;
   let hash = await hashHex(transactionstring, 'SHA-256');
-  hash = bigInt(['0x', hash].join(''));
+  hash = bigInt(BigInt(['0x', hash].join('')));
   let signature = RSA.encrypt(hash, thisNode.pubkey, thisNode.privkey).toString(); // sign by encrypting with priv key
   console.log(signature);
   socket.emit('transaction', transactionstring + '|' + signature);
@@ -339,7 +352,7 @@ async function register() {
   let password1 = document.getElementById('registerpassword1').value;
   let password2 = document.getElementById('registerpassword2').value;
   if (password1 != password2) {
-    console.log('passwords do not match');
+    alert('passwords do not match');
     return false;
   }
 
@@ -364,7 +377,9 @@ async function register() {
   document.cookie = 'pubkey='+thisNode.pubkey;
 
   // announce in blockchain
-  broadcasttransaction(0, 'mypublickeyis'+thisNode.pubkey.toString()); // invoke tostring rather than built in to stop from converting to "infinity"
+  // invoke tostring rather than built in to stop from converting to "infinity"
+  broadcasttransaction(0, 'mypublickeyis'+thisNode.pubkey.toString());
+  alert('registered successfully!');
   return false;
 }
 
