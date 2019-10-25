@@ -183,12 +183,12 @@ tr {
   overflow: auto;
   color: yellow;
 }
-#blockchainpreview .block .proofofwork, .block .previoushash {
+#blockchainpreview .block .proofofwork, .block .prevhash {
   text-overflow: ellipsis;
   overflow-x: hidden;
   border: 2px solid white;
 }
-#blockchainpreview .block .previoushash {
+#blockchainpreview .block .prevhash {
   color: lightblue;
   border-bottom: none;
 }
