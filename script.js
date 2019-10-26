@@ -82,18 +82,6 @@ request.onsuccess = function() {
 }
 
 
-
-
-
-
-
-
-// when a transaction is recieved
-socket.on('transaction', function(transactionstring){
-  // TODO verify transaction, mine it. (optional: if mining)
-  console.log('received transaction: ', transactionstring);
-});
-
 let wait;
 let blockqueue = [];
 // when a block is recieved
@@ -224,30 +212,29 @@ function previewBlockchain() {
 async function maketransaction() {
   const amount = document.getElementById('amount').value;
   const recipient = document.getElementById('recipient').value;
-  const balprom = calcBalance(thisNode.address);
-  const recipPKprom = getPubKey(recipient);
-  const bal = await balprom;
-  const reciPK = await reciPKprom;
-  if (!amount || !recipient) { // left a field empty
-    alert('Fill out all fields.');
-    return false;
-  }
-  if (!thisNode.address) { // not logged in
-    alert('You are not logged in.');
-    return false;
-  }
-  if (bal < amount) { // not enough balance
-    alert('You do not have enough money to send that much.');
-    return false;
-  }
-  // if (!recipPK) {
-  // recipient not in network
-  if (!(recipPK || confirm(`${recipient} is not registered on the network yet. Continue?`))) return false;
-  // }
-  if(!confirm(`Send ${amount} TPC to ${recipient}?`)) return false; // stop unless they confirm affirmatively
-  broadcasttransaction(amount, recipient);
-  alert('Sent. Watch the blockchain for your transaction.');
-  return false;
+  const recipPKprom = getPubKey(recipient); // start before waiting on others
+  calcBalance(thisNode.address, async function(bal){
+    const reciPK = await reciPKprom; // only now wait
+    if (!amount || !recipient) { // left a field empty
+      alert('Fill out all fields.');
+      return false;
+    }
+    if (!thisNode.address) { // not logged in
+      alert('You are not logged in.');
+      return false;
+    }
+    if (bal < amount) { // not enough balance
+      alert('You do not have enough money to send that much.');
+      return false;
+    }
+    // if (!recipPK) {
+    // recipient not in network
+    if (!(recipPK || confirm(`${recipient} is not registered on the network yet. Continue?`))) return false;
+    // }
+    if(!confirm(`Send ${amount} TPC to ${recipient}?`)) return false; // stop unless they confirm affirmatively
+    broadcasttransaction(amount, recipient);
+    alert('Sent. Watch the blockchain for your transaction.');
+  });
 }
 
 // determine the block that is farthest in the blockchain
@@ -289,17 +276,20 @@ async function getPubKey(address) { // get the public key of an address in the b
 
 /** calculate my balance and put it into DOM */
 async function getMyBalance() {
-  let bal = await calcBalance(thisNode.address);
-  console.log(bal, !bal);
-  if (!bal) {
-    alert('you are not logged in');
-    return false;
-  }
-  document.getElementById('tpcbalance').innerHTML = bal;
+  document.getElementById('tpcbalance').innerHTML = 'Calculating...';
+  calcBalance(thisNode.address, function(bal){
+    console.log(bal, !bal);
+    if (!bal) {
+      alert('you are not logged in');
+      document.getElementById('tpcbalance').innerHTML = '0';
+      return false;
+    }
+    document.getElementById('tpcbalance').innerHTML = bal;
+  });
 }
 
 /** calculate balance of address */
-async function calcBalance(address) {
+async function calcBalance(address, callback) {
   let bal = 0;
   // request the blockchain for reading
   blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
@@ -317,12 +307,10 @@ async function calcBalance(address) {
       }
       // advance to next block
       cursor.continue();
-    } else { // finished looping through blockchain
-      return bal;
+    } else { // finished iterating through blockchain
+      callback(bal);
     }
   }
-  bal = await curreq.result;
-  return bal;
 }
 
 async function broadcasttransaction(amount, recipient) {
@@ -346,7 +334,7 @@ async function broadcasttransaction(amount, recipient) {
 
 
 async function register() {
-  alert('Registering... This may take a minute.');
+  setTimeout(function(){alert('Registering... This may take a minute.');}, 1); // asynchronous alert
 
   // verify password
   let password1 = document.getElementById('registerpassword1').value;
@@ -379,7 +367,8 @@ async function register() {
   // announce in blockchain
   // invoke tostring rather than built in to stop from converting to "infinity"
   broadcasttransaction(0, 'mypublickeyis'+thisNode.pubkey.toString());
-  alert('registered successfully!');
+  setTimeout(function(){alert('registered successfully!');}, 1); // async alert
+  document.getElementById('register').style.display = 'none'; // hide registration modal
   return false;
 }
 
