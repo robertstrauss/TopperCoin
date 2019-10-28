@@ -89,6 +89,7 @@ let wait;
 let blockqueue = [];
 // when a block is recieved
 socket.on('block', function(blockstring){
+  console.log('recieved block', blockstring);
   /*
   blocks may be sent in very rapid series, it is possible slight deviation
   in computation times may disorder the blocks, which would be rejected
@@ -97,7 +98,7 @@ socket.on('block', function(blockstring){
   */
   clearTimeout(wait); // interrupt timer
   blockqueue.push(blockstring); // add the block to the queue
-  wait = setTimeout(processblockqueue, 1000); // wait 1 second then process queue, unless interrupted by another block coming in
+  wait = setTimeout(processblockqueue, 200); // wait 200 milliseconds then process queue, unless interrupted by another block coming in
 });
 
 /**
@@ -135,6 +136,7 @@ async function processblockqueue() {
         let endblock = cursor.value;
         // check if the new block extends an endblock directly
         if (newblock.prevhash === endblock.hash) {
+          console.log('endblock length', endblock.length);
           newblock.length = endblock.length+1; // one farther in the blockchain
           console.log('accepting block ', newblock);
           endblockos.delete(endblock.hash); // end block is no longer end block
@@ -166,8 +168,8 @@ async function processblockqueue() {
 
 
 
-// preview blockchain after 100ms to give async functions time to fill it
-setTimeout(previewBlockchain, 100);
+// preview blockchain after 1100ms to give async functions time to fill it
+setTimeout(previewBlockchain, 1000);
 
 
 
@@ -179,33 +181,33 @@ function previewBlockchain() {
   let blockchainos =  transaction.objectStore('blockchain');
   let endblockos   =  transaction.objectStore('endblocks' );
 
+
+
   // fill the blockchain preview div
   blockchainpreviewdiv = document.getElementById('blockchainpreview');
 
-  endblockos.openCursor().onsuccess = function(e) { // once for each fork
+  endblockos.openCursor().onsuccess = function(e) { // once for each fork (from the endpoints)
     let cursor = e.target.result;
     if (cursor) {
-      let endblock = cursor.value;
-      for (let i = 0, block=endblock; i < maxbackfork; i++) { // only display as many back as can be forked
-        blockchainos.get(block.prevhash).onsuccess = function(ev) {
-          if (!ev.target.result) return;
-          let blockdiv = document.createElement('a'); // create an element for this block
-          blockdiv.className = 'block'; // of class block
-          blockdiv.href = '/blockchain/'+block.index; // that links to a page on the block
+      let block = cursor.value;
+      blockchainos.get(block.hash).onsuccess = function prevFrom(ev) {
+        let block = ev.target.result;
+        if (!block) return;
+        let blockdiv = document.createElement('a'); // create an element for this block
+        blockdiv.className = 'block'; // of class block
+        blockdiv.href = '/blockchain/'+block.index; // that links to a page on the block
 
-          // create individual divs for the previous hash, transactions, and proofofwork of the block
-          ['prevhash', 'transactions', 'proofofwork'].forEach(function(key){
-            let element = document.createElement('div');
-            element.className = key;
-            element.innerHTML = block[key];
-            blockdiv.appendChild(element);
-          });
+        // create individual divs for the previous hash, transactions, and proofofwork of the block
+        ['length', 'prevhash', 'transactions', 'proofofwork', 'hash'].forEach(function(key){
+          let element = document.createElement('div');
+          element.className = key;
+          element.innerHTML = block[key];
+          blockdiv.appendChild(element);
+        });
 
-          blockchainpreviewdiv.appendChild(blockdiv); // add created html block to the document
-
-          block = ev.target.result.value;
-        }
-      }
+        blockchainpreviewdiv.prepend(blockdiv); // add created html block to the document before others
+        blockchainos.get(block.prevhash).onsuccess = prevFrom; // preview from previous block
+      }; // preview starting from last block
       cursor.continue();
     }
   };
@@ -246,7 +248,6 @@ async function getLongestBlock(callback) {
   let blockstring = '';
   let endblockos  = blockchaindb.transaction(['endblocks'], 'readonly').objectStore('endblocks');
   let longestblock= {length:0};
-  console.log('once');
   endblockos.openCursor().onsuccess = function(e) {
     // iterate through enblocks to find "longest" - one with most behind it
     let cursor = e.target.result;
@@ -322,7 +323,6 @@ async function broadcasttransaction(amount, recipient) {
   let hash = await hashHex(transactionstring, 'SHA-256');
   hash = bigInt(BigInt(['0x', hash].join('')));
   let signature = RSA.encrypt(hash, thisNode.pubkey, thisNode.privkey).toString(); // sign by encrypting with priv key
-  console.log(signature);
   socket.emit('transaction', transactionstring + '|' + signature);
 }
 

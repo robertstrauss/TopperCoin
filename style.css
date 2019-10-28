@@ -173,17 +173,14 @@ tr {
 #blockchainpreview .block * {
   padding: 4px;
 }
-#blockchainpreview .block .index {
-  border: none;
-  color: white;
-}
+
 #blockchainpreview .block .transactions {
   height: 200px;
   border: 2px solid white;
   overflow: auto;
   color: yellow;
 }
-#blockchainpreview .block .proofofwork, .block .prevhash {
+#blockchainpreview .block .proofofwork, .block .prevhash, .block .hash {
   text-overflow: ellipsis;
   overflow-x: hidden;
   border: 2px solid white;
@@ -195,4 +192,8 @@ tr {
 #blockchainpreview .block .proofofwork {
   color: #9e7;
   border-top: none;
+}
+#blockchainpreview .block .length, .block .hash {
+  border: none;
+  color: lightgrey;
 }

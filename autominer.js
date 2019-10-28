@@ -26,7 +26,7 @@ async function fromBlock(lastblock) {
     // add it to personal blockchain
     let mbsplit = minedblock.split(';');
     let mbhash = await hashHex(minedblock, 'SHA-256');
-    let mb = {hash: mbhash, prevhash: mbsplit[0], transactions: mbsplit[1], proofofwork: mbsplit[2]};
+    let mb = {hash: mbhash, prevhash: mbsplit[0], transactions: mbsplit[1], proofofwork: mbsplit[2], length: lastblock.length+1};
     let trans = blockchaindb.transaction(['blockchain', 'endblocks'], 'readwrite');
     let blockchainos = trans.objectStore('blockchain');
     let endblockos = trans.objectStore('endblocks');
@@ -60,6 +60,15 @@ async function fromBlock(lastblock) {
   });
 }
 
+function startMining() {
+  if (!(thisNode.address || confirm('You are not logged in, so you will not recieve TPC for mining. Continue?'))) return;
+
+  // let miningwindow = window.open('miner.html', '', 'width=324,height=200')
+
+  document.getElementById('miningstatus').innerHTML = 'Mining!';
+
+  getLongestBlock(fromBlock); // start miner from longest block
+}
 
 // let thisNode.miner = mineNewBlock();
 

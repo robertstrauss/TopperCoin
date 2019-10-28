@@ -50,21 +50,18 @@
                 </table>
               <!-- </form> -->
             </div>
-        </div>
+        <!-- </div> -->
 
-        <!-- mining stats and graph -->
-        <div class="flex cell" style="flex: 4 1 50%;">
-          <h2>Mining - <span id="hashrate">stopped</span></h2>
-          <div id="mininggraph" style="display: table-cell">
-            <button onclick="getLongestBlock(fromBlock)">Start Mining</button>
-            <!--<button onclick="startmining();">start mining</button>-->
+          <!-- mining stats and ?graph -->
+          <div class="cell infoblock" style="flex: 1 1 10%;">
+            <span id="miningstatus">Not mining</span>
+            <div><button id="miningbutton" onclick="startMining()">Start Mining</button></div>
           </div>
         </div>
-
         <!-- transactions involving the user -->
-        <div class="flex cell" style="flex: 2 1 30%;">
+        <!-- <div class="flex cell" style="flex: 2 1 30%;">
           <h2>Relevant transactions</h2>
-        </div>
+        </div> -->
 
         <!-- preview of the blockchain -->
         <div class="flex cell" style="flex: 5 1 50%;">
