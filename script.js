@@ -246,7 +246,8 @@ async function getLongestBlock(callback) {
   let blockstring = '';
   let endblockos  = blockchaindb.transaction(['endblocks'], 'readonly').objectStore('endblocks');
   let longestblock= {length:0};
-  endblockos.openCursor(null, 'prev').onsuccess = function(e) {
+  console.log('once');
+  endblockos.openCursor().onsuccess = function(e) {
     // iterate through enblocks to find "longest" - one with most behind it
     let cursor = e.target.result;
     if (cursor) {

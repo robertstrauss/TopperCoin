@@ -14,46 +14,58 @@ async function mineBlock(block, dfc) {
   return minedblock;
 }
 
-async function mineNewBlock(){
-  async function fromLongestBlock(longestblock) {
-    let blockstring = longestblock.hash+';miningbonus>1>'+thisNode.address; // start with previous block (longestblock) hash
 
-    socket.emit('request', 'unminedtransactions');
+async function fromBlock(lastblock) {
+  console.log('starting new block from ', lastblock);
+  let blockstring = lastblock.hash+';miningbonus>1>'+thisNode.address; // start with previous block (lastblock) hash
 
-    let miner = mineBlock(blockstring, difficulty);
-    miner.then(function(minedblock){
-      socket.emit('block', minedblock);
-      return; // end newblock function
-    })
+  socket.emit('request', 'unminedtransactions');
 
-    socket.on('transaction', async function(transactionstring){ // sender>amount>recipient|signature
-      const split = transactionstring.split('|'); // transaction, signature
-      const transaction = split[0].split('>'); // sender, amount, recipient
-      const sender = transaction[0], amount = transaction[1];
-      const hashHex = await hashHex(split[0]);
-      const hashDec = bigInt(BigInt(['0x', hashHex].join('')));
-      // two long asynchronous processes: start both with promises before awaiting
-      const pubkeyprom = getPubKey(sender);
-      calcBalance(sender, async function(bal){
-        const pubkey = await pubkeyprom;
-        if (RSA.decrypt(split[0], RSA.e, pubkey) === hashDec
-            && bal >= transaction[1]) { // check signature and balance
-          // valid transaction
-          blockstring += ','+transactionstring; // add transaction
-          miner = mineBlock(blockstring, difficulty) // restart miner
-        }
-      });
+  thisNode.miner = mineBlock(blockstring, difficulty);
+  thisNode.miner.then(async function(minedblock){ // when mining is finished
+    // add it to personal blockchain
+    let mbsplit = minedblock.split(';');
+    let mbhash = await hashHex(minedblock, 'SHA-256');
+    let mb = {hash: mbhash, prevhash: mbsplit[0], transactions: mbsplit[1], proofofwork: mbsplit[2]};
+    let trans = blockchaindb.transaction(['blockchain', 'endblocks'], 'readwrite');
+    let blockchainos = trans.objectStore('blockchain');
+    let endblockos = trans.objectStore('endblocks');
+    blockchainos.add(mb); // add to blockchain
+    endblockos.delete(lastblock.hash); // make this the endpoint
+    endblockos.add(mb);
+    // start on next block
+    fromBlock(mb);
+    // send block to others
+    socket.emit('block', minedblock);
+    return; // end newblock function
+  })
+
+  socket.on('transaction', async function(transactionstring){ // sender>amount>recipient|signature
+    const split = transactionstring.split('|'); // transaction, signature
+    const transaction = split[0].split('>'); // sender, amount, recipient
+    const sender = transaction[0], amount = transaction[1];
+    const hashHex = await hashHex(split[0], 'SHA-256');
+    const hashDec = bigInt(BigInt(['0x', hashHex].join('')));
+    // two long asynchronous processes: start both with promises before awaiting
+    const pubkeyprom = getPubKey(sender);
+    calcBalance(sender, async function(bal){
+      const pubkey = await pubkeyprom;
+      if (RSA.decrypt(split[0], RSA.e, pubkey) === hashDec
+          && bal >= transaction[1]) { // check signature and balance
+        // valid transaction
+        blockstring += ','+transactionstring; // add transaction
+        thisNode.miner = mineBlock(blockstring, difficulty) // restart miner
+      }
     });
-  }
-  getLongestBlock(fromLongestBlock); // get the longest block and start miner from it
+  });
 }
 
-let miner = null;
-// let miner = mineNewBlock();
 
-socket.on('block', function(){
-  if (miner != null) {
-    miner = null; // stop miner
-    setTimeout(function(){miner = mineNewBlock();}, 1); // restart miner after 1 millisecond
-  }
-});
+// let thisNode.miner = mineNewBlock();
+
+// socket.on('block', function(){
+//   if (thisNode.miner != null) { // currently mining
+//     thisNode.miner = null; // stop miner (? setting promise to null stops async function ?)
+//     setTimeout(function(){getLongestBlock(fromBlock)}, 1000); // get the longest block and start thisNode.miner from it}, 1); // restart thisNode.miner after 1 millisecond
+//   }
+// });
