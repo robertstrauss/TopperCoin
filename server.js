@@ -5,8 +5,8 @@ var io = require('socket.io')(http);
 var path = require('path');
 var fs = require('fs');
 
-var tstream = fs.createWriteStream('unminedtransactions', {flags:'a'});
-var bstream = fs.createWriteStream('blockchain', {flags:'a'});
+var tstream = fs.createWriteStream('unminedtransactions.txt', {flags:'a'});
+var bstream = fs.createWriteStream('blockchain.txt', {flags:'a'});
 
 __dirname = path.resolve(path.dirname('')); // root directory
 

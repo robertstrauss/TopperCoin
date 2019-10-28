@@ -82,6 +82,9 @@ request.onsuccess = function() {
 }
 
 
+
+
+
 let wait;
 let blockqueue = [];
 // when a block is recieved
@@ -185,6 +188,7 @@ function previewBlockchain() {
       let endblock = cursor.value;
       for (let i = 0, block=endblock; i < maxbackfork; i++) { // only display as many back as can be forked
         blockchainos.get(block.prevhash).onsuccess = function(ev) {
+          if (!ev.target.result) return;
           let blockdiv = document.createElement('a'); // create an element for this block
           blockdiv.className = 'block'; // of class block
           blockdiv.href = '/blockchain/'+block.index; // that links to a page on the block
@@ -238,21 +242,20 @@ async function maketransaction() {
 }
 
 // determine the block that is farthest in the blockchain
-async function getLongestBlock() {
+async function getLongestBlock(callback) {
   let blockstring = '';
-  let endblockos = blockchaindb.transaction(['endblocks'], 'readonly').objectStore('endblocks' );
-  let longestblock= {};
-  endblockos.openCursor().onsuccess = function(e) {
+  let endblockos  = blockchaindb.transaction(['endblocks'], 'readonly').objectStore('endblocks');
+  let longestblock= {length:0};
+  endblockos.openCursor(null, 'prev').onsuccess = function(e) {
     // iterate through enblocks to find "longest" - one with most behind it
     let cursor = e.target.result;
     if (cursor) {
       let block = cursor.value;
-      if (block.length > longestblock.length)
-        longestblock = block;
+      if (block.length > longestblock.length) longestblock = block;
       cursor.continue();
     }
     else { // done going through endblocks
-      return longestblock;
+      callback(longestblock);
     }
   }
 }
