@@ -10,6 +10,40 @@
   </head>
   <body>
     <!-- info button and title/h1 -->
+    <!--
+      example fibonachi layout
+    <table id="dash">
+        <tr>
+          <td colspan="2" rowspan="2">
+                  a a <br>
+                  a a 
+          </td>
+          <td colspan="3" rowspan="3">
+                      a a a <br>
+                      a a a <br>
+                      a a a 
+          </td>
+        </tr>
+
+        <tr>
+        </tr>
+
+        <tr>
+          <td>
+                  a
+          </td>
+          <td>
+                    a
+          </td>
+        </tr>
+        <tr>
+            <td colspan="5">
+                    a a a a a 
+            </td>
+        </tr>
+
+    </table> -->
+
     <table id="topbar">
       <td><span id="address">
         <button onclick="document.getElementById('login').style.display = 'inline-block';">
@@ -28,74 +62,63 @@
       </td>
     </table>
 
-    <div id="dash">
+    <table id="dash" style="table-layout:fixed;">
+      <col class="dashcol"><col class="dashcol"><col class="dashcol"><col class="dashcol"><col class="dashcol">
+        <tbody style="width:100%">
+        <tr>
+          <td colspan="2" rowspan="2">
+                <div class="cell">
+                <!-- <form id="makepaymentform" onsubmit="maketransaction(); return false"> <!- - method="GET" action="payment.php" target="emptyframe"> <!- -  onsubmit="makepayment();return false" - -> -->
+                  <table align="center">
+                    <tr><td>send</td><td><input type="number" id="amount" step="0.0001" min="0"/></td><td>TPC</td></tr>
+                    <tr><td>to</td><td colspan="2"><input type="text" id="recipient"/></td></tr>
+                    <tr><td colspan="3">
+                    <button style="width:100%;margin:0" onclick="makepayment()">Send</button>
+                    </td></tr>
+                  </table>
+                <!-- </form> -->
+                </div>
+          </td>
+          <td colspan="3" rowspan="3">
+                <div class="cell">
+                  yeet
+                </div>
+          </td>
+        </tr>
 
-        <!-- info blocks -->
-        <div class="flex" style="flex: 1 1 40%">
-          <table style="width:100%"><tr>
+        <tr>
+        </tr>
 
-            <td colspan="2">
-            <!-- send TPC -->
-            <div class="square">
-            <div class="cell flex">
-              <!-- <form id="makepaymentform" onsubmit="maketransaction(); return false"> <!- - method="GET" action="payment.php" target="emptyframe"> <!- -  onsubmit="makepayment();return false" - -> -->
-                <table align="center">
-                  <tr><td>send</td><td><input type="number" id="amount" step="0.0001" min="0"/></td><td>TPC</td></tr>
-                  <tr><td>to</td><td colspan="2"><input type="text" id="recipient"/></td></tr>
-                  <tr><td colspan="3">
-                  <button style="width:100%;margin:0" onclick="makepayment()">Send</button>
-                  </td></tr>
-                </table>
-              <!-- </form> -->
-            </div>
-            </div>
-            </td>
-
-
-          </tr><tr>
-
-            <!-- balance -->
-            <td>
-              <div class="square">
-                <div class="cell flex" style="flex: 1 1 auto">
+        <tr>
+          <td>
+              <!-- balance -->
+                <div class="cell">
                 <span id="tpcbalance">0</span> TPC<br>
                 <button onclick="getMyBalance()">Check Balance</button>
                 </div>
-              </div>
-            </td>
-
-            <!-- mining -->
-            <td>
-              <div class="square">
-                <div class="cell flex" style="flex: 1 1 auto">
+          </td>
+          <td>
+              <!-- mining -->
+                <div class="cell">
                 <span id="miningstatus">Not mining</span>
                 <div><button id="miningbutton" onclick="startMining()">Start Mining</button></div>
                 </div>
-              </div>
+          </td>
+        </tr>
+        <tr>
+            <td colspan="5" style="width:80vw">
+                <!-- preview of the blockchain -->
+                <div class="cell" style="width:100%">
+                  <h2>Blockchain Preview</h2>
+                  <div id="bcpreviewontainer">
+                    <div id="blockchainpreview"></div>
+                  </div>
+                </div>
             </td>
-
-          </tr></table>
-        </div>
-
-        <div class="flex square" style="flex: 1 1 60%; height: 100%">
-        <div class="cell">
-          yeet
-        </div>
-        </div>
-        <!-- transactions involving the user -->
-        <!-- <div class="flex cell" style="flex: 2 1 30%;">
-          <h2>Relevant transactions</h2>
-        </div> -->
-
-        <!-- preview of the blockchain -->
-        <div class="flex cell" style="flex: 5 1 70%;">
-          <h2>Blockchain Preview</h2>
-          <div id="bcpreviewontainer">
-            <div id="blockchainpreview"></div>
-          </div>
-        </div>
-
-    </div>
+        </tr>
+      </tbody>
+    </table>
+    <!-- end of dash -->
 
     <!-- window of about section -->
     <div id="about" class="modal"><div class="modalc">

@@ -12,6 +12,17 @@
 * {
   transition: 0.2s;
 }
+table {
+  table-layout: fixed;
+  overflow: hidden;
+}
+tr {
+  width: 100%;
+}
+td {
+  
+  white-space: nowrap;
+}
 body {
   font-family: 'Nunito', Sans-Serif;
   padding: 0;
@@ -30,10 +41,11 @@ a {
   border: 1px solid var(--rainbow);
 }
 button {
+  text-align: center;
   color: var(--rainbow);
   background-color: var(--cell-bg);
-  background-image: linear-gradient(0deg, #0000, #0000);
-  border: none;
+  /* background-image: linear-gradient(0deg, #0000, #0000); */
+  /* border: none; */
   border: 1px solid var(--rainbow);
   border-radius: 100px;
   padding: 5px;
@@ -74,12 +86,11 @@ h2 {
   margin-bottom: 10px;
   color: grey;
 }
-tr {
-  text-align: left;
+
+
+.dashcol {
+  width: 20%;
 }
-
-
-
 .modal { /* modal background    source: w3schools */
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
@@ -109,6 +120,7 @@ tr {
   max-width: 100%;
 }
 .cell {
+  flex: 1 1 auto;
   text-align: center;
   background-color: var(--cell-bg);
   color:inherit;
@@ -141,10 +153,10 @@ tr {
 #dash {
   display: flex;
   flex-flow: row wrap;
-  width: 100%;
-  max-width: 100%;
+  margin: 0 10% 0 10%;
+  width: 80%;
   height: 100%;
-  background-color: inherit;
+  background-color: var(--rainbow);
 }
 /* #bcpreviewontainer {
   display: inline-block;
