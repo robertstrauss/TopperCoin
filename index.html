@@ -30,14 +30,13 @@
 
     <div id="dash">
 
-        <!-- info blocks -->
-        <div class="flex" style="flex: 1 1 40%">
-          <table style="width:100%"><tr>
+        <div class="flex">
+          <table><tr>
 
             <td colspan="2">
             <!-- send TPC -->
             <div class="square">
-            <div class="cell flex">
+            <div class="cell">
               <!-- <form id="makepaymentform" onsubmit="maketransaction(); return false"> <!- - method="GET" action="payment.php" target="emptyframe"> <!- -  onsubmit="makepayment();return false" - -> -->
                 <table align="center">
                   <tr><td>send</td><td><input type="number" id="amount" step="0.0001" min="0"/></td><td>TPC</td></tr>
@@ -57,7 +56,7 @@
             <!-- balance -->
             <td>
               <div class="square">
-                <div class="cell flex" style="flex: 1 1 auto">
+                <div class="cell">
                 <span id="tpcbalance">0</span> TPC<br>
                 <button onclick="getMyBalance()">Check Balance</button>
                 </div>
@@ -67,7 +66,7 @@
             <!-- mining -->
             <td>
               <div class="square">
-                <div class="cell flex" style="flex: 1 1 auto">
+                <div class="cell">
                 <span id="miningstatus">Not mining</span>
                 <div><button id="miningbutton" onclick="startMining()">Start Mining</button></div>
                 </div>
@@ -77,7 +76,7 @@
           </tr></table>
         </div>
 
-        <div class="flex square" style="flex: 1 1 60%; height: 100%">
+        <div class="flex">
         <div class="cell">
           yeet
         </div>
