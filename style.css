@@ -20,7 +20,7 @@ tr {
   width: 100%;
 }
 td {
-  
+
   white-space: nowrap;
 }
 body {
@@ -86,11 +86,12 @@ h2 {
   margin-bottom: 10px;
   color: grey;
 }
-
-
-.dashcol {
-  width: 20%;
+h3 {
+  font-size: 2em;
+  color: var(--text-clr);
+  line-height: 1em;
 }
+
 .modal { /* modal background    source: w3schools */
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
@@ -116,19 +117,22 @@ h2 {
   /* padding: 25px 50px 25px 50px; */
   border-radius: 10px;
 }
-.flex {
-  max-width: 100%;
-}
+
 .cell {
-  flex: 1 1 auto;
   text-align: center;
   background-color: var(--cell-bg);
   color:inherit;
-  margin: 10px;
   padding: 25px;
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 5px 5px 10px 5px #0003;
+}
+.cell:before {
+  content: "";
+  display: block;
+  width: 0;
+  height: 0;
+  padding-bottom: 100%;
 }
 .square {
   height: 100%;
@@ -151,12 +155,45 @@ h2 {
   width: 33%;
 }
 #dash {
-  display: flex;
-  flex-flow: row wrap;
-  margin: 0 10% 0 10%;
-  width: 80%;
-  height: 100%;
+  width: 100%;
+  max-width: 60em;
+  margin: 1em auto;
   background-color: var(--rainbow);
+
+  display: grid;
+  grid-template-rows: [topline] 40% [horiz1] 20% [horiz2] auto [bottomline];
+  grid-template-columns: [leftside] 20% [line1] 20% [line2] 60% [rightside];
+  grid-gap: 20px;
+}
+#dash #sendtpc {
+  grid-column-start: leftside;
+  grid-column-end: line2;
+  grid-row-start: topline;
+  grid-row-end: horiz1;
+}
+#dash #yyyeet {
+  grid-column-start: line2;
+  grid-column-end: rightside;
+  grid-row-start: topline;
+  grid-row-end: horiz2;
+}
+#dash #balance {
+  grid-column-start: leftside;
+  grid-column-end: line1;
+  grid-row-start: horiz1;
+  grid-row-end: horiz2;
+}
+#dash #mining {
+  grid-column-start: line1;
+  grid-column-end: line2;
+  grid-row-start: horiz1;
+  grid-row-end: horiz2;
+}
+#dash #blockchainpreviewcell {
+  grid-column-start: leftside;
+  grid-column-end: rightside;
+  grid-row-start: horiz2;
+  grid-row-end: bottomline;
 }
 /* #bcpreviewontainer {
   display: inline-block;

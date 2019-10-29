@@ -16,12 +16,12 @@
         <tr>
           <td colspan="2" rowspan="2">
                   a a <br>
-                  a a 
+                  a a
           </td>
           <td colspan="3" rowspan="3">
                       a a a <br>
                       a a a <br>
-                      a a a 
+                      a a a
           </td>
         </tr>
 
@@ -38,7 +38,7 @@
         </tr>
         <tr>
             <td colspan="5">
-                    a a a a a 
+                    a a a a a
             </td>
         </tr>
 
@@ -62,12 +62,9 @@
       </td>
     </table>
 
-    <table id="dash" style="table-layout:fixed;">
-      <col class="dashcol"><col class="dashcol"><col class="dashcol"><col class="dashcol"><col class="dashcol">
-        <tbody style="width:100%">
-        <tr>
-          <td colspan="2" rowspan="2">
-                <div class="cell">
+    <div id="dash">
+                <!-- form for making payments -->
+                <div class="cell" id="sendtpc">
                 <!-- <form id="makepaymentform" onsubmit="maketransaction(); return false"> <!- - method="GET" action="payment.php" target="emptyframe"> <!- -  onsubmit="makepayment();return false" - -> -->
                   <table align="center">
                     <tr><td>send</td><td><input type="number" id="amount" step="0.0001" min="0"/></td><td>TPC</td></tr>
@@ -78,46 +75,33 @@
                   </table>
                 <!-- </form> -->
                 </div>
-          </td>
-          <td colspan="3" rowspan="3">
-                <div class="cell">
-                  yeet
-                </div>
-          </td>
-        </tr>
 
-        <tr>
-        </tr>
+                <div class="cell" id="yyyeet">
+                  yyyeet
+                </div>
 
-        <tr>
-          <td>
-              <!-- balance -->
-                <div class="cell">
-                <span id="tpcbalance">0</span> TPC<br>
-                <button onclick="getMyBalance()">Check Balance</button>
+
+                <!-- balance -->
+                <div class="cell" id="balance">
+                  <h3><span id="tpcbalance">0</span> TPC<br></h3>
+                  <button onclick="getMyBalance()">Check Balance</button>
                 </div>
-          </td>
-          <td>
-              <!-- mining -->
-                <div class="cell">
-                <span id="miningstatus">Not mining</span>
-                <div><button id="miningbutton" onclick="startMining()">Start Mining</button></div>
+
+                <!-- mining -->
+                <div class="cell" id="mining">
+                  <h3><span id="miningstatus">Not mining</span></h3>
+                  <div><button id="miningbutton" onclick="startMining()">Start Mining</button></div>
                 </div>
-          </td>
-        </tr>
-        <tr>
-            <td colspan="5" style="width:80vw">
+
                 <!-- preview of the blockchain -->
-                <div class="cell" style="width:100%">
+                <div class="cell" id="blockchainpreviewcell">
                   <h2>Blockchain Preview</h2>
                   <div id="bcpreviewontainer">
                     <div id="blockchainpreview"></div>
                   </div>
                 </div>
-            </td>
-        </tr>
-      </tbody>
-    </table>
+
+    </div>
     <!-- end of dash -->
 
     <!-- window of about section -->
