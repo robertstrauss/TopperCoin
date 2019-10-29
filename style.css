@@ -118,6 +118,9 @@ tr {
   overflow: hidden;
   box-shadow: 5px 5px 10px 5px #0003;
 }
+.square {
+  height: 100%;
+}
 .infoblock {
   text-align: center;
 }

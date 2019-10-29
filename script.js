@@ -168,7 +168,7 @@ async function processblockqueue() {
 
 
 
-// preview blockchain after 1100ms to give async functions time to fill it
+// preview blockchain after 1000ms to give async functions time to fill it
 setTimeout(previewBlockchain, 1000);
 
 
@@ -195,7 +195,7 @@ function previewBlockchain() {
         if (!block) return;
         let blockdiv = document.createElement('a'); // create an element for this block
         blockdiv.className = 'block'; // of class block
-        blockdiv.href = '/blockchain/'+block.index; // that links to a page on the block
+        blockdiv.href = '/blockchain/'+block.hash; // that links to a page on the block
 
         // create individual divs for the previous hash, transactions, and proofofwork of the block
         ['length', 'prevhash', 'transactions', 'proofofwork', 'hash'].forEach(function(key){

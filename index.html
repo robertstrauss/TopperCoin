@@ -31,15 +31,13 @@
     <div id="dash">
 
         <!-- info blocks -->
-        <div class="flex" style="flex: 1 1 10%;">
-            <!-- balance -->
-            <div class="cell infoblock">
-              <span id="tpcbalance">0</span> TPC<br>
-              <button onclick="getMyBalance()">Check Balance</button>
-            </div>
+        <div class="flex" style="flex: 1 1 40%">
+          <table style="width:100%"><tr>
 
+            <td colspan="2">
             <!-- send TPC -->
-            <div class="cell infoblock">
+            <div class="square">
+            <div class="cell flex">
               <!-- <form id="makepaymentform" onsubmit="maketransaction(); return false"> <!- - method="GET" action="payment.php" target="emptyframe"> <!- -  onsubmit="makepayment();return false" - -> -->
                 <table align="center">
                   <tr><td>send</td><td><input type="number" id="amount" step="0.0001" min="0"/></td><td>TPC</td></tr>
@@ -50,13 +48,39 @@
                 </table>
               <!-- </form> -->
             </div>
-        <!-- </div> -->
+            </div>
+            </td>
 
-          <!-- mining stats and ?graph -->
-          <div class="cell infoblock" style="flex: 1 1 10%;">
-            <span id="miningstatus">Not mining</span>
-            <div><button id="miningbutton" onclick="startMining()">Start Mining</button></div>
-          </div>
+
+          </tr><tr>
+
+            <!-- balance -->
+            <td>
+              <div class="square">
+                <div class="cell flex" style="flex: 1 1 auto">
+                <span id="tpcbalance">0</span> TPC<br>
+                <button onclick="getMyBalance()">Check Balance</button>
+                </div>
+              </div>
+            </td>
+
+            <!-- mining -->
+            <td>
+              <div class="square">
+                <div class="cell flex" style="flex: 1 1 auto">
+                <span id="miningstatus">Not mining</span>
+                <div><button id="miningbutton" onclick="startMining()">Start Mining</button></div>
+                </div>
+              </div>
+            </td>
+
+          </tr></table>
+        </div>
+
+        <div class="flex square" style="flex: 1 1 60%; height: 100%">
+        <div class="cell">
+          yeet
+        </div>
         </div>
         <!-- transactions involving the user -->
         <!-- <div class="flex cell" style="flex: 2 1 30%;">
@@ -64,7 +88,7 @@
         </div> -->
 
         <!-- preview of the blockchain -->
-        <div class="flex cell" style="flex: 5 1 50%;">
+        <div class="flex cell" style="flex: 5 1 70%;">
           <h2>Blockchain Preview</h2>
           <div id="bcpreviewontainer">
             <div id="blockchainpreview"></div>
