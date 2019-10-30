@@ -127,13 +127,13 @@ h3 {
   overflow: hidden;
   box-shadow: 5px 5px 10px 5px #0003;
 }
-.cell:before {
+/* .cell:before {
   content: "";
   display: block;
   width: 0;
   height: 0;
   padding-bottom: 100%;
-}
+} */
 .square {
   height: 100%;
 }
