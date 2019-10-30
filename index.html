@@ -44,23 +44,23 @@
 
     </table> -->
 
-    <table id="topbar">
-      <td><span id="address">
+    <div id="topbar">
+      <div style="flex: 1 1 10%;"><span id="address">
         <button onclick="document.getElementById('login').style.display = 'inline-block';">
           Log in
         </buton>
         <button onclick="document.getElementById('register').style.display = 'inline-block';">
           Register
         </button>
-      </span></td>
-      <td><h1><center>
+      </span></div>
+      <div style="flex: 1 1 80%"><h1><center>
         TopperCoin
-      </center></h1></td>
-      <td style="text-align:right;margin:0;">
+      </center></h1></div>
+      <div style="flex: 1 1 10%;text-align:right;display:table-cell;vertical-align:middle;margin:auto;">
         <a id="lightdark">🌔</a>
         <a onclick="document.getElementById('about').style.display='inline-block'">?</a>
-      </td>
-    </table>
+      </div>
+    </div>
 
     <div id="dash">
                 <!-- form for making payments -->
@@ -84,13 +84,13 @@
                 <!-- balance -->
                 <div class="cell" id="balance">
                   <h3><span id="tpcbalance">0</span> TPC<br></h3>
-                  <button onclick="getMyBalance()">Check Balance</button>
+                  <div><button onclick="getMyBalance()">Check Balance</button></div>
                 </div>
 
                 <!-- mining -->
                 <div class="cell" id="mining">
                   <h3><span id="miningstatus">Not mining</span></h3>
-                  <div><button id="miningbutton" onclick="startMining()">Start Mining</button></div>
+                  <button id="miningbutton" onclick="startMining()">Start Mining</button>
                 </div>
 
                 <!-- preview of the blockchain -->
