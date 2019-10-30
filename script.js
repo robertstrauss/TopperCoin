@@ -11,10 +11,12 @@ function getCookie(name)
 
 // object containing info specific to the client's node, stored in cookies
 const thisNode = {
-                   address : getCookie('address'),
-                   privkey : getCookie('privkey'),
-                   pubkey  : getCookie('pubkey' )
+                   address : ((getCookie('address'))),
+                   privkey : ((getCookie('privkey'))),
+                   pubkey  : ((getCookie('pubkey' )))
                  }
+
+
 
 // how many zeros (hex) block hash must start with
 const difficulty = 4;
@@ -83,7 +85,9 @@ request.onsuccess = function() {
 
 
 
-
+socket.on('transaction', function(transactionstring){
+  console.log(transactionstring);
+});
 
 let wait;
 let blockqueue = [];
@@ -105,14 +109,19 @@ socket.on('block', function(blockstring){
  * go through list blockqueue[] and add valid blocks to blockchain
  */
 async function processblockqueue() {
+  console.log('processing block queue', blockqueue);
+  let valid = false;
   for (let i = 0; i < blockqueue.length; i++) {
     blockstring = blockqueue[i];
     let split = blockstring.split(';');
     const hash = await hashHex(blockstring, 'SHA-256'); // take sha256 hash of entire block
     let newblock = {hash: hash, prevhash: split[0], transactions: split[1], proofofwork: split[2]};
 
-    if (!newblock.hash.startsWith(Array(difficulty+1).join('0'))) // check if hash of block starts with zeros according to difficulty
+    if (!newblock.hash.startsWith(Array(difficulty+1).join('0'))) {// check if hash of block starts with zeros according to difficulty
+      console.log('invalid block (doesn\'t match difficulty)', blockqueue[i]);
+      blockquque.splice(i); // remove block
       return; // if not, reject
+    }
 
     // get the blockchain and endblocks ready to read from and write to
     let transaction = blockchaindb.transaction(['blockchain', 'endblocks'], 'readwrite');
@@ -130,11 +139,13 @@ async function processblockqueue() {
 
     // check if the new block connects to any previous block recent enough to allow forks
     endblockos.openCursor().onsuccess = function(e){
-      console.log('opened cursor');
+
       let cursor = e.target.result;
+      console.log('opened cursor', cursor);
       if (cursor) {
         let endblock = cursor.value;
         // check if the new block extends an endblock directly
+        console.log('hashes', newblock.prevhash, endblock.hash);
         if (newblock.prevhash === endblock.hash) {
           console.log('endblock length', endblock.length);
           newblock.length = endblock.length+1; // one farther in the blockchain
@@ -162,6 +173,7 @@ async function processblockqueue() {
         return false;
       }
     };
+    blockqueue.splice(i);
   }
 }
 
@@ -220,7 +232,7 @@ async function maketransaction() {
   const recipient = document.getElementById('recipient').value;
   const recipPKprom = getPubKey(recipient); // start before waiting on others
   calcBalance(thisNode.address, async function(bal){
-    const reciPK = await reciPKprom; // only now wait
+    const recipPK = await recipPKprom; // only now wait
     if (!amount || !recipient) { // left a field empty
       alert('Fill out all fields.');
       return false;
@@ -283,8 +295,8 @@ async function getPubKey(address) { // get the public key of an address in the b
 async function getMyBalance() {
   document.getElementById('tpcbalance').innerHTML = 'Calculating...';
   calcBalance(thisNode.address, function(bal){
-    console.log(bal, !bal);
-    if (!bal) {
+    // console.log(bal, !bal);
+    if (bal == null) {
       alert('you are not logged in');
       document.getElementById('tpcbalance').innerHTML = '0';
       return false;
@@ -362,11 +374,11 @@ async function register() {
 
   // save info
   thisNode.address = address;
-  document.cookie = 'address='+thisNode.address;
-  thisNode.privkey = keys.d; // keep secret!
-  document.cookie = 'privkey='+thisNode.privkey;
-  thisNode.pubkey = keys.n; // fixed public exponenet of 65537 (see rsa.js), only need n
-  document.cookie = 'pubkey='+thisNode.pubkey;
+  document.cookie = 'address='+thisNode.address.toString();
+  thisNode.privkey = bigInt((keys.d)); // keep secret!
+  document.cookie = 'privkey='+thisNode.privkey.toString();
+  thisNode.pubkey = bigInt((keys.n)); // fixed public exponenet of 65537 (see rsa.js), only need n
+  document.cookie = 'pubkey='+thisNode.pubkey.toString();
 
   // announce in blockchain
   // invoke tostring rather than built in to stop from converting to "infinity"

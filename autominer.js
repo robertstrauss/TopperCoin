@@ -41,6 +41,7 @@ async function fromBlock(lastblock) {
   })
 
   socket.on('transaction', async function(transactionstring){ // sender>amount>recipient|signature
+    console.log('recieved transaction', transactionstring);
     const split = transactionstring.split('|'); // transaction, signature
     const transaction = split[0].split('>'); // sender, amount, recipient
     const sender = transaction[0], amount = transaction[1];
