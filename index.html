@@ -10,91 +10,99 @@
   </head>
   <body>
     <!-- info button and title/h1 -->
-    <table id="topbar">
-      <td><span id="address">
+    <!--
+      example fibonachi layout
+    <table id="dash">
+        <tr>
+          <td colspan="2" rowspan="2">
+                  a a <br>
+                  a a
+          </td>
+          <td colspan="3" rowspan="3">
+                      a a a <br>
+                      a a a <br>
+                      a a a
+          </td>
+        </tr>
+
+        <tr>
+        </tr>
+
+        <tr>
+          <td>
+                  a
+          </td>
+          <td>
+                    a
+          </td>
+        </tr>
+        <tr>
+            <td colspan="5">
+                    a a a a a
+            </td>
+        </tr>
+
+    </table> -->
+
+    <div id="topbar">
+      <div style="flex: 1 1 10%;"><span id="address">
         <button onclick="document.getElementById('login').style.display = 'inline-block';">
           Log in
         </buton>
         <button onclick="document.getElementById('register').style.display = 'inline-block';">
           Register
         </button>
-      </span></td>
-      <td><h1><center>
+      </span></div>
+      <div style="flex: 1 1 80%"><h1><center>
         TopperCoin
-      </center></h1></td>
-      <td style="text-align:right;margin:0;">
+      </center></h1></div>
+      <div style="flex: 1 1 10%;text-align:right;display:table-cell;vertical-align:middle;margin:auto;">
         <a id="lightdark">🌔</a>
         <a onclick="document.getElementById('about').style.display='inline-block'">?</a>
-      </td>
-    </table>
+      </div>
+    </div>
 
     <div id="dash">
-
-        <div class="flex">
-          <table><tr>
-
-            <td colspan="2">
-            <!-- send TPC -->
-            <div class="square">
-            <div class="cell">
-              <!-- <form id="makepaymentform" onsubmit="maketransaction(); return false"> <!- - method="GET" action="payment.php" target="emptyframe"> <!- -  onsubmit="makepayment();return false" - -> -->
-                <table align="center">
-                  <tr><td>send</td><td><input type="number" id="amount" step="0.0001" min="0"/></td><td>TPC</td></tr>
-                  <tr><td>to</td><td colspan="2"><input type="text" id="recipient"/></td></tr>
-                  <tr><td colspan="3">
-                  <button style="width:100%;margin:0" onclick="makepayment()">Send</button>
-                  </td></tr>
-                </table>
-              <!-- </form> -->
-            </div>
-            </div>
-            </td>
-
-
-          </tr><tr>
-
-            <!-- balance -->
-            <td>
-              <div class="square">
-                <div class="cell">
-                <span id="tpcbalance">0</span> TPC<br>
-                <button onclick="getMyBalance()">Check Balance</button>
+                <!-- form for making payments -->
+                <div class="cell" id="sendtpc">
+                <!-- <form id="makepaymentform" onsubmit="maketransaction(); return false"> <!- - method="GET" action="payment.php" target="emptyframe"> <!- -  onsubmit="makepayment();return false" - -> -->
+                  <table align="center">
+                    <tr><td>send</td><td><input type="number" id="amount" step="0.0001" min="0"/></td><td>TPC</td></tr>
+                    <tr><td>to</td><td colspan="2"><input type="text" id="recipient"/></td></tr>
+                    <tr><td colspan="3">
+                    <button style="width:100%;margin:0" onclick="maketransaction()">Send</button>
+                    </td></tr>
+                  </table>
+                <!-- </form> -->
                 </div>
-              </div>
-            </td>
 
-            <!-- mining -->
-            <td>
-              <div class="square">
-                <div class="cell">
-                <span id="miningstatus">Not mining</span>
-                <div><button id="miningbutton" onclick="startMining()">Start Mining</button></div>
+                <div class="cell" id="yyyeet">
+                  yyyeet
                 </div>
-              </div>
-            </td>
 
-          </tr></table>
-        </div>
 
-        <div class="flex">
-        <div class="cell">
-          yeet
-        </div>
-        </div>
-        <!-- transactions involving the user -->
-        <!-- <div class="flex cell" style="flex: 2 1 30%;">
-          <h2>Relevant transactions</h2>
-        </div> -->
+                <!-- balance -->
+                <div class="cell" id="balance">
+                  <h3><span id="tpcbalance">0</span> TPC<br></h3>
+                  <div><button onclick="getMyBalance()">Check Balance</button></div>
+                </div>
 
-        <!-- preview of the blockchain -->
-        <div class="flex cell" style="flex: 5 1 70%;">
-          <h2>Blockchain Preview</h2>
-          <div id="bcpreviewontainer">
-            <div id="blockchainpreview"></div>
-          </div>
-        </div>
+                <!-- mining -->
+                <div class="cell" id="mining">
+                  <h3><span id="miningstatus">Not mining</span></h3>
+                  <button id="miningbutton" onclick="startMining()">Start Mining</button>
+                </div>
+
+                <!-- preview of the blockchain -->
+                <div class="cell" id="blockchainpreviewcell">
+                  <h2>Blockchain Preview</h2>
+                  <div id="bcpreviewontainer">
+                    <div id="blockchainpreview"></div>
+                  </div>
+                </div>
 
     </div>
+    <!-- end of dash -->
 
     <!-- window of about section -->
     <div id="about" class="modal"><div class="modalc">
@@ -193,7 +201,7 @@
     <script src="control/sha.js"></script> <!-- sha256 hashing -->
     <!-- mostly blockchain stuff -->
     <script src="script.js"></script> <!-- TopperCoin! -->
-    <!-- <script src="webassembly/wasmminer.js"></script> <!- - emscripten-generated webassembly miner compiled from c - -> -->
+    <script src="webassembly/wasmminer.js"></script> <!-- emscripten-generated webassembly miner compiled from c -->
     <script src="autominer.js"></script> <!-- automatic miner -->
   </body>
 </html>

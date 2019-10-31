@@ -46,6 +46,8 @@ RSA.generate = async function(seed) { // uses RNG functions from cryptorng.js
  * @returns {bigInt} encrypted message
  */
 RSA.encrypt = function(m, n, e) {
+  m = bigInt(m);
+  e = bigInt(e);
   return bigInt(m).modPow(e, n);
 };
 
