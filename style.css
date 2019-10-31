@@ -6,7 +6,6 @@
   --rainbow: #3399ff;
   --cell-bg: var(--cell-bg-light);
   --text-clr: var(--text-clr-light);
-  --sixteenth: calc(100vw/16);
 }
 * {
   transition: 0.2s;
