@@ -1,18 +1,23 @@
-/*
+
 // call compiled cpp function to mine block (wasm)
-async function mineBlock(blockstring) {
-  let minedBlock = Module.ccall('mineBlock', 'string', ['string', 'int'], [blockstring, difficulty]);
+async function mineBlock(blockstring, dfc) { // difficulty in zeros in binary
+  let minedBlock = Module.ccall('mineBlock', 'string', ['string', 'int'], [blockstring, dfc]);
   return minedBlock;
-}*/
-async function mineBlock(block, dfc) {
-  let proofofwork = 0;
-  let minedblock;
-  do {
-    proofofwork += 1;
-    minedblock = block + ";" + proofofwork.toString();
-  } while (!sha256(minedblock).startsWith(new Array(dfc + 1).join( "0" )));
-  return minedblock;
 }
+// async function mineBlock(block, dfc) {
+//   let proofofwork = 0;
+//   let minedblock;
+//   do {
+//     proofofwork += 1;
+//     minedblock = block + ";" + proofofwork.toString();
+//   } while (!sha256(minedblock).startsWith(new Array(dfc + 1).join( "0" )));
+//   return minedblock;
+// }
+
+
+
+
+
 
 
 async function fromBlock(lastblock) {
@@ -20,26 +25,30 @@ async function fromBlock(lastblock) {
   let blockstring = lastblock.hash+';miningbonus>1>'+thisNode.address; // start with previous block (lastblock) hash
 
   socket.emit('request', 'unminedtransactions');
+  
+  setTimeout(function(){ // 1 second wait for transactions
+    thisNode.miner = mineBlock(blockstring, difficulty*4)// *4 global hex difficulty to bin diff.
+    thisNode.miner.then(async function(minedblock){ // when mining is finished
+      // add it to personal blockchain
+      let mbsplit = minedblock.split(';');
+      let mbhash = await hashHex(minedblock, 'SHA-256');
+      let mb = {hash: mbhash, prevhash: mbsplit[0], transactions: mbsplit[1], proofofwork: mbsplit[2], length: lastblock.length+1};
+      let trans = blockchaindb.transaction(['blockchain', 'endblocks'], 'readwrite');
+      let blockchainos = trans.objectStore('blockchain');
+      let endblockos = trans.objectStore('endblocks');
+      blockchainos.add(mb); // add to blockchain
+      endblockos.delete(lastblock.hash); // make this the endpoint
+      endblockos.add(mb);
+      trans.commit(); // end transaction
+      // start on next block
+      fromBlock(mb);
+      // send block to others
+      socket.emit('block', minedblock);
+      return; // end newblock function
+    });
+  }, 1000);
 
-  thisNode.miner = mineBlock(blockstring, difficulty);
-  thisNode.miner.then(async function(minedblock){ // when mining is finished
-    // add it to personal blockchain
-    let mbsplit = minedblock.split(';');
-    let mbhash = await hashHex(minedblock, 'SHA-256');
-    let mb = {hash: mbhash, prevhash: mbsplit[0], transactions: mbsplit[1], proofofwork: mbsplit[2], length: lastblock.length+1};
-    let trans = blockchaindb.transaction(['blockchain', 'endblocks'], 'readwrite');
-    let blockchainos = trans.objectStore('blockchain');
-    let endblockos = trans.objectStore('endblocks');
-    blockchainos.add(mb); // add to blockchain
-    endblockos.delete(lastblock.hash); // make this the endpoint
-    endblockos.add(mb);
-    // start on next block
-    fromBlock(mb);
-    // send block to others
-    socket.emit('block', minedblock);
-    return; // end newblock function
-  })
-
+  // add to block on transaction (verify first);
   socket.on('transaction', async function(transactionstring){ // sender>amount>recipient|signature
     console.log('recieved transaction', transactionstring);
     const split = transactionstring.split('|'); // transaction, signature
@@ -55,7 +64,7 @@ async function fromBlock(lastblock) {
           && bal >= transaction[1]) { // check signature and balance
         // valid transaction
         blockstring += ','+transactionstring; // add transaction
-        thisNode.miner = mineBlock(blockstring, difficulty) // restart miner
+        thisNode.miner = mineBlock(blockstring, difficulty*4) // restart miner (*4 bin to hex diff)
       }
     });
   });

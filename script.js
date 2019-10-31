@@ -109,7 +109,7 @@ socket.on('block', function(blockstring){
  * go through list blockqueue[] and add valid blocks to blockchain
  */
 async function processblockqueue() {
-  console.log('processing block queue', blockqueue);
+  // console.log('processing block queue', blockqueue);
   let valid = false;
   for (let i = 0; i < blockqueue.length; i++) {
     blockstring = blockqueue[i];
@@ -119,8 +119,7 @@ async function processblockqueue() {
 
     if (!newblock.hash.startsWith(Array(difficulty+1).join('0'))) {// check if hash of block starts with zeros according to difficulty
       console.log('invalid block (doesn\'t match difficulty)', blockqueue[i]);
-      blockquque.splice(i); // remove block
-      return; // if not, reject
+      break; // if not, reject
     }
 
     // get the blockchain and endblocks ready to read from and write to
@@ -141,13 +140,12 @@ async function processblockqueue() {
     endblockos.openCursor().onsuccess = function(e){
 
       let cursor = e.target.result;
-      console.log('opened cursor', cursor);
+      // console.log('opened cursor', cursor);
       if (cursor) {
         let endblock = cursor.value;
         // check if the new block extends an endblock directly
         console.log('hashes', newblock.prevhash, endblock.hash);
         if (newblock.prevhash === endblock.hash) {
-          console.log('endblock length', endblock.length);
           newblock.length = endblock.length+1; // one farther in the blockchain
           console.log('accepting block ', newblock);
           endblockos.delete(endblock.hash); // end block is no longer end block
@@ -189,9 +187,9 @@ setTimeout(previewBlockchain, 1000);
 
 
 function previewBlockchain() {
-  let transaction  = blockchaindb.transaction(['blockchain', 'endblocks'], 'readonly');
-  let blockchainos =  transaction.objectStore('blockchain');
-  let endblockos   =  transaction.objectStore('endblocks' );
+  let transaction = blockchaindb.transaction(['blockchain', 'endblocks'], 'readonly');
+  let blockchainos = transaction.objectStore('blockchain');
+  let endblockos   = transaction.objectStore('endblocks' );
 
 
 
