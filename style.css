@@ -6,9 +6,10 @@
   --rainbow: #3399ff;
   --cell-bg: var(--cell-bg-light);
   --text-clr: var(--text-clr-light);
+  --strip-width: 1000px;
 }
 * {
-  transition: 0.2s;
+  transition: 0.15s;
 }
 body {
   font-family: 'Nunito', Sans-Serif;
@@ -28,24 +29,21 @@ a {
   border: 1px solid var(--rainbow);
 }
 button {
+  padding: 5px;
+  margin: 5px;
   text-align: center;
   color: var(--rainbow);
   background-color: #0000;
-  /* background-image: linear-gradient(0deg, #0000, #0000); */
-  /* border: none; */
   border: 1px solid var(--rainbow);
-  border-radius: 100px;
-  padding: 0.3vw;
+  border-radius: 4px;
   font-family: 'Nunito', sans-serif;
-  font-weight: 600;
-  font-size: calc(1vw+5px);
+  font-weight: 500;
+  font-size: 100%;
   cursor: pointer;
-  margin: 0.5vw;
-  transition: 0.2s;
 }
 button:hover {
-  background-color: #0001;
-  transition: 0.2s;
+  background-color: var(--rainbow);
+  color: var(--cell-bg);
 }
 input {
   min-width: 20px;
@@ -76,7 +74,7 @@ h2 {
 }
 h3 {
   margin: 5px 0 5px 0;
-  font-size: 2vw;
+  font-size: 20px;
   color: var(--text-clr);
 }
 
@@ -130,19 +128,26 @@ h3 {
 
 
 #topbar {
-  display: flex;
   width: 100%;
   background-color: var(--cell-bg);
   margin: 0;
   width: 100%;
   position: sticky;
   top: 0px;
-  border-bottom: 2px solid grey;
+  border-bottom: 1px solid var(--text-clr);
 }
-
+#topbar > div {
+  margin: 5px;
+  display: flex;
+  width: 100%;
+  max-width: var(--strip-width);
+  margin: auto;
+}
+#topbar > div > * {
+  margin: 15px;
+}
 #dash {
-  width: 90%;
-  max-width: 65em;
+  max-width: var(--strip-width);
   margin: 1em auto;
   background-color: var(--rainbow);
 
