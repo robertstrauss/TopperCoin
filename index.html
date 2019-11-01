@@ -79,7 +79,12 @@
                 <div class="cell" id="yyyeet">
                   <font-size: "30px;"><b><u>Fact of the day:</b></u></>
                   <br>
-                  no
+                  <div id="factoftheday"></div>
+                  <script>
+                    let facts = ["no", "suffer", "boomer", "shut your up", "yyeteteett", "if a cow fart, it go across football fioedl"];
+                    let factofday_num = Math.floor(Math.random() * facts.length);
+                    document.getElementById("factoftheday").innerHTML = facts[factofday_num];
+                  </script>
                 </div>
 
 
