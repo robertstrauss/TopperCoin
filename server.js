@@ -21,16 +21,16 @@ io.on('connection', function(socket){
   socket.on('transaction', function(transactionstring){
     /* first need to verify transaction */
     io.emit('transaction', transactionstring); // forward message to all nodes
-    /*
+
     tstream.write(transactionstring + '\n');
-    */
+
   });
   socket.on('block', function(blockstring){
     /* first should verify block */
     io.emit('block', blockstring); // forward message to all nodes
-    /*
+
     bstream.write(blockstring + '\n');
-    */
+    
   });
   socket.on('request', function(requeststring){
     console.log('received request '+requeststring);

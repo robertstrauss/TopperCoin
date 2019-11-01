@@ -25,7 +25,7 @@ async function fromBlock(lastblock) {
   let blockstring = lastblock.hash+';miningbonus>1>'+thisNode.address; // start with previous block (lastblock) hash
 
   socket.emit('request', 'unminedtransactions');
-  
+
   setTimeout(function(){ // 1 second wait for transactions
     thisNode.miner = mineBlock(blockstring, difficulty*4)// *4 global hex difficulty to bin diff.
     thisNode.miner.then(async function(minedblock){ // when mining is finished
@@ -39,7 +39,11 @@ async function fromBlock(lastblock) {
       blockchainos.add(mb); // add to blockchain
       endblockos.delete(lastblock.hash); // make this the endpoint
       endblockos.add(mb);
-      trans.commit(); // end transaction
+      try {
+        trans.commit(); // end transaction
+      } catch (TypeError) {
+        console.warn('transaction committed before expected.');
+      }
       // start on next block
       fromBlock(mb);
       // send block to others
@@ -54,8 +58,8 @@ async function fromBlock(lastblock) {
     const split = transactionstring.split('|'); // transaction, signature
     const transaction = split[0].split('>'); // sender, amount, recipient
     const sender = transaction[0], amount = transaction[1];
-    const hashHex = await hashHex(split[0], 'SHA-256');
-    const hashDec = bigInt(BigInt(['0x', hashHex].join('')));
+    const hashhHex = await hashHex(split[0], 'SHA-256');
+    const hashDec = bigInt(BigInt(['0x', hashhHex].join('')));
     // two long asynchronous processes: start both with promises before awaiting
     const pubkeyprom = getPubKey(sender);
     calcBalance(sender, async function(bal){
