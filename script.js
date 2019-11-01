@@ -102,15 +102,21 @@ socket.on('block', function(blockstring){
   */
   clearTimeout(wait); // interrupt timer
   blockqueue.push(blockstring); // add the block to the queue
-  wait = setTimeout(processblocksfrom, 200); // wait 200 milliseconds then process queue, unless interrupted by another block coming in
+  wait = setTimeout(processblockqueue, 200); // wait 200 milliseconds then process queue, unless interrupted by another block coming in
 });
 
 /**
  * go through list blockqueue[] and add valid blocks to blockchain
  */
-async function processblocksfrom(blockstring = null) {
-  if (blockstring === null) blockstring = blockqueue[0];
-  console.log('processing block', blockstring);
+async function processblockqueue() {
+  blockstring = blockqueue[0];
+  console.log('processing blockqueue', blockqueue);
+  if (!blockstring) return; // blockqueue is empty
+
+  async function recurse() {
+    blockqueue.splice(0);
+    processblockqueue();
+  }
   // processnextblock()
 
   // for (let i = 0; i < blockqueue.length; i++) {
@@ -119,10 +125,11 @@ async function processblocksfrom(blockstring = null) {
     const hash = await hashHex(blockstring, 'SHA-256'); // take sha256 hash of entire block
     let newblock = {hash: hash, prevhash: split[0], transactions: split[1], proofofwork: split[2]};
 
-    (function(){ // for leaving early
+
       if (!newblock.hash.startsWith(Array(difficulty+1).join('0'))) {// check if hash of block starts with zeros according to difficulty
         console.log('invalid block (doesn\'t match difficulty)', blockstring);
-        return; // if not, reject
+        recurse();
+        return false;
       }
 
       // get the blockchain and endblocks ready to read from and write to
@@ -140,11 +147,11 @@ async function processblocksfrom(blockstring = null) {
       */
 
       // check if the new block connects to any previous block recent enough to allow forks
-      let endres = endblockos.openCursor();
-      endres.onsuccess = function(e){
+      let cursorreq = endblockos.openCursor();
+      cursorreq.onsuccess = function(e){
 
         let cursor = e.target.result;
-        // console.log('opened cursor', cursor);
+        console.log('opened cursor', cursor);
         if (cursor) {
           let endblock = cursor.value;
           // check if the new block extends an endblock directly
@@ -155,7 +162,11 @@ async function processblocksfrom(blockstring = null) {
             endblockos.delete(endblock.hash); // end block is no longer end block
             endblockos.add(newblock); // new block is
             blockchainos.add(newblock); // add new block to blockchain
-            return true; // exit loop
+            try {transaction.commit();}
+            catch (TypeError) {console.warn('commited before expected');}
+            recurse();
+            console.log('recursing');
+            return true; // exit cursor
           }
           // check if the new block extends any block within the last <maxbackfork> blocks, starting a new fork.
           for (let backcount=0, lastblock=endblock; backcount < maxbackfork; backcount++) {
@@ -165,7 +176,8 @@ async function processblocksfrom(blockstring = null) {
                 console.log('accepting block ', newblock);
                 endblocks.add(newblock);
                 blockchainos.add(newblock); // add new block to blockchain
-                return true; // exit loop
+                recurse();
+                return true; // exit cursor
               }
               lastblock = e.target.result.value;
             };
@@ -173,9 +185,7 @@ async function processblocksfrom(blockstring = null) {
           cursor.continue();
         }
       };
-      endres.oncomplete(function(){processblocksfrom(blockqueue[i])});
-    })(); // TODO cursor does not have oncomplete, find equivelant
-    blockqueue.remove(blockstring);
+      cursorreq.oncomplete = recurse;
 }
 
 
