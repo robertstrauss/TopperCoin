@@ -78,7 +78,7 @@ request.onsuccess = function() {
   blockchainobjectstore.count().onsuccess = function(event){
     // length of local blockchain: event.target.result
     // send a request for the blocks after what we have
-    console.log('requesting blockchain');
+    console.log('requesting blockchain since', event.target.result);
     socket.emit('request', `blockchainsince${event.target.result}`);
   };
 }
@@ -110,13 +110,10 @@ socket.on('block', function(blockstring){
  */
 async function processblockqueue() {
   blockstring = blockqueue[0];
-  console.log('processing blockqueue', blockqueue);
+  blockqueue.splice(0, 1); // remove single (1) index zero (0)
+  console.log('processing blockqueue');
   if (!blockstring) return; // blockqueue is empty
 
-  async function recurse() {
-    blockqueue.splice(0);
-    processblockqueue();
-  }
   // processnextblock()
 
   // for (let i = 0; i < blockqueue.length; i++) {
@@ -128,7 +125,7 @@ async function processblockqueue() {
 
       if (!newblock.hash.startsWith(Array(difficulty+1).join('0'))) {// check if hash of block starts with zeros according to difficulty
         console.log('invalid block (doesn\'t match difficulty)', blockstring);
-        recurse();
+        processblockqueue();
         return false;
       }
 
@@ -151,11 +148,9 @@ async function processblockqueue() {
       cursorreq.onsuccess = function(e){
 
         let cursor = e.target.result;
-        console.log('opened cursor', cursor);
         if (cursor) {
           let endblock = cursor.value;
           // check if the new block extends an endblock directly
-          console.log('hashes', newblock, endblock);
           if (newblock.prevhash === endblock.hash) {
             newblock.length = endblock.length+1; // one farther in the blockchain
             console.log('accepting block ', newblock);
@@ -164,8 +159,7 @@ async function processblockqueue() {
             blockchainos.add(newblock); // add new block to blockchain
             try {transaction.commit();}
             catch (TypeError) {console.warn('commited before expected');}
-            recurse();
-            console.log('recursing');
+            processblockqueue();
             return true; // exit cursor
           }
           // check if the new block extends any block within the last <maxbackfork> blocks, starting a new fork.
@@ -176,7 +170,7 @@ async function processblockqueue() {
                 console.log('accepting block ', newblock);
                 endblocks.add(newblock);
                 blockchainos.add(newblock); // add new block to blockchain
-                recurse();
+                processblockqueue();
                 return true; // exit cursor
               }
               lastblock = e.target.result.value;
@@ -185,7 +179,7 @@ async function processblockqueue() {
           cursor.continue();
         }
       };
-      cursorreq.oncomplete = recurse;
+      cursorreq.oncomplete = processblockqueue;
 }
 
 
@@ -209,11 +203,15 @@ function previewBlockchain() {
   // fill the blockchain preview div
   blockchainpreviewdiv = document.getElementById('blockchainpreview');
 
-  endblockos.openCursor().onsuccess = function(e) { // once for each fork (from the endpoints)
+  let curreq = endblockos.openCursor()
+  curreq.onsuccess = function(e) { // once for each fork (from the endpoints)
     let cursor = e.target.result;
     if (cursor) {
       let block = cursor.value;
+      let count = 0;
       blockchainos.get(block.hash).onsuccess = function prevFrom(ev) {
+        if (count > 32) return; // don't go more than 32 back
+        count++;
         let block = ev.target.result;
         if (!block) return;
         let blockdiv = document.createElement('a'); // create an element for this block

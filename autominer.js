@@ -64,6 +64,7 @@ async function fromBlock(lastblock) {
     const pubkeyprom = getPubKey(sender);
     calcBalance(sender, async function(bal){
       const pubkey = await pubkeyprom;
+      const msg = bigInt(BigInt('0x' + parseInt(split[0], 16).toString()));
       if (RSA.decrypt(split[0], RSA.e, pubkey) === hashDec
           && bal >= transaction[1]) { // check signature and balance
         // valid transaction
