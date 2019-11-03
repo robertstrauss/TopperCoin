@@ -57,8 +57,9 @@ request.onupgradeneeded = function(e) { // called if the user doesn't have a blo
   console.log('created endblocks object store');
 
   // genesis block
-  const genesis = {hash: '0000684b7c4cc4bd581d92f7be29d4830d3bd66e320f885900cc7f537e1408cc', prevhash: '',
-                     transactions:'strobertisawesome>100>strobert', proofofwork: '44124', length: 0};
+  const genesis = {hash: '00008407e58ff005efcd89b6ac9e5a9de6b401d457cfc0532edfce250f7d6827', prevhash: '',
+                     transactions:'>999999999>strobert,>999999>Toaster,>999999>alestone,>999999>DDrew',
+                     proofofwork: '96283', length: 0};
   bcObjectStore.add(genesis);
   ebObjectStore.add(genesis);
   console.log('database initialization complete');

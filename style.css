@@ -108,10 +108,11 @@ h3 {
 }
 
 .infotab {
+  display: block;
   font-weight: normal;
   margin: 0;
   vertical-align: middle;
-  padding: 5px 30px 5px 15px;
+  padding: 5px 30px 5px 15px; /* override others */
   font-size: 20px;
   color: rgb(var(--text-clr));
   height: 50px;
