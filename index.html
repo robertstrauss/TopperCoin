@@ -107,34 +107,34 @@
 
 
               <div style="flex: 0 1 20%;">
-                <div id="yyyeet" onclick="randomfact()" style="height: 200px;">
+                <div id="yyyeet" class="cell" onclick="randomfact()" style="height: 200px;">
                   <b><u>Fact of the day:</u></b>
                   <br>
                   <p id="factoftheday"></p>
                   <script>
+                  let facts = ["no", "suffer", "boomer", "shut your up", "yeet is the only word in the oxford english dictionary <s>that...</s>",
+                               "if a cow fart, it go across football fioedl", "bees! BEES! WHY ARE ALL THESE BEES IN HERE?!",
+                               "you dont get an error when you index an array it doesnt have",
+                               "you have a bad random generator torsten, i wanna see more cow flatulence", "do you have more in there?",
+                               "damn it", "it almost worked then, though", "i was gonna make trash, but then this was more fun",
+                               "<b><u>Fact of the day:<br>Fact of the day:<br>Fact of the day:<br>Fact of the day:<br></u></b>",
+                               "cow go fart, cow go zoom", "█████ ██ █ ██████, ███ ██ ████ ███ ██ ███", "|  ||<br>|| |_",
+                               "<q>Don't trust every quote you see online.</q> <i>--Ghandi</i>"];
                     function randomfact(){
-                    let facts = ["no", "suffer", "boomer", "shut your up", "yeet is the only word in the oxford english dictionary <s>that...</s>",
-                                 "if a cow fart, it go across football fioedl", "bees! BEES! WHY ARE ALL THESE BEES IN HERE?!",
-                                 "you dont get an error when you index an array it doesnt have",
-                                 "you have a bad random generator torsten, i wanna see more cow flatulence", "do you have more in there?",
-                                 "damn it", "it almost worked then, though", "i was gonna make trash, but then this was more fun",
-                                 "<b><u>Fact of the day:<br>Fact of the day:<br>Fact of the day:<br>Fact of the day:<br></u></b>",
-                                 "cow go fart, cow go zoom", "█████ ██ █ ██████, ███ ██ ████ ███ ██ ███", "|  ||<br>|| |_",
-                                 "<q>Don't trust every quote you see online.</q> <i>--Ghandi</i>"];
-                    let factofday_num = Math.floor(Math.random() * facts.length);
-                    document.getElementById("factoftheday").innerHTML = facts[factofday_num];
-                  }
-                  randomfact();
+                      let factofday_num = Math.floor(Math.random() * facts.length);
+                      document.getElementById("factoftheday").innerHTML = facts[factofday_num];
+                    }
+                    randomfact();
                   </script>
                 </div>
-                <div id="yyyyeet" onclick="randomquote()" style="height: 200px;">
+                <div id="yyyyeet" class="cell" onclick="randomquote()" style="height: 200px;">
                   <b><u>Quote of the day:</u></b>
                   <br>
                   <p id="quoteoftheday"></p>
                   <script>
+                    let quotes = ["Don't trust every quote you see online.", "I didn't say this."];
+                    let authors = ["Ghandi", "Dr. Martin Luther King Jr.", "Albert Einstein", "Einbert Alenstine", "You"];
                     function randomquote(){
-                      let quotes = ["Don't trust every quote you see online.", "I didn't say this."];
-                      let authors = ["Ghandi", "Dr. Martin Luther King Jr.", "Albert Einstein", "Einbert Alenstine", "You"];
                       let quoteofday_num = Math.floor(Math.random() * quotes.length);
                       let author_num = Math.floor(Math.random() * authors.length);
                       document.getElementById("quoteoftheday").innerHTML = `<q>${quotes[quoteofday_num]}</q> <i>--${authors[author_num]}</i>`;

@@ -3,9 +3,9 @@ const docelem = document.documentElement;
 // rainbow background
 let hue = 202;
 setInterval(function(){
-  hue = (hue+1)%360;
+  hue = (hue+2)%360;
   document.documentElement.style.setProperty('--rainbow',  `${hue}, 70%, 60%`);
-}, 50);
+}, 100);
 
 // light/dark mode
 let lightdarkmode = document.getElementById('lightdark');
