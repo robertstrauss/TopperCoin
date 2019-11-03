@@ -55,7 +55,7 @@
 
                 <!-- login and register -->
                 <div class="infotab" onclick="document.getElementById('login').style.display = 'inline-block';">
-                  &#x1f464; <span id="address">Not Logged In</span>
+                  &#128100; <span id="address">Not Logged In</span>
                 </div>
 
                 <!-- balance -->
@@ -70,7 +70,7 @@
 
                 <!-- light mode / dark mode switch -->
                 <div class="infotab" id="lightdark">
-                  ☀
+                  ☀ Light Mode
                 </div>
 
 
@@ -79,23 +79,19 @@
 
 
 
-              <div style="flex: 1 0 auto;border: 0 1px 0 1px solid #fff1;">
+              <div style="flex: 1 0 auto; border: 1px none rgba(var(--text-clr), 0.1); border-left-style: solid; border-right-style: solid;">
                 <!-- form for making payments -->
                 <div id="sendtpc">
                   <h3>Send Money</h3>
                 <!-- <form id="makepaymentform" onsubmit="maketransaction(); return false">
                 <!- - method="GET" action="payment.php" target="emptyframe"> <!- -  onsubmit="makepayment();return false" - -> -->
-                  <!-- <table align="center"> -->
-                    <!-- <tr><td>send</td><td> -->
+
                       <input placeholder="amount" type="number" id="amount" step="0.0001" min="0"/>
-                    <!-- </td><td>TPC</td></tr> -->
-                    <!-- <tr><td>to</td><td colspan="2"> -->
+
                       <input placeholder="recipient" type="text" id="recipient"/>
-                    <!-- </td></tr> -->
-                    <!-- <tr><td colspan="3"> -->
-                    <button style="width:100%;margin:0" onclick="maketransaction()">Send</button>
-                    <!-- </td></tr>
-                  </table> -->
+
+                      <button style="width:100%;margin:0" onclick="maketransaction()">Send</button>
+
                 <!-- </form> -->
                 </div>
                 <hr>
@@ -137,13 +133,13 @@
                   <p id="quoteoftheday"></p>
                   <script>
                     function randomquote(){
-                    let quotes = ["Don't trust every quote you see online.", "I didn't say this."];
-                    let authors = ["Ghandi", "Dr. Martin Luther King Jr.", "Albert Einstein", "You"];
-                    let quoteofday_num = Math.floor(Math.random() * quotes.length);
-                    let author_num = Math.floor(Math.random() * authors.length);
-                    document.getElementById("quoteoftheday").innerHTML = `<q>${quotes[quoteofday_num]}</q> <i>--${authors[author_num]}</i>`;
-                  }
-                  randomquote();
+                      let quotes = ["Don't trust every quote you see online.", "I didn't say this."];
+                      let authors = ["Ghandi", "Dr. Martin Luther King Jr.", "Albert Einstein", "Einbert Alenstine", "You"];
+                      let quoteofday_num = Math.floor(Math.random() * quotes.length);
+                      let author_num = Math.floor(Math.random() * authors.length);
+                      document.getElementById("quoteoftheday").innerHTML = `<q>${quotes[quoteofday_num]}</q> <i>--${authors[author_num]}</i>`;
+                    }
+                    randomquote();
                   </script>
                 </div>
               </div>
@@ -193,7 +189,7 @@
 
 
     <!-- modal of login -->
-    <div id="login" class="modal"><div class="modalc">
+    <div id="login" class="modal">
       <div class="modal-content">
         <!-- <div style="text-align:right;"><button onclick="document.getElementById('login').style.display='none'">X</button></div> -->
         <h2>Log in</h2>
@@ -205,7 +201,7 @@
               <button style="width:100%" onclick="login">Log In</button>
 
       </div>
-    </div><div class="modalc">
+
       <div class="modal-content">
         <h2>Register</h2>
 
@@ -220,7 +216,7 @@
               <button style="width:100%" onclick="register()">Submit</button>
 
       </div>
-    </div></div>
+    </div>
 
 
     <!-- syncing window -->
