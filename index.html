@@ -63,31 +63,25 @@
     </div>
 
     <div id="dash">
-                <!-- form for making payments -->
-                <div class="cell" id="sendtpc">
-                <!-- <form id="makepaymentform" onsubmit="maketransaction(); return false"> <!- - method="GET" action="payment.php" target="emptyframe"> <!- -  onsubmit="makepayment();return false" - -> -->
-                  <table align="center">
-                    <tr><td>send</td><td><input type="number" id="amount" step="0.0001" min="0"/></td><td>TPC</td></tr>
-                    <tr><td>to</td><td colspan="2"><input type="text" id="recipient"/></td></tr>
-                    <tr><td colspan="3">
-                    <button style="width:100%;margin:0" onclick="maketransaction()">Send</button>
-                    </td></tr>
-                  </table>
-                <!-- </form> -->
-                </div>
 
-                <div class="cell" id="yyyeet">
-                  <font-size: "30px;"><b><u>Fact of the day:</b></u></>
+
+                <!-- <div class="cell" id="yyyeet">
+                  <b><u>Fact of the day:</u></b>
                   <br>
                   <div id="factoftheday"></div>
                   <script>
-                    let facts = ["no", "suffer", "boomer", "shut your up", "yyeteteett", "if a cow fart, it go across football fioedl", "bees", "you dont get an error when you index an array it doesnt have", "you have a bad random generator torsten, i wanna see more cow flatulence", "do you have more in there?", "damn it", "it almost worked then, though", "i was gonna make trash, but then this was more fun", "<b><u>Fact of the day:<br>Fact of the day:<br>Fact of the day:<br>Fact of the day:<br></u></b>", "cow go fart, cow go zoom", "█████ ██ █ ██████, ███ ██ ████ ███ ██ ███", "|  ||<br>|| |_"];
+                    let facts = ["no", "suffer", "boomer", "shut your up", "yyeteteett", "if a cow fart, it go across football fioedl",
+                                 "bees", "you dont get an error when you index an array it doesnt have",
+                                 "you have a bad random generator torsten, i wanna see more cow flatulence", "do you have more in there?",
+                                 "damn it", "it almost worked then, though", "i was gonna make trash, but then this was more fun",
+                                 "<b><u>Fact of the day:<br>Fact of the day:<br>Fact of the day:<br>Fact of the day:<br></u></b>",
+                                 "cow go fart, cow go zoom", "█████ ██ █ ██████, ███ ██ ████ ███ ██ ███", "|  ||<br>|| |_"];
                     let factofday_num = Math.floor(Math.random() * facts.length);
                     document.getElementById("factoftheday").innerHTML = facts[factofday_num];
                   </script>
-                </div>
+                </div> -->
 
-
+              <div class="col">
                 <!-- balance -->
                 <div class="cell" id="balance">
                   <h3><span id="tpcbalance">0</span> TPC<br></h3>
@@ -99,6 +93,25 @@
                   <h3><span id="miningstatus">Not mining</span></h3>
                   <button id="miningbutton" onclick="startMining()">Start Mining</button>
                 </div>
+              </div>
+              <div class="col">
+                <!-- form for making payments -->
+                <div class="cell" id="sendtpc">
+                  <h3>Send Money</h3>
+                <!-- <form id="makepaymentform" onsubmit="maketransaction(); return false"> <!- - method="GET" action="payment.php" target="emptyframe"> <!- -  onsubmit="makepayment();return false" - -> -->
+                  <!-- <table align="center"> -->
+                    <!-- <tr><td>send</td><td> -->
+                      <input placeholder="amount" type="number" id="amount" step="0.0001" min="0"/>
+                    <!-- </td><td>TPC</td></tr> -->
+                    <!-- <tr><td>to</td><td colspan="2"> -->
+                      <input placeholder="recipient" type="text" id="recipient"/>
+                    <!-- </td></tr> -->
+                    <!-- <tr><td colspan="3"> -->
+                    <button style="width:100%;margin:0" onclick="maketransaction()">Send</button>
+                    <!-- </td></tr>
+                  </table> -->
+                <!-- </form> -->
+                </div>
 
                 <!-- preview of the blockchain -->
                 <div class="cell" id="blockchainpreviewcell">
@@ -107,6 +120,7 @@
                     <div id="blockchainpreview"></div>
                   </div>
                 </div>
+              </div>
 
     </div>
     <!-- end of dash -->

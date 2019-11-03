@@ -46,7 +46,9 @@ button:hover {
   color: var(--cell-bg);
 }
 input {
+  /* display: inline-block; */
   min-width: 20px;
+  width: 100%;
   padding: 5px;
   margin: 1px;
   border: 1px solid #d1d5da;
@@ -55,8 +57,7 @@ input {
   color: var(--text-clr);
   outline: none;
   box-shadow: inset 0 1px 2px rgba(27,31,35,.075);
-  width:100%;
-  box-sizing:border-box;25
+  box-sizing:border-box;
 }
 input:focus {
   border-color: var(--rainbow);
@@ -151,40 +152,28 @@ h3 {
   margin: 1em auto;
   background-color: var(--rainbow);
 
-  display: grid;
-  grid-template-rows: [topline] 40% [horiz1] 20% [horiz2] 65% [bottomline];
-  grid-template-columns: [leftside] 20% [line1] 20% [line2] 60% [rightside];
+  display: flex;
+  /* display: grid;
+  grid-template-rows: [topline] 50% [horiz1] auto [bottomline];
+  grid-template-columns: [leftside] 20% [line1] auto [rightside]; */
+}
+#dash .col {
+  display: inline-block;
 }
 #dash #sendtpc {
-  grid-column-start: leftside;
-  grid-column-end: line2;
-  grid-row-start: topline;
-  grid-row-end: horiz1;
-}
-#dash #yyyeet {
-  grid-column-start: line2;
-  grid-column-end: rightside;
-  grid-row-start: topline;
-  grid-row-end: horiz2;
+
 }
 #dash #balance {
-  grid-column-start: leftside;
-  grid-column-end: line1;
-  grid-row-start: horiz1;
-  grid-row-end: horiz2;
+
 }
 #dash #mining {
-  grid-column-start: line1;
-  grid-column-end: line2;
-  grid-row-start: horiz1;
-  grid-row-end: horiz2;
+
 }
 #dash #blockchainpreviewcell {
-  grid-column-start: leftside;
-  grid-column-end: rightside;
-  grid-row-start: horiz2;
-  grid-row-end: bottomline;
+
 }
+
+
 #bcpreviewontainer {
   display: inline-block;
   width: 100%;
@@ -196,6 +185,7 @@ h3 {
   display: inline-block;
   white-space: nowrap;
   width: 100%;
+  height: 1000px;
   justify-content: left;
   text-align: left;
   /* border: 5px solid grey; */
@@ -205,8 +195,7 @@ h3 {
   color:white;
 }
 #blockchainpreview .block {
-  display: inline-block;
-  width: 200px;
+  display: block;
   overflow: auto;
   margin: 15px;
   border: none;
@@ -217,7 +206,7 @@ h3 {
 }
 
 #blockchainpreview .block .transactions {
-  height: 200px;
+  max-height: 200px;
   border: 2px solid white;
   overflow: auto;
   color: yellow;
