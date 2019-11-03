@@ -226,7 +226,7 @@ function previewBlockchain() {
           blockdiv.appendChild(element);
         });
 
-        blockchainpreviewdiv.prepend(blockdiv); // add created html block to the document before others
+        blockchainpreviewdiv.appendChild(blockdiv); // add created html block to the document before others
         blockchainos.get(block.prevhash).onsuccess = prevFrom; // preview from previous block
       }; // preview starting from last block
       cursor.continue();

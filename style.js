@@ -1,22 +1,22 @@
 const docelem = document.documentElement;
 
 // rainbow background
-let hue = 120;
+let hue = 202;
 setInterval(function(){
   hue = (hue+1)%360;
-  document.documentElement.style.setProperty('--rainbow',  `hsl(${hue}, 70%, 60%)`);
+  document.documentElement.style.setProperty('--rainbow',  `${hue}, 70%, 60%`);
 }, 50);
 
 // light/dark mode
 let lightdarkmode = document.getElementById('lightdark');
 lightdarkmode.addEventListener('click', function() {
-  if (getComputedStyle(docelem).getPropertyValue('--cell-bg').trim() ===
-      getComputedStyle(docelem).getPropertyValue('--cell-bg-dark').trim()) {
-        docelem.style.setProperty('--cell-bg',  getComputedStyle(docelem).getPropertyValue('--cell-bg-light'));
+  if (getComputedStyle(docelem).getPropertyValue('--bg-clr').trim() ===
+      getComputedStyle(docelem).getPropertyValue('--bg-clr-dark').trim()) {
+        docelem.style.setProperty('--bg-clr',  getComputedStyle(docelem).getPropertyValue('--bg-clr-light'));
         docelem.style.setProperty('--text-clr',  getComputedStyle(docelem).getPropertyValue('--text-clr-light'));
         lightdarkmode.innerHTML = '🌔'; // ☽
   } else {
-    docelem.style.setProperty('--cell-bg',  getComputedStyle(docelem).getPropertyValue('--cell-bg-dark'));
+    docelem.style.setProperty('--bg-clr',  getComputedStyle(docelem).getPropertyValue('--bg-clr-dark'));
     docelem.style.setProperty('--text-clr',  getComputedStyle(docelem).getPropertyValue('--text-clr-dark'));
     lightdarkmode.innerHTML = '☀'; // ☼  ❂
   }
