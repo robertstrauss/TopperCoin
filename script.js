@@ -393,7 +393,7 @@ async function register() {
   // invoke tostring rather than built in to stop from converting to "infinity"
   broadcasttransaction(0, 'mypublickeyis'+thisNode.pubkey.toString());
   setTimeout(function(){alert('registered successfully!');}, 1); // async alert
-  document.getElementById('register').style.display = 'none'; // hide registration modal
+  document.getElementById('login').style.display = 'none'; // hide registration modal
   return false;
 }
 

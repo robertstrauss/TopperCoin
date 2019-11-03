@@ -44,28 +44,13 @@
 
     </table> -->
 
-    <div id="topbar">
-      <div>
-      <div><h1>
-        TopperCoin
-      </h1></div>
-      <div style="margin: auto 0 auto auto;text-align:right;">
-        <button onclick="document.getElementById('login').style.display = 'inline-block';">
-          Log in
-        </buton>
-        <button onclick="document.getElementById('register').style.display = 'inline-block';">
-          Register
-        </button>
-        <a id="lightdark">🌔</a>
-        <a onclick="document.getElementById('about').style.display='inline-block'">?</a>
-      </div>
-      </div>
-    </div>
+
+
 
     <div id="dash">
 
 
-                <!-- <div class="cell" id="yyyeet">
+                <!-- <div class="infotab" id="yyyeet">
                   <b><u>Fact of the day:</u></b>
                   <br>
                   <div id="factoftheday"></div>
@@ -81,22 +66,37 @@
                   </script>
                 </div> -->
 
-              <div class="col">
+              <div style="flex: 0 1 auto;border-right: 1px solid #fff1">
+                <div class="infotab">
+                <h1 onclick="document.getElementById('about').style.display='inline-block'">
+                  TopperCoin
+                </h1></div>
+                <!-- login and register -->
+                <div class="infotab" onclick="document.getElementById('login').style.display = 'inline-block';">
+                  &#x1f464; <span id="address">Not Logged In</span>
+                </div>
+
                 <!-- balance -->
-                <div class="cell" id="balance">
-                  <h3><span id="tpcbalance">0</span> TPC<br></h3>
-                  <div><button onclick="getMyBalance()">Check Balance</button></div>
+                <div class="infotab" id="balance" onclick="getMyBalance()">
+                  &#x1f4b0; <span id="tpcbalance">0</span> TPC
                 </div>
 
                 <!-- mining -->
-                <div class="cell" id="mining">
-                  <h3><span id="miningstatus">Not mining</span></h3>
-                  <button id="miningbutton" onclick="startMining()">Start Mining</button>
+                <div class="infotab" id="mining" onclick="startMining()">
+                  ⚒ <span id="miningstatus">Not mining</span>
+                </div>
+
+                <div class="infotab" id="lightdark">
+                  ☀
                 </div>
               </div>
-              <div class="col">
+
+
+
+
+              <div style="flex: 1 0 auto;">
                 <!-- form for making payments -->
-                <div class="cell" id="sendtpc">
+                <div id="sendtpc">
                   <h3>Send Money</h3>
                 <!-- <form id="makepaymentform" onsubmit="maketransaction(); return false"> <!- - method="GET" action="payment.php" target="emptyframe"> <!- -  onsubmit="makepayment();return false" - -> -->
                   <!-- <table align="center"> -->
@@ -112,9 +112,9 @@
                   </table> -->
                 <!-- </form> -->
                 </div>
-
+                <hr>
                 <!-- preview of the blockchain -->
-                <div class="cell" id="blockchainpreviewcell">
+                <div id="blockchainpreviewcell">
                   <h2>Blockchain Preview</h2>
                   <div id="bcpreviewontainer">
                     <div id="blockchainpreview"></div>
@@ -171,33 +171,28 @@
       <div class="modal-content">
         <!-- <div style="text-align:right;"><button onclick="document.getElementById('login').style.display='none'">X</button></div> -->
         <h2>Log in</h2>
-          <table style="width:100%">
-            <tr>
-              <td>username:</td><td><input id="loginaddress"/></td>
-            </tr><tr>
-              <td>password:</td><td><input type="password" id="loginpassword"/></td>
-            </tr><tr>
-              <td colspan="2"><button style="width:100%" onclick="login">Log In</button></td>
-            </tr>
-          </table>
+
+              <input placeholder="username" id="loginaddress"/>
+
+              <input placeholder="password" type="password" id="loginpassword"/>
+
+              <button style="width:100%" onclick="login">Log In</button>
+
       </div>
-    </div></div>
-    <div id="register" class="modal"><div class="modalc">
+    </div><div class="modalc">
       <div class="modal-content">
         <h2>Register</h2>
-          <table style="width:100%">
-            <tr>
-              <td>create username:</td><td><input type="text" id="registeraddress" pattern="[^>|,;]+"
+
+              <input placeholder="create username" "type="text" id="registeraddress" pattern="[^>|,;]+"
                             oninvalid="setCustomValidity('cannot include '>', '|', ',', or ';')"
-                            onchange="try{setCustomValidity('')}catch(e){}"/></td>
-            </tr><tr>
-              <td>create password:</td><td><input type="password" id="registerpassword1"/></td>
-            </tr><tr>
-              <td>verify password:</td><td><input type="password" id="registerpassword2"/></td>
-            </tr><tr>
-              <td colspan="2"><button style="width:100%" onclick="register()">Submit</button></td>
-            </tr>
-          </table>
+                            onchange="try{setCustomValidity('')}catch(e){}"/>
+
+              <input placeholder="create password" type="password" id="registerpassword1"/>
+
+              <input placeholder="verify password" type="password" id="registerpassword2"/>
+
+              <button style="width:100%" onclick="register()">Submit</button>
+
       </div>
     </div></div>
 

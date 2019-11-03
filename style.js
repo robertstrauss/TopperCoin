@@ -10,15 +10,15 @@ setInterval(function(){
 // light/dark mode
 let lightdarkmode = document.getElementById('lightdark');
 lightdarkmode.addEventListener('click', function() {
-  if (getComputedStyle(docelem).getPropertyValue('--cell-bg') ===
-      getComputedStyle(docelem).getPropertyValue('--cell-bg-dark')) {
+  if (getComputedStyle(docelem).getPropertyValue('--cell-bg').trim() ===
+      getComputedStyle(docelem).getPropertyValue('--cell-bg-dark').trim()) {
         docelem.style.setProperty('--cell-bg',  getComputedStyle(docelem).getPropertyValue('--cell-bg-light'));
         docelem.style.setProperty('--text-clr',  getComputedStyle(docelem).getPropertyValue('--text-clr-light'));
-        lightdarkmode.innerHTML = '🌔'; // ☽ \sun
+        lightdarkmode.innerHTML = '🌔'; // ☽
   } else {
     docelem.style.setProperty('--cell-bg',  getComputedStyle(docelem).getPropertyValue('--cell-bg-dark'));
     docelem.style.setProperty('--text-clr',  getComputedStyle(docelem).getPropertyValue('--text-clr-dark'));
-    lightdarkmode.innerHTML = '☀'; // ☼
+    lightdarkmode.innerHTML = '☀'; // ☼  ❂
   }
 });
 

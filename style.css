@@ -1,11 +1,11 @@
 :root {
-  --cell-bg-dark: #222;
+  --cell-bg-dark: #15202b; /*#222;*/
   --text-clr-dark: #ddd;
   --cell-bg-light: #fff;
   --text-clr-light: #222;
   --rainbow: #3399ff;
-  --cell-bg: var(--cell-bg-light);
-  --text-clr: var(--text-clr-light);
+  --cell-bg: var(--cell-bg-dark);
+  --text-clr: var(--text-clr-dark);
   --strip-width: 1000px;
 }
 * {
@@ -16,7 +16,7 @@ body {
   padding: 0;
   margin: 0;
   color: var(--text-clr);
-  background-color: var(--rainbow);
+  background-color: var(--cell-bg);
 }
 a {
   color: var(--rainbow);
@@ -29,34 +29,39 @@ a {
   border: 1px solid var(--rainbow);
 }
 button {
-  padding: 5px;
-  margin: 5px;
+  display: inline-block;
+  min-width: 100px;
+  height: 100%;
+  margin: 0px 5px 0px 5px;
   text-align: center;
-  color: var(--rainbow);
-  background-color: #0000;
-  border: 1px solid var(--rainbow);
-  border-radius: 4px;
+  color: var(--cell-bg);
+  background-color: var(--rainbow);
+  border: 0;
+  border-radius: 1000px;
   font-family: 'Nunito', sans-serif;
-  font-weight: 500;
   font-size: 100%;
   cursor: pointer;
+  padding: auto;
 }
-button:hover {
-  background-color: var(--rainbow);
-  color: var(--cell-bg);
+button:hover::after {
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-color: #0008;
 }
 input {
   /* display: inline-block; */
   min-width: 20px;
   width: 100%;
-  padding: 5px;
+  padding: 10px;
   margin: 1px;
-  border: 1px solid #d1d5da;
+  /* border: 1px solid #d1d5da; */
+  border: 0;
   border-radius: 3px;
   background-color: #00000005;
   color: var(--text-clr);
   outline: none;
-  box-shadow: inset 0 1px 2px rgba(27,31,35,.075);
+  /* box-shadow: inset 0 1px 2px rgba(27,31,35,.075); */
   box-sizing:border-box;
 }
 input:focus {
@@ -105,7 +110,22 @@ h3 {
   border-radius: 10px;
 }
 
-.cell {
+.infotab {
+  font-weight: normal;
+  margin: 0;
+  vertical-align: middle;
+  padding: 5px 30px 5px 15px;
+  font-size: 20px;
+  color: var(--text-clr);
+  height: 50px;
+  line-height: 50px;
+  cursor: pointer;
+}
+.infotab:hover {
+  /* box-shadow: 0px 0px 5px 2px #00000033; */
+  background-color: #fff1;
+}
+/* .cell {
   display: grid;
   justify-content: center;
   align-items: center;
@@ -117,7 +137,7 @@ h3 {
   border-radius: 10px;
   overflow: auto;
   box-shadow: 1px 1px 10px 2px #0003;
-}
+} */
 /* .cell:before {
   content: "";
   display: block;
@@ -128,7 +148,7 @@ h3 {
 
 
 
-#topbar {
+/* #topbar {
   width: 100%;
   background-color: var(--cell-bg);
   margin: 0;
@@ -141,24 +161,24 @@ h3 {
   margin: 5px;
   display: flex;
   width: 100%;
-  max-width: var(--strip-width);
+  /* max-width: var(--strip-width); * /
   margin: auto;
 }
 #topbar > div > * {
   margin: 15px;
-}
+} */
 #dash {
-  max-width: var(--strip-width);
-  margin: 1em auto;
-  background-color: var(--rainbow);
+  /* max-width: var(--strip-width); */
+  /* margin: 1em auto; */
+  background-color: var(--cell-bg);
 
   display: flex;
   /* display: grid;
   grid-template-rows: [topline] 50% [horiz1] auto [bottomline];
   grid-template-columns: [leftside] 20% [line1] auto [rightside]; */
 }
-#dash .col {
-  display: inline-block;
+#dash > div > div {
+  padding: 15px;
 }
 #dash #sendtpc {
 
