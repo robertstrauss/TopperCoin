@@ -16,6 +16,7 @@ const thisNode = {
                    pubkey  : ((getCookie('pubkey' )))
                  }
 
+document.getElementById('address').innerHTML = thisNode.address || "Not Logged In";
 
 
 // how many zeros (hex) block hash must start with
