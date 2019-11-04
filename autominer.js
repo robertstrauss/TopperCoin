@@ -37,7 +37,11 @@ async function fromBlock(lastblock) {
       let blockchainos = trans.objectStore('blockchain');
       let endblockos = trans.objectStore('endblocks');
       blockchainos.add(mb); // add to blockchain
-      endblockos.delete(lastblock.hash); // make this the endpoint
+      try {
+        endblockos.delete(lastblock.hash); // make this the endpoint
+      } catch (DataError) {
+        console.warn('first block, no previous hash');
+      }
       endblockos.add(mb);
       try {
         trans.commit(); // end transaction

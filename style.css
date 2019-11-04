@@ -35,7 +35,7 @@ button {
   padding: 8px;
   margin: 1px;
   border: 0;
-  border-radius: 3px;
+  border-radius: 300px;
   background-color: hsl(var(--rainbow));
   color: rgb(var(--bg-clr));
   outline: none;
@@ -53,7 +53,7 @@ input {
   padding: 8px;
   margin: 1px;
   border: 1px solid #0000;
-  border-radius: 3px;
+  border-radius: 300px;
   background-color: rgba(var(--text-clr), 0.1);
   color: rgb(var(--text-clr));
   outline: none;
