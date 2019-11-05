@@ -11,6 +11,8 @@
 }
 * {
   transition: 0.15s;
+  /* background-color: hsl(var(--rainbow)) !important;
+  color: hsl(var(--rainbow)) !important; */
 }
 body {
   font-family: 'Nunito', Sans-Serif;
@@ -143,6 +145,10 @@ h3 {
   grid-template-rows: [topline] 50% [horiz1] auto [bottomline];
   grid-template-columns: [leftside] 20% [line1] auto [rightside]; */
 }
+#dash > div {
+  height: 100vh;
+  overflow: scroll;
+}
 #dash > div > div {
   padding: 15px;
 }
@@ -163,19 +169,21 @@ h3 {
 #bcpreviewontainer {
   display: inline-block;
   width: 100%;
+  overflow: scroll;
 }
 #blockchainpreview {
   font-family: "Courier New", Courier, monospace;
   display: inline-block;
   white-space: nowrap;
   width: 100%;
-  height: 1000px;
   justify-content: left;
   text-align: left;
   /* border: 5px solid grey; */
   border-radius: 5px;
   background-color: black;
-  color:white;
+  color: white;
+  overflow: hidden;
+  overflow-y: scroll;
 }
 #blockchainpreview .block {
   display: block;

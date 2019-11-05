@@ -73,19 +73,36 @@ request.onsuccess = function() {
   blockchaindb = request.result; // set the global variable for accessing blockchain
 
   // open the database for writing
-  blockchainobjectstore = blockchaindb.transaction(['blockchain'], 'readwrite').objectStore('blockchain');
+  endblockos = blockchaindb.transaction(['endblocks'], 'readwrite').objectStore('endblocks');
 
-  // request the count (length) of the blockchain,
-  // when it is returned send a request for the rest
-  blockchainobjectstore.count().onsuccess = function(event){
-    // length of local blockchain: event.target.result
-    // send a request for the blocks after what we have
-    console.log('requesting blockchain since', event.target.result);
-    socket.emit('request', `blockchainsince${event.target.result}`);
+  // request the blockchain since each of local endblocks
+  endblockos.openCursor().onsuccess = function(event){
+    cursor = event.target.result;
+    if (cursor) {
+      // length of local blockchain: event.target.result
+      // send a request for the blocks after what we have
+      console.log('requesting blockchain since', cursor.value.hash);
+      socket.emit('blockchainrequest', `${cursor.value.hash}`);
+      cursor.continue();
+    }
   };
 }
 
 
+socket.on('blockchainrequest', function(starthash){
+  console.log('blockchain request', starthash);
+  blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+  prevhash = blockchainos.index('prevhash');
+  prevhash.openCursor(starthash).onsuccess = function(e) {
+    console.log(e);
+    let cursor = e.target.result;
+    if (cursor) {
+      console.log('block', cursor.value)
+      socket.emit('block', cursor.value);
+      cursor.continue(e.target.result.value.hash);
+    }
+  }
+});
 
 socket.on('transaction', function(transactionstring){
   console.log(transactionstring);
@@ -273,6 +290,7 @@ async function getLongestBlock(callback) {
   let longestblock= {length:0};
   endblockos.openCursor().onsuccess = function(e) {
     // iterate through enblocks to find "longest" - one with most behind it
+    console.log(e.target);
     let cursor = e.target.result;
     if (cursor) {
       let block = cursor.value;

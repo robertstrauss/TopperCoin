@@ -24,7 +24,7 @@ async function fromBlock(lastblock) {
   console.log('starting new block from ', lastblock);
   let blockstring = lastblock.hash+';miningbonus>1>'+thisNode.address; // start with previous block (lastblock) hash
 
-  socket.emit('request', 'unminedtransactions');
+  socket.emit('transactionrequest');
 
   setTimeout(function(){ // 1 second wait for transactions
     thisNode.miner = mineBlock(blockstring, difficulty*4)// *4 global hex difficulty to bin diff.
