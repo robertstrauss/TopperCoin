@@ -4,6 +4,7 @@ var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 var path = require('path');
 var fs = require('fs');
+var sha256 = require('control/sha.js');
 
 var tstream = fs.createWriteStream('unminedtransactions.txt', {flags:'a'});
 var bstream = fs.createWriteStream('blockchain.txt', {flags:'a'});
@@ -60,10 +61,12 @@ http.listen(8000, function(){
 
 
 
-
+// TODO set up validation before writing in server
+// OR simply forward all content AND REQUESTS
+// multiple responses will be handled by forks
 function isvalidblock(blockstring) {
   let split = blockstring.split(';');
-  const hash = await hashHex(blockstring, 'SHA-256'); // take sha256 hash of entire block
+  const hash = sha256.sha256(blockstring); // take sha256 hash of entire block
   let newblock = {hash: hash, prevhash: split[0], transactions: split[1], proofofwork: split[2]};
 
 
