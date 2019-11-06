@@ -17,7 +17,7 @@ const thisNode = {
                  }
 
 // how many zeros (hex) block hash must start with
-const difficulty = 4;
+const difficulty = 5;
 
 // the furthest number of blocks back a fork can be started
 const maxbackfork = 20;
@@ -218,7 +218,7 @@ async function processblockqueue() {
 async function isValidTransaction(transactionstring) {
   let isvalid = false;
   let prom = new Promise(async function (valid, invalid) {
-    
+
     const split = transactionstring.split('|'); // transaction, signature
     const transaction = split[0].split('>'); // sender, amount, recipient
     const sender = transaction[0], amount = transaction[1];
