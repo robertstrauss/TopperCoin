@@ -101,6 +101,7 @@ socket.on('blockchainrequest', function(req){
 });
 
 
+
 const transactions = [];
 // TODO append to unmined list and give on transaction request, remove on block
 socket.on('transaction', async function(transactionstring){
@@ -141,7 +142,7 @@ async function processblockqueue() {
 
   // for (let i = 0; i < blockqueue.length; i++) {
   //   blockstring = blockqueue[i];
-    
+
     const hash = await hashHex(blockstring, 'SHA-256'); // take sha256 hash of entire block
     let split = blockstring.split(';');
     let newblock = {hash: hash, prevhash: split[0], transactions: split[1], proofofwork: split[2]};
@@ -212,6 +213,7 @@ async function processblockqueue() {
 
 
 
+
 // validate transactions
 async function isValidTransaction(transactionstring) {
   let isvalid = false;
@@ -244,6 +246,7 @@ async function isValidTransaction(transactionstring) {
   });
   return prom;
 }
+
 
 
 
