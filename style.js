@@ -14,11 +14,11 @@ lightdarkmode.addEventListener('click', function() {
       getComputedStyle(docelem).getPropertyValue('--bg-clr-dark').trim()) {
         docelem.style.setProperty('--bg-clr',  getComputedStyle(docelem).getPropertyValue('--bg-clr-light'));
         docelem.style.setProperty('--text-clr',  getComputedStyle(docelem).getPropertyValue('--text-clr-light'));
-        lightdarkmode.innerHTML = '🌔 Dark Mode'; // ☽
+        lightdarkmode.innerHTML = '☀ Light Mode'; // ☽
   } else {
     docelem.style.setProperty('--bg-clr',  getComputedStyle(docelem).getPropertyValue('--bg-clr-dark'));
     docelem.style.setProperty('--text-clr',  getComputedStyle(docelem).getPropertyValue('--text-clr-dark'));
-    lightdarkmode.innerHTML = '☀ Light Mode'; // ☼  ❂
+    lightdarkmode.innerHTML = '🌔 Dark Mode'; // ☼  ❂
   }
 });
 

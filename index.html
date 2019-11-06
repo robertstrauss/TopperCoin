@@ -10,7 +10,7 @@
   </head>
   <body>
     <div id="dash">
-              <div style="flex: 0 1 auto">
+              <div style="flex: 0 1 auto; min-width: 200px;">
                       <span class="infotab" onclick="document.getElementById('about').style.display='inline-block'"><h1>
                         TopperCoin
                       </h1></span>
@@ -32,7 +32,7 @@
 
                       <!-- light mode / dark mode switch -->
                       <span class="infotab" id="lightdark">
-                        ☀ Light Mode
+                        🌔 Dark Mode
                       </span>
 
 
@@ -41,7 +41,7 @@
 
 
 
-              <div style="flex: 1 0 auto; border: 1px none rgba(var(--text-clr), 0.1); border-left-style: solid; border-right-style: solid;">
+              <div id="middle">
                       <!-- form for making payments -->
                       <div id="sendtpc">
                         <h3>Send Money</h3>
@@ -55,20 +55,17 @@
 
                       </form>
                       </div>
-                      <hr>
                       <!-- preview of the blockchain -->
-                      <div id="blockchainpreviewcell">
-                        <h3>Blockchain</h3>
-                        <div id="bcpreviewontainer">
-                          <div id="blockchainpreview"></div>
-                        </div>
+                      <!-- <h3>Blockchain</h3> -->
+                      <div id="bcpreviewontainer" style="flex: 1 1 auto;">
+                        <div id="blockchainpreview"></div>
                       </div>
               </div>
 
 
 
-              <div style="flex: 0 1 20%;">
-                      <div id="yyyeet" class="cell" onclick="randomfact()" style="height: 200px;">
+              <div id="rightcol">
+                      <div id="yyyeet" class="cell" onclick="randomfact()" style="flex: 1 1 50px;">
                         <b><u>Fact of the day:</u></b>
                         <br>
                         <p id="factoftheday"></p>
@@ -87,7 +84,7 @@
                           randomfact();
                         </script>
                       </div>
-                      <div id="yyyyeet" class="cell" onclick="randomquote()" style="height: 200px;">
+                      <div id="yyyyeet" class="cell" onclick="randomquote()" style="flex: 1 1 50px;">
                         <b><u>Quote of the day:</u></b>
                         <br>
                         <p id="quoteoftheday"></p>

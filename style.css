@@ -56,7 +56,8 @@ input {
   margin: 1px;
   border: 1px solid #0000;
   border-radius: 300px;
-  background-color: rgba(var(--text-clr), 0.1);
+  background-color: #0000;
+  border-color: rgba(var(--text-clr), 0.1);
   color: rgb(var(--text-clr));
   outline: none;
   font-family: 'Nunito', sans-serif;
@@ -81,6 +82,7 @@ h2 {
   color: grey;
 }
 h3 {
+  padding: 5px;
   margin: 5px 0 5px 0;
   font-size: 20px;
   color: rgb(var(--text-clr));
@@ -127,6 +129,7 @@ h3 {
 }
 .cell {
   margin: 20px;
+  padding: 20px;
   border-radius: 10px;
   background-color: rgba(var(--text-clr), 0.05);
 }
@@ -145,51 +148,61 @@ h3 {
   grid-template-rows: [topline] 50% [horiz1] auto [bottomline];
   grid-template-columns: [leftside] 20% [line1] auto [rightside]; */
 }
-#dash > div {
+
+/* #dash > div {
   height: 100vh;
-  overflow: scroll;
+  overflow: hidden;
 }
 #dash > div > div {
   padding: 15px;
+} */
+
+#dash #middle {
+  display: flex;
+  height: 100vh;
+  flex-flow: column;
+  flex: 1 1 auto;
+  border: 1px rgba(var(--text-clr), 0.1);
+  border-style: none solid none solid;
+}
+#dash #rightcol {
+  display: flex;
+  flex-flow: column;
+  flex: 0 1 20%;
+  min-width: 200px;
 }
 #dash #sendtpc {
-
-}
-#dash #balance {
-
-}
-#dash #mining {
-
-}
-#dash #blockchainpreviewcell {
-
+  padding: 5px 15px 20px 15px;
+  border-bottom: 3px solid rgba(var(--text-clr), 0.5);
 }
 
 
 #bcpreviewontainer {
-  display: inline-block;
   width: 100%;
-  overflow: scroll;
+  height: 100%;
+  overflow-y: auto;
 }
 #blockchainpreview {
-  font-family: "Courier New", Courier, monospace;
-  display: inline-block;
+  /* font-family: "Courier New", Courier, monospace; */
+  /* display: inline-block; */
   white-space: nowrap;
   width: 100%;
-  justify-content: left;
+  justify-content: center;
   text-align: left;
   /* border: 5px solid grey; */
-  border-radius: 5px;
-  background-color: black;
-  color: white;
-  overflow: hidden;
-  overflow-y: scroll;
+  /* border-radius: 5px; */
+  /* background-color: black; */
+  /* color: white; */
+  overflow-y: auto;
 }
 #blockchainpreview .block {
   display: block;
   overflow: auto;
-  margin: 15px;
-  border: none;
+  margin: 0;
+  padding: 15px;
+  border: 1px solid rgba(var(--text-clr), 0.2);
+  border-style: none;
+  border-bottom-style: solid;
   text-decoration: none;
 }
 #blockchainpreview .block * {
@@ -198,24 +211,18 @@ h3 {
 
 #blockchainpreview .block .transactions {
   max-height: 200px;
-  border: 2px solid white;
   overflow: auto;
-  color: yellow;
+  color: rgb(var(--text-clr));
 }
 #blockchainpreview .block .proofofwork, .block .prevhash, .block .hash {
   text-overflow: ellipsis;
   overflow-x: hidden;
-  border: 2px solid white;
 }
 #blockchainpreview .block .prevhash {
   color: lightblue;
-  border-bottom: none;
 }
 #blockchainpreview .block .proofofwork {
-  color: #9e7;
-  border-top: none;
-}
-#blockchainpreview .block .length, .block .hash {
-  border: none;
-  color: lightgrey;
+  vertical-align: middle;
+  display: inline-block;
+  color: #77dd77;
 }

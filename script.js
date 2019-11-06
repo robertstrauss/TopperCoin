@@ -58,7 +58,7 @@ request.onupgradeneeded = function(e) { // called if the user doesn't have a blo
   console.log('created endblocks object store');
 
   // genesis block
-  const genesis = {hash: '00008407e58ff005efcd89b6ac9e5a9de6b401d457cfc0532edfce250f7d6827', prevhash: '',
+  const genesis = {hash: '00008407e58ff005efcd89b6ac9e5a9de6b401d457cfc0532edfce250f7d6827', prevhash: 'genesis',
                      transactions:'>999999999>strobert,>999999>Toaster,>999999>alestone,>999999>DDrew',
                      proofofwork: '96283', length: 0};
   bcObjectStore.add(genesis);
@@ -72,8 +72,9 @@ request.onupgradeneeded = function(e) { // called if the user doesn't have a blo
 request.onsuccess = function() {
   blockchaindb = request.result; // set the global variable for accessing blockchain
 
-  // open the database for writing
-  endblockos = blockchaindb.transaction(['endblocks'], 'readwrite').objectStore('endblocks');
+  // open the database to request from the end
+  let trans = blockchaindb.transaction(['endblocks'], 'readonly');
+  endblockos = trans.objectStore('endblocks');
 
   // request the blockchain since each of local endblocks
   endblockos.openCursor().onsuccess = function(event){
@@ -86,6 +87,7 @@ request.onsuccess = function() {
       cursor.continue();
     }
   };
+  trans.oncomplete = (() => previewBlockchain());
 }
 
 
@@ -166,51 +168,41 @@ async function processblockqueue() {
       let cursorreq = endblockos.openCursor();
       cursorreq.onsuccess = function(e){
 
-        let cursor = e.target.result;
-        if (cursor) {
-          let endblock = cursor.value;
-          // check if the new block extends an endblock directly
-          if (newblock.prevhash === endblock.hash) {
-            newblock.length = endblock.length+1; // one farther in the blockchain
-            console.log('accepting block ', newblock);
-            endblockos.delete(endblock.hash); // end block is no longer end block
-            endblockos.add(newblock); // new block is
-            blockchainos.add(newblock); // add new block to blockchain
-            try {transaction.commit();}
-            catch (TypeError) {console.warn('commited before expected');}
-            processblockqueue();
-            return true; // exit cursor
-          }
-          // check if the new block extends any block within the last <maxbackfork> blocks, starting a new fork.
-          for (let backcount=0, lastblock=endblock; backcount < maxbackfork; backcount++) {
-            blockchainos.get(lastblock.prevhash).onsuccess = function(e) {
-              if (newblock.prevhash === lastblock.hash) {
-                newblock.length = lastblock.length+1;
-                console.log('accepting block ', newblock);
-                endblocks.add(newblock);
-                blockchainos.add(newblock); // add new block to blockchain
-                processblockqueue();
-                return true; // exit cursor
-              }
-              lastblock = e.target.result.value;
-            };
-          }
-          cursor.continue();
+      let cursor = e.target.result;
+      if (cursor) {
+        let endblock = cursor.value;
+        // check if the new block extends an endblock directly
+        if (newblock.prevhash === endblock.hash) {
+          newblock.length = endblock.length+1; // one farther in the blockchain
+          console.log('accepting block ', newblock);
+          endblockos.delete(endblock.hash); // end block is no longer end block
+          endblockos.add(newblock); // new block is
+          blockchainos.add(newblock); // add new block to blockchain
+          try {transaction.commit();}
+          catch (TypeError) {console.warn('commited before expected');}
+          processblockqueue(); // recurse
+          return true; // exit cursor
         }
-      };
-      cursorreq.oncomplete = processblockqueue;
+        // check if the new block extends any block within the last <maxbackfork> blocks, starting a new fork.
+        for (let backcount=0, lastblock=endblock; backcount < maxbackfork; backcount++) {
+          blockchainos.get(lastblock.prevhash).onsuccess = function(e) {
+            if (newblock.prevhash === lastblock.hash) {
+              newblock.length = lastblock.length+1;
+              console.log('accepting block ', newblock);
+              endblocks.add(newblock);
+              blockchainos.add(newblock); // add new block to blockchain
+              processblockqueue();
+              return true; // exit cursor
+            }
+            lastblock = e.target.result.value;
+          };
+        }
+        cursor.continue();
+      }
+    };
+    cursorreq.oncomplete = processblockqueue;
+    previewBlockchain(); // display blockchain
 }
-
-
-
-
-// preview blockchain after 1000ms to give async functions time to fill it
-setTimeout(previewBlockchain, 1000);
-
-
-
-
-
 
 function previewBlockchain() {
   let transaction = blockchaindb.transaction(['blockchain', 'endblocks'], 'readonly');
@@ -221,7 +213,7 @@ function previewBlockchain() {
 
   // fill the blockchain preview div
   blockchainpreviewdiv = document.getElementById('blockchainpreview');
-
+  blockchainpreviewdiv.innerHTML = '';
   let curreq = endblockos.openCursor()
   curreq.onsuccess = function(e) { // once for each fork (from the endpoints)
     let cursor = e.target.result;
@@ -238,7 +230,7 @@ function previewBlockchain() {
         blockdiv.href = '/blockchain/'+block.hash; // that links to a page on the block
 
         // create individual divs for the previous hash, transactions, and proofofwork of the block
-        ['length', 'prevhash', 'transactions', 'proofofwork', 'hash'].forEach(function(key){
+        ['prevhash', 'transactions', 'proofofwork'].forEach(function(key){
           let element = document.createElement('div');
           element.className = key;
           element.innerHTML = block[key];
@@ -287,7 +279,7 @@ async function maketransaction() {
 async function getLongestBlock(callback) {
   let blockstring = '';
   let endblockos  = blockchaindb.transaction(['endblocks'], 'readonly').objectStore('endblocks');
-  let longestblock= {length:0};
+  let longestblock= {length:-1};
   endblockos.openCursor().onsuccess = function(e) {
     // iterate through enblocks to find "longest" - one with most behind it
     console.log(e.target);
