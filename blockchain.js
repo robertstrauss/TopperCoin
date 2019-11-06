@@ -102,13 +102,19 @@ socket.on('blockchainrequest', function(req){
 
 
 
+const transactions = [];
 // TODO append to unmined list and give on transaction request, remove on block
-socket.on('transaction', function(transactionstring){
-  console.log(transactionstring);
+socket.on('transaction', async function(transactionstring){
+  console.log('recieved transaction', transactionstring);
+  isValidTransaction(transactionstring).then(function(){
+      transactions.push(transactionstring);
+  }, function(){
+    console.log('recieved invalid transaction');
+  });
 });
 
 let wait;
-let blockqueue = [];
+const blockqueue = [];
 // when a block is recieved
 socket.on('block', function(blockstring){
   console.log('recieved block', blockstring);
@@ -136,9 +142,9 @@ async function processblockqueue() {
 
   // for (let i = 0; i < blockqueue.length; i++) {
   //   blockstring = blockqueue[i];
-    console.log('bs', blockstring);
-    let split = blockstring.split(';');
+
     const hash = await hashHex(blockstring, 'SHA-256'); // take sha256 hash of entire block
+    let split = blockstring.split(';');
     let newblock = {hash: hash, prevhash: split[0], transactions: split[1], proofofwork: split[2]};
 
 
@@ -204,6 +210,47 @@ async function processblockqueue() {
 
 // function previewBlockchain() { // needs to be defined, but nothing to be done
 // }
+
+
+
+
+// validate transactions
+async function isValidTransaction(transactionstring) {
+  let isvalid = false;
+  let prom = new Promise(async function (valid, invalid) {
+    
+    const split = transactionstring.split('|'); // transaction, signature
+    const transaction = split[0].split('>'); // sender, amount, recipient
+    const sender = transaction[0], amount = transaction[1];
+    const hashhHex = await hashHex(split[0], 'SHA-256');
+    const hashDec = bigInt(BigInt(['0x', hashhHex].join('')));
+    // two long asynchronous processes: start both with promises before awaiting
+    const pubkeyprom = getPubKey(sender);
+    calcBalance(sender, async function(bal){
+      let pubkeystr = await pubkeyprom;
+      if (!pubkeystr) { // user not yet registered
+          pubkeystr = transaction[2].substring(13); // 13 = length of 'mypublickeyis'
+      }
+      // try {
+      const pubkey = bigInt(BigInt(pubkeystr));
+      // } catch (TypeError){
+      //   console.warn('received invalid transaction');
+      //   return false;
+      // }
+      // const msg = strToBigInt(split[0]);
+      let sign = RSA.decrypt(bigInt(BigInt(split[1])), RSA.e, pubkey);
+      let isvalid = (sign.equals(hashDec) && bal >= transaction[1]); // return the validity
+      if (isvalid) valid();
+      else invalid();
+    });
+  });
+  return prom;
+}
+
+
+
+
+
 
 
 
