@@ -41,13 +41,13 @@ io.on('connection', function(socket){
 
   });
   socket.on('request', function(req){
-    // forward request to three random nodes
-    io.to(nodes[Math.round(Math.random()*nodes.length)]).emit(req.type+'request', req.content);
-    io.to(nodes[Math.round(Math.random()*nodes.length)]).emit(req.type+'request', req.content);
-    io.to(nodes[Math.round(Math.random()*nodes.length)]).emit(req.type+'request', req.content);
+    // forward request to three random nodes. give my id to respond to
+    io.to(nodes[Math.round(Math.random()*nodes.length)]).emit(req.type+'request', {content:req.content, respondto:socket.id});
+    io.to(nodes[Math.round(Math.random()*nodes.length)]).emit(req.type+'request', {content:req.content, respondto:socket.id});
+    io.to(nodes[Math.round(Math.random()*nodes.length)]).emit(req.type+'request', {content:req.content, respondto:socket.id});
   });
   socket.on('response', function(resp){
-    socket.emit(resp.type, resp.content); // forward to just requester
+    io.to(resp.to).emit(resp.type, resp.content); // forward to just requester
   });
   // socket.on('blockchainrequest', function(requeststring){
   //   io.emit('blockchainrequest', requeststring);
@@ -72,6 +72,6 @@ io.on('connection', function(socket){
   // });
 });
 
-http.listen(8000, function(){
-  console.log('listening on *:8000');
+http.listen(3000, function(){
+  console.log('listening on *:3000');
 });

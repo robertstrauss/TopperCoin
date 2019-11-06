@@ -80,33 +80,40 @@ request.onsuccess = function() {
       cursor.continue();
     }
   };
-  trans.oncomplete = (() => previewBlockchain());
+  // trans.oncomplete = (() => previewBlockchain());
 }
 
 // reply with blockchain when requested
-socket.on('blockchainrequest', function(starthash){
-  console.log('blockchain request', starthash);
+socket.on('blockchainrequest', function(req){
+  console.log('blockchain request', req);
+  starthash = req.content;
   blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
   prevhash = blockchainos.index('prevhash');
-  console.log('index', prevhash);
-  prevhash.openCursor(starthash).onsuccess = function(e) {
-    console.log('e', e);
-    let cursor = e.target.result;
-    if (cursor) {
-      console.log('block', cursor.value)
-      socket.emit('block', cursor.value);
-      cursor.continue(e.target.result.value.hash);
+  prevhash.get(starthash).onsuccess = function respp(e) {
+    // console.log('e', e);
+    let block = e.target.result;
+    if (block) {
+      console.log('responding with block', block);
+      socket.emit('response', {to: req.respondto, type: 'block', content: block.prevhash+';'+block.transactions+';'+block.proofofwork});
+      prevhash.get(block.hash).onsuccess = respp; // do next block(s)
     }
-  }
+  };
 });
 
+
+const transactions = [];
 // TODO append to unmined list and give on transaction request, remove on block
-socket.on('transaction', function(transactionstring){
-  console.log(transactionstring);
+socket.on('transaction', async function(transactionstring){
+  console.log('recieved transaction', transactionstring);
+  isValidTransaction(transactionstring).then(function(){
+      transactions.push(transactionstring);
+  }, function(){
+    console.log('recieved invalid transaction');
+  });
 });
 
 let wait;
-let blockqueue = [];
+const blockqueue = [];
 // when a block is recieved
 socket.on('block', function(blockstring){
   console.log('recieved block', blockstring);
@@ -134,8 +141,9 @@ async function processblockqueue() {
 
   // for (let i = 0; i < blockqueue.length; i++) {
   //   blockstring = blockqueue[i];
-    let split = blockstring.split(';');
+    
     const hash = await hashHex(blockstring, 'SHA-256'); // take sha256 hash of entire block
+    let split = blockstring.split(';');
     let newblock = {hash: hash, prevhash: split[0], transactions: split[1], proofofwork: split[2]};
 
 
@@ -196,11 +204,50 @@ async function processblockqueue() {
       }
     };
     cursorreq.oncomplete = processblockqueue;
-    previewBlockchain(); // display blockchain
+    // previewBlockchain(); // display blockchain
 }
 
-function previewBlockchain() { // needs to be defined, but nothing to be done
+// function previewBlockchain() { // needs to be defined, but nothing to be done
+// }
+
+
+
+// validate transactions
+async function isValidTransaction(transactionstring) {
+  let isvalid = false;
+  let prom = new Promise(async function (valid, invalid) {
+    
+    const split = transactionstring.split('|'); // transaction, signature
+    const transaction = split[0].split('>'); // sender, amount, recipient
+    const sender = transaction[0], amount = transaction[1];
+    const hashhHex = await hashHex(split[0], 'SHA-256');
+    const hashDec = bigInt(BigInt(['0x', hashhHex].join('')));
+    // two long asynchronous processes: start both with promises before awaiting
+    const pubkeyprom = getPubKey(sender);
+    calcBalance(sender, async function(bal){
+      let pubkeystr = await pubkeyprom;
+      if (!pubkeystr) { // user not yet registered
+          pubkeystr = transaction[2].substring(13); // 13 = length of 'mypublickeyis'
+      }
+      // try {
+      const pubkey = bigInt(BigInt(pubkeystr));
+      // } catch (TypeError){
+      //   console.warn('received invalid transaction');
+      //   return false;
+      // }
+      // const msg = strToBigInt(split[0]);
+      let sign = RSA.decrypt(bigInt(BigInt(split[1])), RSA.e, pubkey);
+      let isvalid = (sign.equals(hashDec) && bal >= transaction[1]); // return the validity
+      if (isvalid) valid();
+      else invalid();
+    });
+  });
+  return prom;
 }
+
+
+
+
 
 
 

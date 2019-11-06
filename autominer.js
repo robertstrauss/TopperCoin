@@ -23,10 +23,10 @@ async function mineBlock(blockstring, dfc) { // difficulty in zeros in binary
 async function fromBlock(lastblock) {
   console.log('starting new block from ', lastblock);
   let blockstring = lastblock.hash+';miningbonus>1>'+thisNode.address; // start with previous block (lastblock) hash
+  blockstring +=    transactions.join(','); // dump recorded transactions into block delimited by commas
+  // socket.emit('transactionrequest');
 
-  socket.emit('transactionrequest');
-
-  setTimeout(function(){ // 1 second wait for transactions
+  // setTimeout(function(){ // 1 second wait for transactions
     thisNode.miner = mineBlock(blockstring, difficulty*4)// *4 global hex difficulty to bin diff.
     thisNode.miner.then(async function(minedblock){ // when mining is finished
       // add it to personal blockchain
@@ -54,9 +54,10 @@ async function fromBlock(lastblock) {
       socket.emit('block', minedblock);
       return; // end newblock function
     });
-  }, 1000);
+  // }, 1000);
 
   // add to block on transaction (verify first);
+  /*
   socket.on('transaction', async function(transactionstring){ // sender>amount>recipient|signature
     console.log('recieved transaction', transactionstring);
     const split = transactionstring.split('|'); // transaction, signature
@@ -89,7 +90,7 @@ async function fromBlock(lastblock) {
         }
       }
     });
-  });
+  });*/
 }
 
 function startMining() {
