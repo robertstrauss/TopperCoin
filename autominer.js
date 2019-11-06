@@ -66,34 +66,62 @@ async function fromBlock(lastblock) {
     const hashDec = bigInt(BigInt(['0x', hashhHex].join('')));
     // two long asynchronous processes: start both with promises before awaiting
     const pubkeyprom = getPubKey(sender);
+    console.log(sender);
     calcBalance(sender, async function(bal){
-      const pubkey = await pubkeyprom;
-      const msg = bigInt(BigInt('0x' + parseInt(split[0], 16).toString()));
-      if (RSA.decrypt(split[0], RSA.e, pubkey) === hashDec
-          && bal >= transaction[1]) { // check signature and balance
-        // valid transaction
-        blockstring += ','+transactionstring; // add transaction
-        thisNode.miner = mineBlock(blockstring, difficulty*4) // restart miner (*4 bin to hex diff)
+      let pubkeystr = await pubkeyprom;
+      if (!pubkeystr) { // user not yet registered
+          pubkeystr = transaction[2].substring(13); // 13 = length of 'mypublickeyis'
+          console.log('pk', pubkeystr);
+      }
+      const pubkey = bigInt(BigInt(pubkeystr));
+      // const msg = strToBigInt(split[0]);
+      let sign = RSA.decrypt(bigInt(BigInt(split[1])), RSA.e, pubkey);
+      console.log('sign', sign);
+      console.log('hashDec', hashDec);
+      console.log(sign, hashDec, sign.equals(hashDec), sign.value=== hashDec.value, sign.value==hashDec.value);
+      if (sign.equals(hashDec)){
+        console.log('yes');
+        console.log(bal, transaction[1])
+        if (bal >= transaction[1]) { // check signature and balance
+          // valid transaction
+          blockstring += ','+transactionstring; // add transaction
+          thisNode.miner = mineBlock(blockstring, difficulty*4) // restart miner (*4 bin to hex diff)
+        }
       }
     });
   });
 }
 
 function startMining() {
+  // confirm if not logged in
   if (!(thisNode.address || confirm('You are not logged in, so you will not recieve TPC for mining. Continue?'))) return;
 
-  // let miningwindow = window.open('miner.html', '', 'width=324,height=200')
 
-  document.getElementById('miningstatus').innerHTML = 'Mining!';
+  try{document.body.removeChild(thisNode.mineframe); // remove if already there
+  } catch (TypeError) {console.log('miner not already started.')}
 
-  getLongestBlock(fromBlock); // start miner from longest block
+  // thisNode.mineframe = document.createElement('iframe');
+  // thisNode.mineframe.src = '/miner.html';
+  // document.body.appendChild(thisNode.mineframe); // put miner in document
+  try{thisNode.minewin.close()} catch (TypeError) {}
+  thisNode.minewin = window.open('miner.html', '', 'width=324,height=200')
+
+  // change the mining button
+  let minebtn = document.getElementById('miningstatus');
+  minebtn.innerHTML = '⚒ <span>Mining!</span>';
+  minebtn.style.color = 'hsl(var(--rainbow))';
+  minebtn.onclick = stopMining;
+
+  // getLongestBlock(fromBlock); // start miner from longest block
 }
 
-// let thisNode.miner = mineNewBlock();
+function stopMining() {
+  // document.body.removeChild(thisNode.mineframe); // remove miner from document
+  thisNode.minewin.close();
 
-// socket.on('block', function(){
-//   if (thisNode.miner != null) { // currently mining
-//     thisNode.miner = null; // stop miner (? setting promise to null stops async function ?)
-//     setTimeout(function(){getLongestBlock(fromBlock)}, 1000); // get the longest block and start thisNode.miner from it}, 1); // restart thisNode.miner after 1 millisecond
-//   }
-// });
+  // change the mining button
+  let minebtn = document.getElementById('miningstatus');
+  minebtn.innerHTML = '⚒ <span>Not mining</span>';
+  minebtn.style.color = 'hsl(var(--text-clr))';
+  minebtn.onclick = startMining;
+}
