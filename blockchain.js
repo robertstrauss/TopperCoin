@@ -80,25 +80,27 @@ request.onsuccess = function() {
       cursor.continue();
     }
   };
-  trans.oncomplete = (() => previewBlockchain());
+  // trans.oncomplete = (() => previewBlockchain());
 }
 
 // reply with blockchain when requested
-socket.on('blockchainrequest', function(starthash){
-  console.log('blockchain request', starthash);
+socket.on('blockchainrequest', function(req){
+  console.log('blockchain request', req);
+  starthash = req.content;
   blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
   prevhash = blockchainos.index('prevhash');
-  console.log('index', prevhash);
-  prevhash.openCursor(starthash).onsuccess = function(e) {
-    console.log('e', e);
-    let cursor = e.target.result;
-    if (cursor) {
-      console.log('block', cursor.value)
-      socket.emit('block', cursor.value);
-      cursor.continue(e.target.result.value.hash);
+  prevhash.get(starthash).onsuccess = function respp(e) {
+    // console.log('e', e);
+    let block = e.target.result;
+    if (block) {
+      console.log('responding with block', block);
+      socket.emit('response', {to: req.respondto, type: 'block', content: block.prevhash+';'+block.transactions+';'+block.proofofwork});
+      prevhash.get(block.hash).onsuccess = respp; // do next block(s)
     }
-  }
+  };
 });
+
+
 
 // TODO append to unmined list and give on transaction request, remove on block
 socket.on('transaction', function(transactionstring){
@@ -134,6 +136,7 @@ async function processblockqueue() {
 
   // for (let i = 0; i < blockqueue.length; i++) {
   //   blockstring = blockqueue[i];
+    console.log('bs', blockstring);
     let split = blockstring.split(';');
     const hash = await hashHex(blockstring, 'SHA-256'); // take sha256 hash of entire block
     let newblock = {hash: hash, prevhash: split[0], transactions: split[1], proofofwork: split[2]};
@@ -196,11 +199,11 @@ async function processblockqueue() {
       }
     };
     cursorreq.oncomplete = processblockqueue;
-    previewBlockchain(); // display blockchain
+    // previewBlockchain(); // display blockchain
 }
 
-function previewBlockchain() { // needs to be defined, but nothing to be done
-}
+// function previewBlockchain() { // needs to be defined, but nothing to be done
+// }
 
 
 

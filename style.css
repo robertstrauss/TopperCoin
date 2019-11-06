@@ -196,13 +196,23 @@ h3 {
   overflow-y: auto;
 }
 #blockchainpreview .block {
-  display: block;
+  display: flex;
+  box-sizing: border-box;
+  width: 100%;
   overflow: auto;
   margin: 0;
   padding: 15px;
   border: 1px solid rgba(var(--text-clr), 0.2);
   border-style: none;
   border-bottom-style: solid;
+}
+#blockchainpreview .block > a {
+  flex: 1 1 auto;
+}
+#blockchainpreview .block > span {
+  flex: 0 1 auto;
+}
+#blockchainpreview .blockcontent {
   text-decoration: none;
 }
 #blockchainpreview .block * {

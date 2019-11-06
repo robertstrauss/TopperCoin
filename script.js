@@ -11,12 +11,12 @@ function openMiner() {
   thisNode.miner = window.open('/miner.html', '', 'width=1,height=1');
 }
 
-
+setInterval(previewBlockchain, 3000);
 
 function previewBlockchain() {
-  let transaction = blockchaindb.transaction(['blockchain', 'endblocks'], 'readonly');
-  let blockchainos = transaction.objectStore('blockchain');
-  let endblockos   = transaction.objectStore('endblocks' );
+  let transaction  = blockchaindb.transaction(['blockchain', 'endblocks'], 'readonly');
+  let blockchainos =  transaction.objectStore('blockchain');
+  let endblockos   =  transaction.objectStore('endblocks' );
 
 
 
@@ -34,8 +34,9 @@ function previewBlockchain() {
         count++;
         let block = ev.target.result;
         if (!block) return;
+        
         let blockdiv = document.createElement('a'); // create an element for this block
-        blockdiv.className = 'block'; // of class block
+        blockdiv.className = 'blockcontent'; // of class block
         blockdiv.href = '/blockchain/'+block.hash; // that links to a page on the block
 
         // create individual divs for the previous hash, transactions, and proofofwork of the block
@@ -46,8 +47,14 @@ function previewBlockchain() {
           blockdiv.appendChild(element);
         });
 
-        blockchainpreviewdiv.appendChild(blockdiv); // add created html block to the document before others
-        blockchainos.get(block.prevhash).onsuccess = prevFrom; // preview from previous block
+        // try to get already existing div for length
+        let lengthdiv = document.getElementById(`length${block.length}`) || document.createElement('div');
+        lengthdiv.className = 'block';
+        lengthdiv.appendChild(blockdiv);
+        let ldiv = document.createElement('span'); ldiv.innerHTML = block.length;
+        lengthdiv.appendChild(ldiv);
+        blockchainpreviewdiv.appendChild(lengthdiv); // add created html block to the preview
+        blockchainos.get(block.prevhash).onsuccess = prevFrom; // do all previous blocks
       }; // preview starting from last block
       cursor.continue();
     }
@@ -78,9 +85,10 @@ async function maketransaction() {
     // recipient not in network
     if (!(recipPK || confirm(`${recipient} is not registered on the network yet. Continue?`))) return false;
     // }
-    if(!confirm(`Send ${amount} TPC to ${recipient}?`)) return false; // stop unless they confirm affirmatively
+    // if(!confirm(`Send ${amount} TPC to ${recipient}?`)) return false; // stop unless they confirm affirmatively
     broadcasttransaction(amount, recipient);
-    alert('Sent. Watch the blockchain for your transaction.');
+    amount.value = ''; // clear fields
+    recipient.value = '';
   });
 }
 
