@@ -14,10 +14,10 @@ const thisNode = {
                    address : ((getCookie('address'))),
                    privkey : ((getCookie('privkey'))),
                    pubkey  : ((getCookie('pubkey' )))
-                 }
+                 };
 
 // how many zeros (hex) block hash must start with
-const difficulty = 6;
+const difficulty = 4;
 
 // the furthest number of blocks back a fork can be started
 const maxbackfork = 20;
@@ -27,7 +27,7 @@ const maxbackfork = 20;
 
 // initial set up of using the blockchain
 let blockchaindb; // global used for accessing blockchain
-let request = indexedDB.open('blockchain', 2);
+let request = indexedDB.open('blockchain');
 request.onupgradeneeded = function(e) { // called if the user doesn't have a blockchain database yet
   console.log('initializing blockchain database');
   blockchaindb = request.result; // global way of accessing blockchain
@@ -281,7 +281,6 @@ async function getLongestBlock(callback) {
   let longestblock= {length:0};
   endblockos.openCursor().onsuccess = function(e) {
     // iterate through enblocks to find "longest" - one with most behind it
-    console.log(e.target);
     let cursor = e.target.result;
     if (cursor) {
       let block = cursor.value;

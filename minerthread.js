@@ -1,23 +1,23 @@
-self.Module = {
-    // locateFile: function (s) {
-    //     console.log(s);
-    //     return s;
-    // },
-    // Add this function
-    onRuntimeInitialized: function() {
-        self.postMessage('ready');
-    }
-};
+// self.Module = {
+//   // locateFile: function (s) {
+//   //     console.log(s);
+//   //     return s;
+//   // },
+//   // Add this function
+//   onRuntimeInitialized: function() {
+//     console.log('ready');
+//   }
+// };
 
 
-importScripts('webassembly/wasmminer.js');
+importScripts('wasmminer.js');
 // fetch('webassembly/wasmminer.js').then(response => response.text()).then(eval);
 
-self.addEventListener('message', (e)=>{
+onmessage = (e)=>{
   // if (!Module) Module = JSON.parse(e.data); // Module being sent over
   let minedBlock = Module.ccall('mineBlock', 'string', ['string', 'int'], [e.data.blockstring, e.data.dfc]);
-  self.postMessage(minedBlock);
-});
+  postMessage(minedBlock);
+};
 
 // self.importScripts('webassembly/wasmminer.js');
 
@@ -30,7 +30,7 @@ self.addEventListener('message', (e)=>{
 //   return WebAssembly.compile(bytes);
 // }).then(WasmModule => {
 //   console.log(WasmModule);
-//   console.log(WebAssembly.Instance(WasmModule));
+//   // console.log(WebAssembly.Instance(WasmModule));
 //   let insta = (new WebAssembly.Instance(WasmModule));
 //   console.log(insta);
 //   // g_WebWorker.postMessage(WasmModule)
