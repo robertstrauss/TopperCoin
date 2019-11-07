@@ -14,7 +14,7 @@ importScripts('webassembly/wasmminer.js');
 // fetch('webassembly/wasmminer.js').then(response => response.text()).then(eval);
 
 self.addEventListener('message', (e)=>{
-  // if (!Module) Module = e.data;
+  // if (!Module) Module = JSON.parse(e.data); // Module being sent over
   let minedBlock = Module.ccall('mineBlock', 'string', ['string', 'int'], [e.data.blockstring, e.data.dfc]);
   self.postMessage(minedBlock);
 });

@@ -17,7 +17,7 @@ const thisNode = {
                  }
 
 // how many zeros (hex) block hash must start with
-const difficulty = 5;
+const difficulty = 6;
 
 // the furthest number of blocks back a fork can be started
 const maxbackfork = 20;
@@ -27,7 +27,7 @@ const maxbackfork = 20;
 
 // initial set up of using the blockchain
 let blockchaindb; // global used for accessing blockchain
-let request = indexedDB.open('blockchain');
+let request = indexedDB.open('blockchain', 2);
 request.onupgradeneeded = function(e) { // called if the user doesn't have a blockchain database yet
   console.log('initializing blockchain database');
   blockchaindb = request.result; // global way of accessing blockchain
@@ -245,7 +245,11 @@ async function isValidTransaction(transactionstring) {
     calcBalance(sender, async function(bal){
       let pubkeystr = await pubkeyprom;
       if (!pubkeystr) { // user not yet registered
+        try{
           pubkeystr = transaction[2].substring(13); // 13 = length of 'mypublickeyis'
+        } catch (TypeError) {
+          return invalid();
+        }
       }
       // try {
       const pubkey = bigInt(BigInt(pubkeystr));
@@ -256,8 +260,8 @@ async function isValidTransaction(transactionstring) {
       // const msg = strToBigInt(split[0]);
       let sign = RSA.decrypt(bigInt(BigInt(split[1])), RSA.e, pubkey);
       let isvalid = (sign.equals(hashDec) && bal >= transaction[1]); // return the validity
-      if (isvalid) valid();
-      else invalid();
+      if (isvalid) return valid();
+      else return invalid();
     });
   });
   return prom;
