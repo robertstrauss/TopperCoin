@@ -1,8 +1,9 @@
 
 // call compiled cpp function to mine block (wasm)
-async function mineBlock(blockstring, dfc) { // difficulty in zeros in binary
+async function mineBlock(blockstring, dfc, callback) { // difficulty in zeros in binary
   let minedBlock = Module.ccall('mineBlock', 'string', ['string', 'int'], [blockstring, dfc]);
-  return minedBlock;
+  callback(minedBlock);
+  // return minedBlock;
 }
 // async function mineBlock(block, dfc) {
 //   let proofofwork = 0;
@@ -16,10 +17,6 @@ async function mineBlock(blockstring, dfc) { // difficulty in zeros in binary
 
 
 
-
-
-
-
 async function fromBlock(lastblock) {
   console.log('starting new block from ', lastblock);
   let blockstring = lastblock.hash+';miningbonus>1>'+thisNode.address+','; // start with previous block (lastblock) hash
@@ -27,9 +24,13 @@ async function fromBlock(lastblock) {
   console.log('mining', blockstring);
   // socket.emit('transactionrequest');
 
-  setTimeout(function(){ // 1 second wait for transactions
-    thisNode.miner = mineBlock(blockstring, difficulty*4)// *4 global hex difficulty to bin diff.
-    thisNode.miner.then(async function(minedblock){ // when mining is finished
+  // setTimeout(()=>{ // 1 second wait for transactions
+    // let miner = mineBlock(blockstring, difficulty*4)// *4 global hex difficulty to bin diff.
+    // thisNode.miner.postMessage({blockstring: blockstring, dfc: difficulty*4}); // send data for mining
+    // miner.then(async function(minedblock){ // when mining is finished
+    // thisNode.miner.addEventListener('message', async (e)=>{ // miner thread responds with result (minedblock)
+    setTimeout(()=>{mineBlock(blockstring, difficulty*4, async (minedblock)=>{
+      // let minedblock = e.data;
       // add it to personal blockchain
       let mbsplit = minedblock.split(';');
       let mbhash = await hashHex(minedblock, 'SHA-256');
@@ -54,8 +55,8 @@ async function fromBlock(lastblock) {
       // send block to others
       socket.emit('block', minedblock);
       return; // end newblock function
-    });
-  }, 1000);
+    })}, 1);
+  // });
 }
 
 function startMining() {
@@ -69,8 +70,14 @@ function startMining() {
   // thisNode.mineframe = document.createElement('iframe');
   // thisNode.mineframe.src = '/miner.html';
   // document.body.appendChild(thisNode.mineframe); // put miner in document
-  try{thisNode.minewin.close()} catch (TypeError) {}
-  thisNode.minewin = window.open('miner.html', '', 'width=324,height=200')
+  // try{thisNode.minewin.close()} catch (TypeError) {}
+  // thisNode.minewin = window.open('miner.html', '', 'width=324,height=200')
+  getLongestBlock(fromBlock);
+  // thisNode.miner = new Worker('minerthread.js'); // open thread
+  // thisNode.miner.postMessage(Module); // send over the Module
+  // getLongestBlock(fromBlock); // start mining from longest block
+  // start off longest block once thread is ready
+  // thisNode.miner.addEventListener('message', (e)=>{console.log(e);if(e.data === 'ready') getLongestBlock(fromBlock)});
 
   // change the mining button
   let minebtn = document.getElementById('miningstatus');
@@ -83,8 +90,8 @@ function startMining() {
 
 function stopMining() {
   // document.body.removeChild(thisNode.mineframe); // remove miner from document
-  thisNode.minewin.close();
-
+  // thisNode.minewin.close();
+  thisNode.miner.terminate();
   // change the mining button
   let minebtn = document.getElementById('miningstatus');
   minebtn.innerHTML = '⚒ <span>Not mining</span>';

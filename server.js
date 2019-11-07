@@ -5,11 +5,16 @@ var io = require('socket.io')(http);
 var path = require('path');
 var fs = require('fs');
 
+
+
+
 const nodes = []; // array of all connected nodes
 // var tstream = fs.createWriteStream('unminedtransactions.txt', {flags:'a'});
 // var bstream = fs.createWriteStream('blockchain.txt', {flags:'a'});
 
 __dirname = path.resolve(path.dirname('')); // root directory
+
+// express.static.mime.define({'application/wasm': ['wasm']}); // fix wasm mime type errors (doesn't work)
 
 app.use(express.static(__dirname + '/')); // use root so other files can be used
 

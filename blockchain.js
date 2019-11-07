@@ -151,7 +151,7 @@ async function processblockqueue() {
       if (!newblock.hash.startsWith(Array(difficulty+1).join('0'))) {// check if hash of block starts with zeros according to difficulty
         console.log('invalid block (doesn\'t match difficulty)', blockstring);
         processblockqueue();
-        return;
+        return false; // abort
       }
 
       let valid = true;
@@ -164,7 +164,7 @@ async function processblockqueue() {
           validateNext(t+1);
         }, ()=>{valid=false});
       })(0);
-      if (!valid) {processblockqueue(); return;} // abort here, this block is invalid
+      if (!valid) {processblockqueue(); return false;} // abort here, this block is invalid
 
       // get the blockchain and endblocks ready to read from and write to
       let transaction = blockchaindb.transaction(['blockchain', 'endblocks'], 'readwrite');
@@ -197,6 +197,8 @@ async function processblockqueue() {
           try {transaction.commit();}
           catch (TypeError) {console.warn('commited before expected');}
           processblockqueue(); // recurse
+          try{thisNode.miner.terminate();} // stop mining if are
+          catch(e){} // not mining
           return true; // exit cursor
         }
         // check if the new block extends any block within the last <maxbackfork> blocks, starting a new fork.
@@ -208,6 +210,8 @@ async function processblockqueue() {
               endblocks.add(newblock);
               blockchainos.add(newblock); // add new block to blockchain
               processblockqueue();
+              try{thisNode.miner.terminate();} // stop mining if are
+              catch(e){} // not mining
               return true; // exit cursor
             }
             lastblock = e.target.result.value;
