@@ -21,9 +21,8 @@ function previewBlockchain() {
 
 
   // fill the blockchain preview div
-  blockchainpreviewdiv = document.getElementById('blockchainpreview');
-  blockchainpreviewdiv.innerHTML = '';
-  let curreq = endblockos.openCursor()
+  blockchainpreviewdiv = document.createElement('div');//document.getElementById('blockchainpreview');
+  let curreq = endblockos.openCursor();
   curreq.onsuccess = function(e) { // once for each fork (from the endpoints)
     let cursor = e.target.result;
     if (cursor) {
@@ -34,8 +33,8 @@ function previewBlockchain() {
         count++;
         let block = ev.target.result;
         if (!block) return;
-        
-        let blockdiv = document.createElement('a'); // create an element for this block
+
+        let blockdiv = document.createElement('div'); // create an element for this block
         blockdiv.className = 'blockcontent'; // of class block
         blockdiv.href = '/blockchain/'+block.hash; // that links to a page on the block
 
@@ -43,7 +42,7 @@ function previewBlockchain() {
         ['prevhash', 'transactions', 'proofofwork'].forEach(function(key){
           let element = document.createElement('div');
           element.className = key;
-          element.innerHTML = block[key];
+          element.innerHTML = block[key].replace(/,/g, '<br>');
           blockdiv.appendChild(element);
         });
 
@@ -58,6 +57,9 @@ function previewBlockchain() {
       }; // preview starting from last block
       cursor.continue();
     }
+  };
+  transaction.oncomplete = () => {
+    document.getElementById('blockchainpreview').innerHTML = blockchainpreviewdiv.innerHTML;
   };
 }
 

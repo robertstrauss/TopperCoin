@@ -56,42 +56,6 @@ async function fromBlock(lastblock) {
       return; // end newblock function
     });
   }, 1000);
-
-  // add to block on transaction (verify first);
-  /*
-  socket.on('transaction', async function(transactionstring){ // sender>amount>recipient|signature
-    console.log('recieved transaction', transactionstring);
-    const split = transactionstring.split('|'); // transaction, signature
-    const transaction = split[0].split('>'); // sender, amount, recipient
-    const sender = transaction[0], amount = transaction[1];
-    const hashhHex = await hashHex(split[0], 'SHA-256');
-    const hashDec = bigInt(BigInt(['0x', hashhHex].join('')));
-    // two long asynchronous processes: start both with promises before awaiting
-    const pubkeyprom = getPubKey(sender);
-    console.log(sender);
-    calcBalance(sender, async function(bal){
-      let pubkeystr = await pubkeyprom;
-      if (!pubkeystr) { // user not yet registered
-          pubkeystr = transaction[2].substring(13); // 13 = length of 'mypublickeyis'
-          console.log('pk', pubkeystr);
-      }
-      const pubkey = bigInt(BigInt(pubkeystr));
-      // const msg = strToBigInt(split[0]);
-      let sign = RSA.decrypt(bigInt(BigInt(split[1])), RSA.e, pubkey);
-      console.log('sign', sign);
-      console.log('hashDec', hashDec);
-      console.log(sign, hashDec, sign.equals(hashDec), sign.value=== hashDec.value, sign.value==hashDec.value);
-      if (sign.equals(hashDec)){
-        console.log('yes');
-        console.log(bal, transaction[1])
-        if (bal >= transaction[1]) { // check signature and balance
-          // valid transaction
-          blockstring += ','+transactionstring; // add transaction
-          thisNode.miner = mineBlock(blockstring, difficulty*4) // restart miner (*4 bin to hex diff)
-        }
-      }
-    });
-  });*/
 }
 
 function startMining() {

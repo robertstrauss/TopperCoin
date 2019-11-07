@@ -151,8 +151,20 @@ async function processblockqueue() {
       if (!newblock.hash.startsWith(Array(difficulty+1).join('0'))) {// check if hash of block starts with zeros according to difficulty
         console.log('invalid block (doesn\'t match difficulty)', blockstring);
         processblockqueue();
-        return false;
+        return;
       }
+
+      let valid = true;
+      (async function validateNext(t) {
+        let trans = newblock.transactions[t];
+        isValidTransaction(trans).then(()=>{
+          // remove this transaction from list of unmined transactions
+          let i = transactions.indexOf(trans);
+          if (i != -1) transactions.splice(i, 1);
+          validateNext(t+1);
+        }, ()=>{valid=false});
+      })(0);
+      if (!valid) {processblockqueue(); return;} // abort here, this block is invalid
 
       // get the blockchain and endblocks ready to read from and write to
       let transaction = blockchaindb.transaction(['blockchain', 'endblocks'], 'readwrite');
