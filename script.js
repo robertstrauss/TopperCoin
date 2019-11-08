@@ -1,9 +1,9 @@
 
-
-
-document.getElementById('address').innerHTML = thisNode.address || "Not Logged In";
-
-
+function main() {
+  previewBlockchain();
+  getMyBalance();
+  document.getElementById('address').innerHTML = thisNode.address || "Not Logged In";
+}
 
 function openMiner() {
   // confirm to continue if not logged in
@@ -68,29 +68,30 @@ function previewBlockchain() {
 async function maketransaction() {
   const amount = document.getElementById('amount').value;
   const recipient = document.getElementById('recipient').value;
-  const recipPKprom = getPubKey(recipient); // start before waiting on others
-  calcBalance(thisNode.address, async function(bal){
-    const recipPK = await recipPKprom; // only now wait
-    if (!amount || !recipient) { // left a field empty
-      alert('Fill out all fields.');
-      return false;
-    }
-    if (!thisNode.address) { // not logged in
-      alert('You are not logged in.');
-      return false;
-    }
-    if (bal < amount) { // not enough balance
-      alert('You do not have enough money to send that much.');
-      return false;
-    }
-    // if (!recipPK) {
-    // recipient not in network
-    if (!(recipPK || confirm(`${recipient} is not registered on the network yet. Continue?`))) return false;
-    // }
-    // if(!confirm(`Send ${amount} TPC to ${recipient}?`)) return false; // stop unless they confirm affirmatively
-    broadcasttransaction(amount, recipient);
-    amount.value = ''; // clear fields
-    recipient.value = '';
+  getPubKey(recipient, recipPK=>{ // start before waiting on others
+    calcBalance(thisNode.address, async function(bal){
+      // const recipPK = await recipPKprom; // only now wait
+      if (!amount || !recipient) { // left a field empty
+        alert('Fill out all fields.');
+        return false;
+      }
+      if (!thisNode.address) { // not logged in
+        alert('You are not logged in.');
+        return false;
+      }
+      if (bal < amount) { // not enough balance
+        alert('You do not have enough money to send that much.');
+        return false;
+      }
+      // if (!recipPK) {
+      // recipient not in network
+      if (!(recipPK || confirm(`${recipient} is not registered on the network yet. Continue?`))) return false;
+      // }
+      // if(!confirm(`Send ${amount} TPC to ${recipient}?`)) return false; // stop unless they confirm affirmatively
+      broadcasttransaction(amount, recipient);
+      amount.value = ''; // clear fields
+      recipient.value = '';
+    });
   });
 }
 
@@ -123,28 +124,61 @@ async function register() {
 
   // verify entered address
   let address = document.getElementById('registeraddress').value;
-  let pubkey = await getPubKey(address);
-  if (pubkey != null) {
-    console.log('That username is not available');
-    return false;
-  }
+  getPubKey(address, async pubkey=>{
+    if (pubkey != null) {
+      console.log('That username is not available');
+      return false;
+    }
 
-  let keys = await RSA.generate(password1); // start generation of RSA keypair seeded from password1 (1024 bit, secure, real)
-  // let RSAKey = cryptico.generateRSAKey(password1, 1024);
-  // let publicKeyString = cryptico.publicKeyString(RSAKey);
+    let keys = await RSA.generate(password1); // start generation of RSA keypair seeded from password1 (1024 bit, secure, real)
+    // let RSAKey = cryptico.generateRSAKey(password1, 1024);
+    // let publicKeyString = cryptico.publicKeyString(RSAKey);
 
-  // save info
-  thisNode.address = address;
-  document.cookie = 'address='+thisNode.address.toString();
-  thisNode.privkey = bigInt((keys.d)); // keep secret!
-  document.cookie = 'privkey='+thisNode.privkey.toString();
-  thisNode.pubkey = bigInt((keys.n)); // fixed public exponenet of 65537 (see rsa.js), only need n
-  document.cookie = 'pubkey='+thisNode.pubkey.toString();
+    // save info
+    thisNode.address = address;
+    document.cookie = 'address='+thisNode.address.toString();
+    thisNode.privkey = bigInt((keys.d)); // keep secret!
+    document.cookie = 'privkey='+thisNode.privkey.toString();
+    thisNode.pubkey = bigInt((keys.n)); // fixed public exponenet of 65537 (see rsa.js), only need n
+    document.cookie = 'pubkey='+thisNode.pubkey.toString();
 
-  // announce in blockchain
-  // invoke tostring rather than built in to stop from converting to "infinity"
-  broadcasttransaction(0, 'mypublickeyis'+thisNode.pubkey.toString());
-  setTimeout(function(){alert('registered successfully!');}, 1); // async alert
-  document.getElementById('login').style.display = 'none'; // hide registration modal
-  return false;
+    // announce in blockchain
+    // invoke tostring rather than built in to stop from converting to "infinity"
+    broadcasttransaction(0, 'mypublickeyis'+thisNode.pubkey.toString());
+    setTimeout(function(){alert('registered successfully!');}, 1); // async alert
+    document.getElementById('login').style.display = 'none'; // hide registration modal
+  });
+}
+
+
+async function login() {
+  setTimeout(function(){alert('Logging in... This may take a minute.');}, 1); // asynchronous alert
+
+  // verify password
+  let password = document.getElementById('loginpassword').value;
+
+  // verify entered address
+  let address = document.getElementById('loginaddress').value;
+  getPubKey(address, async pubkey=>{
+    if (pubkey === null) {
+      console.log('That username is not registered yet');
+      return false;
+    }
+
+    let keys = await RSA.generate(password); // start generation of RSA keypair seeded from password1 (1024 bit, secure, real)
+    // let RSAKey = cryptico.generateRSAKey(password1, 1024);
+    // let publicKeyString = cryptico.publicKeyString(RSAKey);
+
+    // save info
+    thisNode.address = address;
+    document.cookie = 'address='+thisNode.address.toString();
+    thisNode.privkey = bigInt((keys.d)); // keep secret!
+    document.cookie = 'privkey='+thisNode.privkey.toString();
+    thisNode.pubkey = bigInt((keys.n)); // fixed public exponenet of 65537 (see rsa.js), only need n
+    document.cookie = 'pubkey='+thisNode.pubkey.toString();
+
+
+    setTimeout(function(){alert('logged in successfully!');}, 1); // async alert
+    document.getElementById('login').style.display = 'none'; // hide registration modal
+  });
 }

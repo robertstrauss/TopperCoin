@@ -8,10 +8,10 @@
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
     <link href="style.css" rel="stylesheet" type="text/css" />
   </head>
-  <body>
+  <body onload="setTimeout(main, 500)">
     <div id="dash">
               <div id="leftcol">
-                      <span class="infotab" onclick="document.getElementById('about').style.display='inline-block'"><h1>
+                      <span class="infotab" onclick="document.getElementById('about').style.display='inline-block'"><h1 class="rainbowtxt">
                         TopperCoin
                       </h1></span>
 
@@ -27,7 +27,7 @@
 
                       <!-- mining -->
                       <span class="infotab" id="miningstatus" onclick="startMining()">
-                        ⚒ <span>Open Miner</span>
+                        ⚒ <span>Not Mining</span>
                       </span>
 
                       <!-- light mode / dark mode switch -->

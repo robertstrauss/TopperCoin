@@ -3,7 +3,7 @@
   --text-clr-dark: 228, 230, 231;
   --bg-clr-light: 250, 250, 255;
   --text-clr-light: 32, 32, 32;
-  --rainbow: 203, 89%, 53%;
+  --accent: 203, 89%, 53%;
   /* default values */
   --bg-clr: var(--bg-clr-dark);
   --text-clr: var(--text-clr-dark);
@@ -11,8 +11,8 @@
 }
 * {
   transition: 0.15s;
-  /* background-color: hsl(var(--rainbow)) !important;
-  color: hsl(var(--rainbow)) !important; */
+  /* background-color: hsl(var(--accent)) !important;
+  color: hsl(var(--accent)) !important; */
 }
 body {
   font-family: 'Nunito', Sans-Serif;
@@ -22,14 +22,14 @@ body {
   background-color: rgb(var(--bg-clr));
 }
 a {
-  color: hsl(var(--rainbow));
+  color: hsl(var(--accent));
   margin: 5px;
   padding: 10px;
   padding-top: 1px;
   padding-bottom: 1px;
   font-weight: 600;
   cursor: pointer;
-  border: 1px solid hsl(var(--rainbow));
+  border: 1px solid hsl(var(--accent));
 }
 button {
   min-width: 20px;
@@ -38,7 +38,7 @@ button {
   margin: 1px;
   border: 0;
   border-radius: 300px;
-  background-color: hsl(var(--rainbow));
+  background-color: hsl(var(--accent));
   color: rgb(var(--bg-clr));
   outline: none;
   box-sizing:border-box;
@@ -46,7 +46,7 @@ button {
   cursor: pointer;
 }
 button:hover {
-  background-image: linear-gradient(0deg, #0004, #0004);
+  /* background-image: linear-gradient(0deg, #0004, #0004); */
 }
 input {
   box-sizing: border-box;
@@ -67,14 +67,17 @@ input:hover {
   background-image: linear-gradient(0deg, rgba(var(--text-clr), 0.1), rgba(var(--text-clr), 0.05));
 }
 input:focus {
-  border-color: hsl(var(--rainbow));
+  border-color: hsl(var(--accent));
   background-image: linear-gradient(0deg, rgba(var(--text-clr), 0.1), rgba(var(--text-clr), 0.1));
 }
 h1 {
-  color: hsl(var(--rainbow));
+  /* color: hsl(var(--accent)); */
   font-size: 36px;
-  line-height: 0;
+  line-height: 1;
+  margin: auto;
+  /* animation: rainbow_text 6s infinite; */
 }
+
 h2 {
   font-size: 30px;
   margin-top: 2px;
@@ -88,7 +91,27 @@ h3 {
   color: rgb(var(--text-clr));
 }
 
+.rainbowbg, .rainbowtxt, button {
+  background: linear-gradient(120deg, orange, red, purple, #0033cc, limegreen, yellow);
+  background-size: 400% 100%;
+  animation: bg_shift 10s infinite;
+}
 
+/* things that have rainbow text */
+.rainbowtxt {
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+}
+
+@keyframes bg_shift {
+  0%,100% {
+    background-position: 0 0;
+  }
+  50% {
+    background-position: 100% 0;
+  }
+}
 
 .rainbowbg {
   background: linear-gradient(124deg, #ff2400, #e81d1d, #e8b71d, #e3e81d, #1de840, #1ddde8, #2b1de8, #dd00f3, #dd00f3);
