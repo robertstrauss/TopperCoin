@@ -17,7 +17,7 @@ const thisNode = {
                  };
 
 // how many zeros (bin) block hash must start with
-const difficulty = 1; // time ~= 2^difficulty
+const difficulty = 22; // time ~= 2^difficulty
 // the furthest number of blocks back a fork can be started
 const maxbackfork = 20;
 
@@ -26,7 +26,7 @@ const maxbackfork = 20;
 
 // initial set up of using the blockchain
 let blockchaindb; // global used for accessing blockchain
-let request = indexedDB.open('blockchain');
+let request = indexedDB.open('blockchain3');
 request.onupgradeneeded = function(e) { // called if the user doesn't have a blockchain database yet
   console.log('initializing blockchain database');
   blockchaindb = request.result; // global way of accessing blockchain
@@ -61,7 +61,7 @@ request.onupgradeneeded = function(e) { // called if the user doesn't have a blo
    * when onsuccess is called after this
    */
 }
-request.onsuccess = function() {
+request.onsuccess = ()=>{
   blockchaindb = request.result; // set the global variable for accessing blockchain
 
   // open the database to request from the end
@@ -105,6 +105,7 @@ const transactions = [];
 socket.on('transaction', async function(transactionstring){
   console.log('recieved transaction', transactionstring);
   isValidTransaction(transactionstring).then(function(){
+      console.log('added transaction to mine')
       transactions.push(transactionstring);
   }, function(){
     console.log('recieved invalid transaction');
@@ -152,9 +153,6 @@ async function processblockqueue() {
     (async function validateNext(t) {
       let trans = newblock.transactions[t];
       isValidTransaction(trans).then(()=>{
-        // remove this transaction from list of unmined transactions
-        let i = transactions.indexOf(trans);
-        if (i != -1) transactions.splice(i, 1);
         validateNext(t+1);
       }, () => valid=false);
     })(0);
@@ -199,6 +197,22 @@ async function processblockqueue() {
               // blockchainos.getAll().onsuccess = e => console.log(e.target.result);
               transaction.commit();
               cursor = null; // stop cursor
+
+              for (let t = 0; t < newblock.transactions.length; t++){
+                let trans = newblock.transactions.split(',')[t];
+                // remove this transaction from list of unmined transactions
+                console.log('transaction in block', trans);
+                console.log('transactions waiting', transactions);
+                let i = transactions.indexOf(trans);
+                console.log('index', i);
+                if (i != -1) transactions.splice(i, 1);
+              }
+
+              if (thisNode.miner != null) {
+                thisNode.miner.terminate(); // stop mining
+                thisNode.miner = new Worker('minerthread.js'); // open thread
+                setTimeout(()=>fromBlock(newblock), 1000); // start mining from longest block after 1000s to get Module ready
+              }
               // blockchainos.count().onsuccess = console.log;
               // let bblockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
               // bblockchainos.getAll().onsuccess = console.log;
@@ -213,19 +227,7 @@ async function processblockqueue() {
     };
 
     cursorreq.oncomplete = processblockqueue; //recurse
-
-    if (thisNode.miner != null) {
-      thisNode.miner.terminate(); // stop mining
-      thisNode.miner = new Worker('minerthread.js'); // open thread
-      setTimeout(()=>fromBlock(newblock), 1000); // start mining from longest block after 1000s to get Module ready
-    }
-    // previewBlockchain(); // display blockchain
-  // });
 }
-
-// function previewBlockchain() { // needs to be defined, but nothing to be done
-// }
-
 
 
 
@@ -249,16 +251,9 @@ async function isValidTransaction(transactionstring) {
             return invalid();
           }
         }
-        // try {
         const pubkey = bigInt(BigInt(pubkeystr));
-        // } catch (TypeError){
-        //   console.warn('received invalid transaction');
-        //   return false;
-        // }
-        // const msg = strToBigInt(split[0]);
         let sign = RSA.decrypt(bigInt(BigInt(split[1])), RSA.e, pubkey);
         let isvalid = (sign.equals(hashDec) && bal >= transaction[1]); // return the validity
-        console.log(sign, hashDex, bal, transaction[1]);
         if (isvalid) return valid();
         else return invalid();
       });
@@ -297,17 +292,21 @@ async function getPubKey(address, callback) { // get the public key of an addres
   // make regexp for finding publickey
   let re = new RegExp(address+'>0>mypublickeyis([a-zA-Z0-9]+)');
   // request the blockchain for reading
-  blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+  const trans = blockchaindb.transaction(['blockchain'], 'readonly');
+  const blockchainos = trans.objectStore('blockchain');
+  let pubkey = null;
   blockchainos.openCursor().onsuccess = function(e) { // iterate through blockchain to find publickey announcement
     let cursor = e.target.result; // cursor holds current block
     if (cursor) { // if still in the blockchain
       if ((pk = re.exec(cursor.value.transactions)) != null) { // check for regexp match, and return it if so
-        callback(pk[1]);
+        pubkey = pk[1]
+        return; // stop
       }
       // advance to next block
       cursor.continue();
     }
   }
+  trans.oncomplete = ()=>callback(pubkey);
 }
 
 
@@ -343,6 +342,7 @@ async function broadcasttransaction(amount, recipient) {
   console.log('dechash', hashd);
   let signature = RSA.encrypt(hashd, thisNode.pubkey, thisNode.privkey).toString(); // sign by encrypting with priv key
   console.log('signature', signature);
+  console.log('once.emit');
   socket.emit('transaction', transactionstring + '|' + signature);
 }
 
