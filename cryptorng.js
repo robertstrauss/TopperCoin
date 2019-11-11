@@ -43,17 +43,20 @@ async function hashBin(message, algorithim) {
  * @returns {bigInt} a random generated prime
  */
 async function seededBigRandomPrime(seed) {
-  let hash1, hash2, hash3 = seed, bigHex, bigDec; // input to RNG
-  // const min = bigInt(6074001000).shiftLeft(bits - 33);  // min ≈ √2 × 2^(bits - 1)
-  // const max = bigInt.one.shiftLeft(bits).minus(1);  // max = 2^(bits) - 1
-  for (;;) {
-    hash1 = await hashHex(hash3,  'SHA-256');
-    hash2 = await hashHex(hash1, 'SHA-512');
-    hash3 = await hashHex(hash2, 'Sha-256');
-    bigHex = ['0x', hash1, hash2, hash3].join('');
-    bigDec = bigInt(BigInt(bigHex)); // using BigInt web API, and bigInteger.js
-    if (bigDec.isProbablePrime(256)) {
-      return bigDec;
+  // return new Promise(async (resolve, reject) => {
+    let hash1, hash2, bigDec;
+    hash2 = await hashHex(seed, 'SHA-512');
+    // const min = bigInt(6074001000).shiftLeft(bits - 33);  // min ≈ √2 × 2^(bits - 1)
+    // const max = bigInt.one.shiftLeft(bits).minus(1);  // max = 2^(bits) - 1
+    for (;;) {
+      hash1 = hash2;
+      hash2 = await hashHex(hash1, 'SHA-512');
+      bigDec = bigInt(BigInt('0x'+hash1+hash2)); // using BigInt web API, and bigInteger.js
+      if (bigDec.isProbablePrime(256)) {
+        // resolve(bigDec);
+        // break;
+        return bigDec;
+      }
     }
-  }
+  // });
 }

@@ -18,14 +18,16 @@ RSA.generate = async function(seed) { // uses RNG functions from cryptorng.js
   let seed2 = await hashHex(seed, 'SHA-1'); // multiple seeded primes are needed, only one seed.
   // set up variables for key generation
   const e = RSA.e;  // use fixed public exponent 65537
-  let p;
-  let q;
+  let p, pp;
+  let q, qq;
   let lambda;
 
   // generate p and q such that λ(n) = lcm(p − 1, q − 1) is coprime with e and |p-q| >= 2^(keysize/2 - 100)
   do {
-    p = await seededBigRandomPrime(seed);
-    q = await seededBigRandomPrime(seed2);
+    pp = seededBigRandomPrime(seed);
+    qq = seededBigRandomPrime(seed2);
+    p = await pp;
+    q = await qq;
     lambda = p.minus(1).times(q.minus(1)); //bigInt.lcm(p.minus(1), q.minus(1)); only ned product not lcm because p&q are prime
   } while (bigInt.gcd(e, lambda).notEquals(1) || p.minus(q).abs().shiftRight(
       1024 / 2 - 100).isZero());
