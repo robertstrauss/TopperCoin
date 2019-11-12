@@ -14,11 +14,11 @@ __dirname = path.resolve(path.dirname('')); // root directory
 
 app.use(express.static(__dirname + '/')); // use root so other files can be used
 
-app.get('/', function(req, res){
+app.get('/', function (req, res){
   res.sendFile(__dirname + '/index.html'); // serve index.html
 });
 
-io.on('connection', function(socket){
+io.on('connection', function (socket){
   if (nodes.indexOf(socket.id) === -1) // if it isn't already
     nodes.push(socket.id); // add node to list
   console.log('node connected', socket.id);
@@ -27,20 +27,13 @@ io.on('connection', function(socket){
     var index = nodes.indexOf(socket.id); // get index of node, check if exists
     if (index != -1) nodes.splice(index, 1); // remove this node on leave
   });
-  socket.on('transaction', function(transactionstring){
-    io.emit('transaction', transactionstring); // forward message to all nodes
-  });
-  socket.on('block', function(blockstring){
-    io.emit('block', blockstring); // forward message to all nodes
-  });
-  socket.on('request', function(req){
-    // forward request to three random nodes. give my id to respond to
-    io.to(nodes[Math.round(Math.random()*nodes.length)]).emit(req.type+'request', {content:req.content, respondto:socket.id});
-    io.to(nodes[Math.round(Math.random()*nodes.length)]).emit(req.type+'request', {content:req.content, respondto:socket.id});
-    io.to(nodes[Math.round(Math.random()*nodes.length)]).emit(req.type+'request', {content:req.content, respondto:socket.id});
-  });
-  socket.on('response', function(resp){
-    io.to(resp.to).emit(resp.type, resp.content); // forward to just requester
+  socket.on('block', io.emit); // just forward all blocks
+  socket.on('transaction', io.emit); //forward all transactions
+  socket.on('message', function (message) { // message to specific set of nodes
+    var newmessage = message;
+    delete newmessage.to;
+    newmessage.from = socket.id;
+    message.to.forEach(toid => io.to(toid).emit(newmessage));
   });
 });
 
