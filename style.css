@@ -73,7 +73,10 @@ input:focus {
 h1 {
   /* color: hsl(var(--accent)); */
   font-size: 36px;
-  line-height: 1;
+  /* position: absolute; */
+  top: 50%;
+  left: 50%;
+  /* transform: translateX(50%) translateY(50%); */
   margin: auto;
   /* animation: rainbow_text 6s infinite; */
 }
@@ -101,7 +104,7 @@ h3 {
 .rainbowtxt {
   -webkit-background-clip: text;
   background-clip: text;
-  color: transparent !important;
+  color: transparent;
 }
 
 @keyframes bg_shift {
