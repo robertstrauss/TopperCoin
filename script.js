@@ -12,7 +12,7 @@ function requestSync () {
       // length of local blockchain: event.target.result
       // send a request for the blocks after what we have
       console.log('requesting blockchain since', cursor.value.hash);
-      socket.emit('request', {type:'blockchain', content:`${cursor.value.hash}`});
+      socket.emit('topeers', {type:'sincereq', content:cursor.value.hash});
       cursor.continue();
     }
   };
@@ -25,7 +25,7 @@ function main() {
   getMyBalance();
   document.getElementById('address').innerHTML = thisNode.address || "Not Logged In";
   setInterval(previewBlockchain, 3000); // update preview every 3s
-  setInterval(requestSync, 5000); // resync every 5s
+  setInterval(requestSync, 50000); // resync every 50s
 }
 
 function openMiner() {

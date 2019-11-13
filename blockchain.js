@@ -75,7 +75,7 @@ request.onsuccess = ()=>{
       // length of local blockchain: event.target.result
       // send a request for the blocks after what we have
       console.log('requesting blockchain since', cursor.value.hash);
-      socket.emit('request', {type:'blockchain', content:`${cursor.value.hash}`});
+      socket.emit('topeers', {type:'sincereq', content:cursor.value.hash});
       cursor.continue();
     }
   };
@@ -83,19 +83,20 @@ request.onsuccess = ()=>{
 }
 
 // reply with blockchain when requested
-socket.on('blockchainrequest', function(req){
-  console.log('blockchain request', req);
-  starthash = req.content;
+socket.on('sincereq', function(req){
+  // request of the blockchain since a point
+  let starthash = req.content, sender = req.from;
   blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
   prevhash = blockchainos.index('prevhash');
-  prevhash.get(starthash).onsuccess = function respp(e) {
-    let block = e.target.result;
-    if (block) {
-      console.log('responding with block', block);
-      socket.emit('response', {to: req.respondto, type: 'block', content: block.prevhash+';'+block.transactions+';'+block.proofofwork});
-      prevhash.get(block.hash).onsuccess = respp; // do next block(s)
-    }
-  };
+  function getsendnext(hash) {
+    // get the block(?s) after hash
+    prevhash.get(hash).onsuccess = (e) => {
+      // send them back
+      socket.emit('message', {to: sender, type: 'block', content: e.target.result});
+      getsendnext(e.target.result);
+    };
+  }
+  getsendnext(starthash);
 });
 
 

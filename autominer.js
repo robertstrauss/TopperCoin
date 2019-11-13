@@ -56,7 +56,7 @@ async function fromBlock(lastblock) {
       // console.log('fromblock time');
       // fromBlock(mb);
       // send block to others
-      socket.emit('block', minedblock);
+      socket.emit('toall', {type:'block', content:minedblock});
     });//}, 1);
   // });
 }
