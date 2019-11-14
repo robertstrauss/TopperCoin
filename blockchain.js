@@ -344,7 +344,7 @@ async function broadcasttransaction(amount, recipient) {
   let signature = RSA.encrypt(hashd, thisNode.pubkey, thisNode.privkey).toString(); // sign by encrypting with priv key
   console.log('signature', signature);
   console.log('once.emit');
-  socket.emit('transaction', transactionstring + '|' + signature);
+  socket.emit('toall', {type: 'transaction', content: transactionstring + '|' + signature});
 }
 
 

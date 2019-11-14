@@ -44,9 +44,9 @@ io.on('connection', function (socket){
   });
 
 
-  socket.on('toall', message => io.emit(message.type, message.content)); // just  forward all blocks
+  socket.on('toall', message => io.emit(message.type, message.content)); // just forward to all
   // socket.on('transaction', io.emit); // forward all transactions
-  socket.on('message', function (message) { // message to specific set of nodes
+  socket.on('message', function (message) { // message to specific node
     io.to(message.to).emit(message.type, {from:socket.id, content:message.content}); // send message to each in list of recipients
   });
   socket.on('topeers', function (message) {
