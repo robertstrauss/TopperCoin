@@ -2,7 +2,11 @@
 function main() {
   previewBlockchain();
   getMyBalance();
-  document.getElementById('address').innerHTML = thisNode.name || thisNode.pubkey || "Not Logged In";
+  document.getElementById('displayname').value = thisNode.name || '';
+  document.getElementById('publickeydiv').innerHTML = thisNode.pubkey || '';
+  document.getElementById('privatekeydiv').innerHTML = thisNode.privkey || '';
+  document.getElementById('address').innerHTML = thisNode.name || thisNode.pubkey || 'Not Logged In';
+  document.getElementById('addresstab').onclick = ()=>{document.getElementById('wallet').style.display = 'inline-block'};
   setInterval(previewBlockchain, 3000); // update preview every 3s
   setInterval(resync, 30000); // resync every 30s
 }
@@ -86,7 +90,7 @@ async function maketransaction() {
 async function getMyBalance() {
   document.getElementById('tpcbalance').innerHTML = 'Calculating...';
   calcBalance(thisNode.pubkey, function(bal){
-    // console.log(bal, !bal);
+    // con.log(bal, !bal);
     if (bal == null) {
       alert('you are not logged in');
       document.getElementById('tpcbalance').innerHTML = '0';

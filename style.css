@@ -31,7 +31,7 @@ a {
   cursor: pointer;
   border: 1px solid hsl(var(--accent));
 }
-button {
+.btn {
   min-width: 20px;
   width: 100%;
   padding: 8px;
@@ -45,7 +45,7 @@ button {
   font-family: 'Nunito', sans-serif;
   cursor: pointer;
 }
-button:hover {
+.btn:hover {
   /* background-image: linear-gradient(0deg, #0004, #0004); */
 }
 input {
@@ -91,7 +91,7 @@ h3 {
   color: rgb(var(--text-clr));
 }
 
-.rainbowbg, .rainbowtxt, button {
+.rainbowbg, .rainbowtxt, .btn {
   background: linear-gradient(120deg, orange, red, purple, #0033cc, limegreen, yellow);
   background-size: 400% 100%;
   animation: bg_shift 10s infinite;
@@ -115,7 +115,7 @@ h3 {
 
 .rainbowbg {
   background: linear-gradient(124deg, #ff2400, #e81d1d, #e8b71d, #e3e81d, #1de840, #1ddde8, #2b1de8, #dd00f3, #dd00f3);
-  background-size: 1800% 1800%;
+  background-size: 8000% 8000%;
 
   -webkit-animation: rainbow 18s ease infinite;
   -z-animation: rainbow 18s ease infinite;
@@ -124,7 +124,15 @@ h3 {
 }
 
 
-
+.blockcode {
+  max-height: 75px;
+  overflow: auto;
+  word-wrap:break-word;
+  background-color: rgba(var(--text-clr), 0.1);
+  padding: 5px;
+  border: 1px solid grey;
+  border-radius: 5px;
+}
 
 .modal { /* modal background    source: w3schools */
   display: none; /* Hidden by default */
@@ -150,6 +158,9 @@ h3 {
 }
 
 .infotab {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
   display: block;
   font-weight: normal;
   margin: 0;

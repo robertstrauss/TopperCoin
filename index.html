@@ -16,7 +16,7 @@
                       </h1></span>
 
                       <!-- login and register -->
-                      <span class="infotab" onclick="document.getElementById('login').style.display = 'inline-block';">
+                      <span class="infotab" id="addresstab" onclick="document.getElementById('login').style.display = 'inline-block';">
                         &#128100; <span id="address">Not Logged In</span>
                       </span>
 
@@ -51,7 +51,7 @@
 
                             <input placeholder="recipient" type="text" id="recipient"/>
 
-                            <button style="width:100%;margin:0" onclick="maketransaction()">Send</button>
+                            <button class="btn" style="width:100%;margin:0" onclick="maketransaction()">Send</button>
 
                       </form>
                       </div>
@@ -116,10 +116,34 @@
     </div>
     <!-- end of dash -->
 
+    <!-- wallet modal -->
+    <div id="wallet" class="modal"><div class="modalc">
+      <div class="modal-content">
+        <h2>Wallet</h2>
+        <form onsubmit="return false;">
+          Display name
+          <input id="displayname" type="text" value=""/><br>
+          <br>
+          Public key
+          <button onclick="window.getSelection().selectAllChildren(document.getElementById('publickeydiv'));
+                           document.execCommand('copy');">copy to clipboard</button>
+          <div class="blockcode"><code id="publickeydiv"></code></div>
+          <br>
+          Private key
+          <button onclick="if(!confirm('Be careful! Do not share this key with anyone. '
+                             +'You should only be copying this into a place for safekeeping.')) return false;
+                           window.getSelection().selectAllChildren(document.getElementById('privatekeydiv'));
+                           document.execCommand('copy');">copy to clipboard</button>
+          <div class="blockcode"><code id="privatekeydiv"></code></div>
+          <br>
+        </form>
+      </div>
+    </div></div>
+
     <!-- window of about section -->
     <div id="about" class="modal"><div class="modalc">
       <div class="modal-content">
-        <!-- <div style="text-align:right;"><button onclick="document.getElementById('about').style.display='none'">X</button></div> -->
+        <!-- <div style="text-align:right;"><button class="btn" onclick="document.getElementById('about').style.display='none'">X</button></div> -->
         <h2>About TopperCoin</h2>
         <p>
           TopperCoin is a cryptocurrency, like BitCoin, built by and for LAHS students.
@@ -161,13 +185,13 @@
     <!-- modal of login -->
     <div id="login" class="modal">
       <div class="modal-content">
-        <!-- <div style="text-align:right;"><button onclick="document.getElementById('login').style.display='none'">X</button></div> -->
+        <!-- <div style="text-align:right;"><button class="btn" onclick="document.getElementById('login').style.display='none'">X</button></div> -->
         <h2>Log in</h2>
           <form onsubmit="return false;">
 
               <input placeholder="super-secure login key" type="text" id="loginkey"/>
 
-              <button style="width:100%" onclick="login()">Log In</button>
+              <button class="btn" style="width:100%" onclick="login()">Log In</button>
 
           </form>
       </div>
@@ -188,7 +212,7 @@
               </p>
               <input placeholder="a unique, unguessable, super-secure key" type="text" id="registerloginkey"/>
 
-              <button style="width:100%" onclick="register()">Submit</button>
+              <button class="btn" style="width:100%" onclick="register()">Submit</button>
 
           </form>
       </div>
@@ -198,7 +222,7 @@
     <!-- syncing window -->
     <div id="syncingmodal" class="modal"><div class="modalc">
       <div class="modal-content">
-        <!-- <div style="text-align:right;"><button onclick="document.getElementById('syncingmodal').style.display='none'">X</button></div> -->
+        <!-- <div style="text-align:right;"><button class="btn" onclick="document.getElementById('syncingmodal').style.display='none'">X</button></div> -->
         <h2>Syncing Blockchain</h2>
         <p>This may take a few minutes. Please be patient.</p>
       </div>
@@ -213,6 +237,15 @@
     <script src="rsa.js"></script> <!-- rsa -->
     <script src="style.js"></script> <!-- fancy style things -->
     <!-- <script src="control/sha.js"></script> <!- - sha256 hashing - -> -->
+    <script>
+      const con = console;
+
+      // con = {
+      //   log: ()=>{},
+      //   warn: ()=>{},
+      //   error: ()=>{}
+      // };
+    </script>
     <script src="blockchain.js"></script> <!-- Blockchain and other functionality -->
     <script src="script.js"></script> <!-- UI functionality -->
     <!-- <script src="webassembly/wasmminer.js"></script> <!- - emscripten-generated webassembly miner compiled from c - -> -->

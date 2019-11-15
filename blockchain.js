@@ -28,7 +28,7 @@ const difficulty = 22; // time ~= 2^difficulty
 let blockchaindb; // global used for accessing blockchain
 let request = indexedDB.open('blockchain3');
 request.onupgradeneeded = function(e) { // called if the user doesn't have a blockchain database yet
-  console.log('initializing blockchain database');
+  con.log('initializing blockchain database');
   blockchaindb = request.result; // global way of accessing blockchain
 
   // create objectstore for the full blockchain
@@ -38,7 +38,7 @@ request.onupgradeneeded = function(e) { // called if the user doesn't have a blo
   bcObjectStore.createIndex('proofofwork', 'proofofwork', { unique: false });
   bcObjectStore.createIndex('length',      'length',      { unique: false });
 
-  console.log('created blockchain object store');
+  con.log('created blockchain object store');
 
   // object store for just the most recent blocks
   let ebObjectStore = blockchaindb.createObjectStore('endblocks', { keyPath: 'hash' });
@@ -47,15 +47,15 @@ request.onupgradeneeded = function(e) { // called if the user doesn't have a blo
   ebObjectStore.createIndex('proofofwork', 'proofofwork', { unique: false });
   ebObjectStore.createIndex('length',      'length',      { unique: false });
 
-  console.log('created endblocks object store');
+  con.log('created endblocks object store');
 
   // genesis block
-  const genesis = {hash: '5410d1f90c3e3e4d251d782fff69250cb1cb63c136e42dac916691816873316f',
-                     prevhash: 'genesis', transactions:'>999999999>strobert',
+  const genesis = {hash: '6fdbb03bb088842ae686afefbe42eb4394d4374d5641d164e62ba22ae369cf26',
+                     prevhash: 'genesis', transactions:'>999999999>11001666236737003471863781910704567116068419957597583941839782326558264484999739371681108528684580876407741425804606311794382574832099003290677645902524504542809704507732379121112859411382290288546627771471401350311007839746272894141706841943317302894861593923182245917367911293853069802985807722607401716264230589409586942854651761065403183850480637814329688850499812945013737407353402424189496813931892715089162144387062537145943965377831040752871925007816297760653496620084702709212234424916926301099420702183856942585137076501003584947736344810789854675049699806884822962332811732839895574891447744884403003129583',
                      proofofwork: 'genesis', length: 1};
   bcObjectStore.add(genesis);
   ebObjectStore.add(genesis);
-  console.log('database initialization complete');
+  con.log('database initialization complete');
   /**
    * blockchain will be synced
    * when onsuccess is called after this
@@ -74,7 +74,7 @@ request.onsuccess = ()=>{
     if (cursor) {
       // length of local blockchain: event.target.result
       // send a request for the blocks after what we have
-      console.log('requesting blockchain since', cursor.value.hash);
+      con.log('requesting blockchain since', cursor.value.hash);
       socket.emit('request', {type:'blockchain', content:`${cursor.value.hash}`});
       cursor.continue();
     }
@@ -95,7 +95,7 @@ function resync () {
     if (cursor) {
       // length of local blockchain: event.target.result
       // send a request for the blocks after what we have
-      console.log('requesting blockchain since', cursor.value.hash);
+      con.log('requesting blockchain since', cursor.value.hash);
       socket.emit('request', {type:'blockchain', content:`${cursor.value.hash}`});
       cursor.continue();
     }
@@ -107,14 +107,14 @@ function resync () {
 
 // reply with blockchain when requested
 socket.on('blockchainrequest', function(req){
-  console.log('blockchain request', req);
+  con.log('blockchain request', req);
   starthash = req.content;
   blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
   prevhash = blockchainos.index('prevhash');
   prevhash.get(starthash).onsuccess = function respp(e) {
     let block = e.target.result;
     if (block) {
-      console.log('responding with block', block);
+      con.log('responding with block', block);
       socket.emit('response', {to: req.respondto, type: 'block', content: block.prevhash+';'+block.transactions+';'+block.proofofwork});
       prevhash.get(block.hash).onsuccess = respp; // do next block(s)
     }
@@ -126,12 +126,12 @@ socket.on('blockchainrequest', function(req){
 const transactions = [];
 // TODO append to unmined list and give on transaction request, remove on block
 socket.on('transaction', async function(transactionstring){
-  console.log('recieved transaction', transactionstring);
+  con.log('recieved transaction', transactionstring);
   isValidTransaction(transactionstring).then(function(){
-      console.log('added transaction to mine')
+      con.log('added transaction to mine')
       transactions.push(transactionstring);
   }, function(){
-    console.log('recieved invalid transaction');
+    con.log('recieved invalid transaction');
   });
 });
 
@@ -139,7 +139,7 @@ let wait;
 const blockqueue = [];
 // when a block is recieved
 socket.on('block', function(blockstring){
-  console.log('recieved block', blockstring);
+  con.log('recieved block', blockstring);
   /*
   blocks may be sent in very rapid series, it is possible slight deviation
   in computation times may disorder the blocks, which would be rejected
@@ -155,113 +155,48 @@ socket.on('block', function(blockstring){
  * go through list blockqueue[] and add valid blocks to blockchain
  */
 async function processblockqueue() {
-    blockstring = blockqueue[0];
-    blockqueue.splice(0, 1); // remove single (1) index zero (0)
-    console.log('processing blockqueue');
-    if (!blockstring) return; // blockqueue is empty
-
-    const hash = await hashHex(blockstring, 'SHA-256'); // take bin sha256 hash of entire block
-    const bhash = await hashBin(blockstring, 'SHA-256');
-    let split = blockstring.split(';');
-    let newblock = {hash: hash, prevhash: split[0], transactions: split[1], proofofwork: split[2]};
+  con.log('processing blockqueue');
+  blockstring = blockqueue[0];
+  blockqueue.splice(0, 1); // remove single (1) index zero (0)
+  if (!blockstring) return; // blockqueue is empty
 
 
-    if (!bhash.startsWith(Array(difficulty+1).join('0'))) {// check if hash of block starts with zeros according to difficulty
-      console.log('invalid block (doesn\'t match difficulty)', blockstring);
-      return processblockqueue();
-    }
+  // check if block matches difficulty
+  const hash = await hashHex(blockstring, 'SHA-256'); // take bin sha256 hash of entire block
+  const bhash = await hashBin(blockstring, 'SHA-256');
+  let split = blockstring.split(';');
+  let newblock = {hash: hash, prevhash: split[0], transactions: split[1], proofofwork: split[2]};
 
-    // let valid = true;
-    // (async function validateNext(t) {
-    //   let trans = newblock.transactions[t];
-    //   isValidTransaction(trans).then(()=>{
-    //     validateNext(t+1);
-    //   }, () => valid=false);
-    // })(0);
-    // if (!valid) {return processblockqueue();} // abort here, this block is invalid
+  if (!bhash.startsWith(Array(difficulty+1).join('0'))) {// check if hash of block starts with zeros according to difficulty
+    con.log('invalid block (doesn\'t match difficulty)', blockstring);
+    return processblockqueue();
+  }
+  con.log('block matches difficulty');
 
-    // get the blockchain and endblocks ready to read from and write to
-    const transaction = blockchaindb.transaction(['blockchain', 'endblocks'], 'readwrite');
-    const blockchainos = transaction.objectStore('blockchain'); // full blockchain
-    const endblockos = transaction.objectStore('endblocks') // the most recent blocks
+  // get the blockchain and endblocks ready to read from and write to
+  const transaction = blockchaindb.transaction(['blockchain', 'endblocks'], 'readwrite');
+  const blockchainos = transaction.objectStore('blockchain'); // full blockchain
+  const endblockos = transaction.objectStore('endblocks') // the most recent blocks
 
-    /*
-    ###################################################
-    ## the blockchain is self-organizing because     ##
-    ## each block has the hash of the previous block.##
-    ## we only need to determine if a block should   ##
-    ## be added, not where to put it.                ##
-    ###################################################
-    */
-
-    // check if the new block connects to any previous block recent enough to allow forks
-    // let cursorreq = endblockos.openCursor();
-    // cursorreq.onsuccess = (e) => {
-    //
-    //   let cursor = e.target.result;
-    //   if (cursor) {
-    //     let endblock = cursor.value;
-    //     // check if the new block extends an endblock directly
-    //     if (newblock.prevhash === endblock.hash) {
-    //       newblock.length = endblock.length+1; // one farther in the blockchain
-    //       // console.log('accepting block ', newblock);
-    //       endblockos.delete(endblock.hash); // end block is no longer end block
-    //       // endblockos.add(newblock); // new block is
-    //     }
-    //     // check if the new block extends any block within the last <maxbackfork> blocks, starting a new fork.
-    //     for (let backcount=0, lastblock=endblock; backcount < maxbackfork; backcount++) {
-    //       blockchainos.get(lastblock.prevhash).onsuccess = (e) => {
-    //         if (newblock.prevhash === lastblock.hash) {
-    //           newblock.length = lastblock.length+1;
-    //           console.log('accepting block ', newblock);
-    //           endblockos.add(newblock);
-    //           blockchainos.add(newblock); // add new block to blockchain
-    //           // blockchainos.getAll().onsuccess = e => console.log(e.target.result);
-    //           transaction.commit();
-    //           cursor = null; // stop cursor
-    //
-    //           for (let t = 0; t < newblock.transactions.length; t++){
-    //             let trans = newblock.transactions.split(',')[t];
-    //             // remove this transaction from list of unmined transactions
-    //             console.log('transaction in block', trans);
-    //             console.log('transactions waiting', transactions);
-    //             let i = transactions.indexOf(trans);
-    //             console.log('index', i);
-    //             if (i != -1) transactions.splice(i, 1);
-    //           }
-    //
-    //           if (thisNode.miner != null) {
-    //             thisNode.miner.terminate(); // stop mining
-    //             thisNode.miner = new Worker('minerthread.js'); // open thread
-    //             setTimeout(()=>fromBlock(newblock), 1000); // start mining from longest block after 1000s to get Module ready
-    //           }
-    //           // blockchainos.count().onsuccess = console.log;
-    //           // let bblockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
-    //           // bblockchainos.getAll().onsuccess = console.log;
-    //         }
-    //         try{
-    //           lastblock = e.target.result.value;
-    //         } catch (TypeError) {console.warn('no previous block'); return;}
-    //       };
-    //     }
-    //     cursor.continue();
-    //   }
-    // };
-    //
-    // cursorreq.oncomplete = processblockqueue; //recurse
-
-
-
-
+  /*
+  ###################################################
+  ## the blockchain is self-organizing because     ##
+  ## each block has the hash of the previous block.##
+  ## we only need to determine if a block should   ##
+  ## be added, not where to put it.                ##
+  ###################################################
+  */
 
   // get the block this new block extends from
   const findparentblock = blockchainos.get(newblock.prevhash);
   findparentblock.onsuccess = e => {
     const parentblock = e.target.result;
+    con.log('parentblock', parentblock);
     if (parentblock === null) return;
 
     // verify each transaction
     const transs = newblock.transactions.split(',');
+    if (transs[0].startsWith('>1>')) transs.splice(0,1); // allow miningbonus of one as first transaction
     async function verifynexttrans(t) {
       if (t >= transs.length) return;
       isValidTransaction(transs[t]).then(() => {
@@ -275,11 +210,12 @@ async function processblockqueue() {
 
           // add new block to local blockchain
           newblock.length = parentblock.length+1;
-          console.log('accepting block', newblock);
+          con.log('accepting block', newblock);
           try {
-            endblockos.delete(parentblock);
+            endblockos.delete(parentblock.hash);
           } catch (e) {
-            console.log('fork started');
+            con.log(e);
+            con.log('fork started');
           }
           endblockos.add(newblock);
           blockchainos.add(newblock);
@@ -295,9 +231,10 @@ async function processblockqueue() {
         }
         return verifynexttrans(t+1);
       }, () => {
-        console.warn('recieved invalid block (contains invalid transactions)', newblock);
+        con.warn('recieved invalid block (contains invalid transactions)', newblock);
       });
     }
+    verifynexttrans(0);
   }
   findparentblock.oncomplete = () => processblockqueue(); // recurse
 }
@@ -306,8 +243,8 @@ async function processblockqueue() {
 
 // validate transactions
 async function isValidTransaction(transactionstring) {
-  let isvalid = false;
   return new Promise(async function (valid, invalid) {
+    if (transactionstring === '' || transactionstring === null) return valid();
     const split = transactionstring.split('|'); // transaction, signature
     const transaction = split[0].split('>'); // sender, amount, recipient
     const senderpk = transaction[0], amount = transaction[1];
@@ -323,11 +260,6 @@ async function isValidTransaction(transactionstring) {
     });
   });
 }
-
-
-
-
-
 
 
 
@@ -349,28 +281,6 @@ async function getLongestBlock(callback) {
     }
   }
 }
-
-// async function getPubKey(address, callback) { // get the public key of an address in the blockchain
-//   // make regexp for finding publickey
-//   let re = new RegExp(address+'>0>mypublickeyis([a-zA-Z0-9]+)');
-//   // request the blockchain for reading
-//   const trans = blockchaindb.transaction(['blockchain'], 'readonly');
-//   const blockchainos = trans.objectStore('blockchain');
-//   let pubkey = null;
-//   blockchainos.openCursor().onsuccess = function(e) { // iterate through blockchain to find publickey announcement
-//     let cursor = e.target.result; // cursor holds current block
-//     if (cursor) { // if still in the blockchain
-//       if ((pk = re.exec(cursor.value.transactions)) != null) { // check for regexp match, and return it if so
-//         pubkey = pk[1]
-//         return; // stop
-//       }
-//       // advance to next block
-//       cursor.continue();
-//     }
-//   }
-//   trans.oncomplete = ()=>callback(pubkey);
-// }
-
 
 /** calculate balance of address */
 async function calcBalance(pubkey, callback) {
@@ -401,10 +311,10 @@ async function broadcasttransaction(amount, recipient) {
   let transactionstring = `${thisNode.pubkey}>${amount}>${recipient}`;
   let hashh = await hashHex(transactionstring, 'SHA-256');
   let hashd = bigInt(BigInt(['0x', hashh].join('')));
-  console.log('dechash', hashd);
+  con.log('dechash', hashd);
   let signature = RSA.encrypt(hashd, thisNode.pubkey, thisNode.privkey).toString(); // sign by encrypting with priv key
-  console.log('signature', signature);
-  console.log('once.emit');
+  con.log('signature', signature);
+  con.log('once.emit');
   socket.emit('transaction', transactionstring + '|' + signature);
 }
 

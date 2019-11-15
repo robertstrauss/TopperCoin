@@ -19,46 +19,20 @@ async function mineBlock(blockstring, dfc, callback) { // difficulty in zeros in
 
 
 async function fromBlock(lastblock) {
-  console.log('starting new block from ', lastblock);
-  let blockstring = lastblock.hash+';miningbonus>1>'+thisNode.pubkey+','; // start with previous block (lastblock) hash
+  con.log('starting new block from ', lastblock);
+  let blockstring = lastblock.hash+';>1>'+thisNode.pubkey+','; // start with previous block (lastblock) hash
   blockstring +=    transactions.join(','); // dump recorded transactions into block delimited by commas
-  // console.log('mining', blockstring);
-  // socket.emit('transactionrequest');
 
-  // setTimeout(()=>{ // 1 second wait for transactions
-    // let miner = mineBlock(blockstring, difficulty*4)// *4 global hex difficulty to bin diff.
-    thisNode.miner.postMessage({blockstring: blockstring, dfc: difficulty}); // send data for mining
-    // miner.then(async function(minedblock){ // when mining is finished
-    thisNode.miner.addEventListener('message', async (e)=>{ // miner thread responds with result (minedblock)
-    // setTimeout(()=>{mineBlock(blockstring, difficulty*4, async (minedblock)=>{
-    console.log('thread mined block', e.data);
-      let minedblock = e.data;
-      // add it to personal blockchain
-      let mbsplit = minedblock.split(';');
-      let mbhash = await hashHex(minedblock, 'SHA-256');
-      let mb = {hash: mbhash, prevhash: mbsplit[0], transactions: mbsplit[1], proofofwork: mbsplit[2], length: lastblock.length+1};
-      // let trans = blockchaindb.transaction(['blockchain', 'endblocks'], 'readwrite');
-      // let blockchainos = trans.objectStore('blockchain');
-      // let endblockos = trans.objectStore('endblocks');
-      // blockchainos.add(mb); // add to blockchain
-      // try {
-      //   endblockos.delete(lastblock.hash); // make this the endpoint
-      // } catch (DataError) {
-      //   console.warn('first block, no previous hash');
-      // }
-      // endblockos.add(mb);
-      // try {
-      //   trans.commit(); // end transaction
-      // } catch (TypeError) {
-      //   console.warn('transaction committed before expected.');
-      // }
-      // start on next block
-      // console.log('fromblock time');
-      // fromBlock(mb);
-      // send block to others
-      socket.emit('block', minedblock);
-    });//}, 1);
-  // });
+  thisNode.miner.postMessage({blockstring: blockstring, dfc: difficulty}); // send data for mining
+  thisNode.miner.addEventListener('message', async (e)=>{ // miner thread responds with result (minedblock)
+    con.log('thread mined block', e.data);
+    let minedblock = e.data;
+    // add it to personal blockchain
+    let mbsplit = minedblock.split(';');
+    let mbhash = await hashHex(minedblock, 'SHA-256');
+    let mb = {hash: mbhash, prevhash: mbsplit[0], transactions: mbsplit[1], proofofwork: mbsplit[2], length: lastblock.length+1};
+    socket.emit('block', minedblock);
+  });
 }
 
 function startMining() {
