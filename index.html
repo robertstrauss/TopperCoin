@@ -49,7 +49,7 @@
 
                             <input placeholder="amount" type="number" id="amount" step="0.0001" min="0"/>
 
-                            <input placeholder="recipient" type="text" id="recipient"/>
+                            <input placeholder="public key or name" type="text" id="recipient"/>
 
                             <button class="btn" style="width:100%;margin:0" onclick="maketransaction()">Send</button>
 
@@ -125,17 +125,33 @@
           <input id="displayname" type="text" value=""/><br>
           <br>
           Public key
-          <button onclick="window.getSelection().selectAllChildren(document.getElementById('publickeydiv'));
+          <button type="button" onclick="window.getSelection().selectAllChildren(document.getElementById('publickeydiv'));
                            document.execCommand('copy');">copy to clipboard</button>
           <div class="blockcode"><code id="publickeydiv"></code></div>
           <br>
           Private key
-          <button onclick="if(!confirm('Be careful! Do not share this key with anyone. '
+          <button type="button" onclick="if(!confirm('Be careful! Do not share this key with anyone. '
                              +'You should only be copying this into a place for safekeeping.')) return false;
                            window.getSelection().selectAllChildren(document.getElementById('privatekeydiv'));
                            document.execCommand('copy');">copy to clipboard</button>
           <div class="blockcode"><code id="privatekeydiv"></code></div>
           <br>
+          Login key
+          <button type="button" onclick="if(!confirm('Be careful! Do not share this key with anyone. '
+                             +'You should only be copying this into a place for safekeeping.')) return false;
+                           window.getSelection().selectAllChildren(document.getElementById('loginkeydiv'));
+                           document.execCommand('copy');">copy to clipboard</button>
+          <div class="blockcode"><span id="loginkeydiv"></span></div>
+          <br>
+          <button type="button" onclick="if (!confirm('Make sure you have your login key saved somewhere, or you won\'t be able to get back into your account.')) return false;
+                                         document.cookie = 'name=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+                                         document.cookie = 'pubkey=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+                                         document.cookie = 'privkey=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+                                         document.cookie = 'loginkey=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+                                         window.location.reload();
+                                         ">Log Out</button><br>
+          <br>
+          <button class="btn" onclick="document.cookie='name='+document.getElementById('displayname').value;window.location.reload()">Save</button>
         </form>
       </div>
     </div></div>

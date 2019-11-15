@@ -5,8 +5,9 @@ function main() {
   document.getElementById('displayname').value = thisNode.name || '';
   document.getElementById('publickeydiv').innerHTML = thisNode.pubkey || '';
   document.getElementById('privatekeydiv').innerHTML = thisNode.privkey || '';
+  document.getElementById('loginkeydiv').innerHTML = getCookie('loginkey') || '';
   document.getElementById('address').innerHTML = thisNode.name || thisNode.pubkey || 'Not Logged In';
-  document.getElementById('addresstab').onclick = ()=>{document.getElementById('wallet').style.display = 'inline-block'};
+  if(thisNode.pubkey) document.getElementById('addresstab').onclick = ()=>{document.getElementById('wallet').style.display = 'inline-block'};
   setInterval(previewBlockchain, 3000); // update preview every 3s
   setInterval(resync, 30000); // resync every 30s
 }
@@ -103,28 +104,26 @@ async function getMyBalance() {
 
 
 async function register() {
-  alert('Registering... This may take a minute.');
-
   const loginkey = document.getElementById('registerloginkey').value;
   if (loginkey.length < 16)
-    return alert('A login key should be at absolute minimum 16 charachters long.\
-                  This is the only thing between a hacker and all your money!');
+    return alert('A login key should be at absolute minimum 16 charachters long. '
+                  +'This is the only thing between a hacker and all your money!');
 
   const name = document.getElementById('registername').value;
 
-
-
+  alert('Registering... This may take a minute.');
   let keys = await RSA.generate(loginkey); // generate RSA keypair from loginkey
 
   // save info
-  thisNode.name = name;
-  document.cookie = 'name='+thisNode.name.toString();
-  thisNode.privkey = bigInt((keys.d)); // keep secret!
-  document.cookie = 'privkey='+thisNode.privkey.toString();
+  thisNode.name   = name;
+  thisNode.privkey= bigInt((keys.d)); // keep secret!
   thisNode.pubkey = bigInt((keys.n)); // fixed public exponent e of 65537 (rsa.js)
-  document.cookie = 'pubkey='+thisNode.pubkey.toString();
+  document.cookie = 'name='    +thisNode.name.toString();
+  document.cookie = 'privkey=' +thisNode.privkey.toString();
+  document.cookie = 'pubkey='  +thisNode.pubkey.toString();
+  document.cookie = 'loginkey='+loginkey.toString();
 
-  // TODO tell user to save privkey/pubkey or loginkey ###############################################
+  // alert(`Make sure to save this key.\n--------\n${loginkey}\n--------\nIt\'s the only way to access your money!`);
 
   window.location.reload();
 }
@@ -139,10 +138,11 @@ async function login() {
 
   let keys = await RSA.generate(loginkey); // start generation of RSA keypair seeded from password1 (1024 bit, secure, real)
 
-  thisNode.privkey = bigInt((keys.d)); // keep secret!
-  document.cookie = 'privkey='+thisNode.privkey.toString();
+  thisNode.privkey= bigInt((keys.d)); // keep secret!
   thisNode.pubkey = bigInt((keys.n)); // fixed public exponenet of 65537 (see rsa.js), only need n
-  document.cookie = 'pubkey='+thisNode.pubkey.toString();
+  document.cookie = 'privkey=' +thisNode.privkey.toString();
+  document.cookie = 'pubkey='  +thisNode.pubkey.toString();
+  document.cookie = 'loginkey='+loginkey.toString();
 
   window.location.reload();
 }
