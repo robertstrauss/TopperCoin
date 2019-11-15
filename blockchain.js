@@ -19,7 +19,7 @@ const thisNode = {
 // how many zeros (bin) block hash must start with
 const difficulty = 22; // time ~= 2^difficulty
 // the furthest number of blocks back a fork can be started
-const maxbackfork = 20;
+// const maxbackfork = 20;
 
 
 
@@ -81,6 +81,29 @@ request.onsuccess = ()=>{
   };
   // trans.oncomplete = (() => previewBlockchain());
 }
+
+
+
+function resync () {
+  // open the database to request from the end
+  let trans = blockchaindb.transaction(['endblocks'], 'readonly');
+  endblockos = trans.objectStore('endblocks');
+
+  // request the blockchain since each of local endblocks
+  endblockos.openCursor().onsuccess = function(event){
+    cursor = event.target.result;
+    if (cursor) {
+      // length of local blockchain: event.target.result
+      // send a request for the blocks after what we have
+      console.log('requesting blockchain since', cursor.value.hash);
+      socket.emit('request', {type:'blockchain', content:`${cursor.value.hash}`});
+      cursor.continue();
+    }
+  };
+  // trans.oncomplete = (() => previewBlockchain());
+}
+
+
 
 // reply with blockchain when requested
 socket.on('blockchainrequest', function(req){

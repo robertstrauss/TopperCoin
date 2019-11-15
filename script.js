@@ -1,23 +1,6 @@
 
 
-function requestSync () {
-  // open the database to request from the end
-  let trans = blockchaindb.transaction(['endblocks'], 'readonly');
-  endblockos = trans.objectStore('endblocks');
 
-  // request the blockchain since each of local endblocks
-  endblockos.openCursor().onsuccess = function(event){
-    cursor = event.target.result;
-    if (cursor) {
-      // length of local blockchain: event.target.result
-      // send a request for the blocks after what we have
-      console.log('requesting blockchain since', cursor.value.hash);
-      socket.emit('request', {type:'blockchain', content:`${cursor.value.hash}`});
-      cursor.continue();
-    }
-  };
-  // trans.oncomplete = (() => previewBlockchain());
-};
 
 
 function main() {
@@ -25,7 +8,7 @@ function main() {
   getMyBalance();
   document.getElementById('address').innerHTML = thisNode.address || "Not Logged In";
   setInterval(previewBlockchain, 3000); // update preview every 3s
-  setInterval(requestSync, 5000); // resync every 5s
+  setInterval(resync, 30000); // resync every 30s
 }
 
 function openMiner() {
