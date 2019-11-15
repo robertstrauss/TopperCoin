@@ -2,10 +2,9 @@
 const socket = io();
 
 // for getting cookies
-function getCookie(name)
-{
-  var re = new RegExp(name + "=([^;]+)");
-  var value = re.exec(document.cookie);
+function getCookie(name) {
+  let re = new RegExp(name + "=([^;]+)");
+  let value = re.exec(document.cookie);
   return (value != null) ? unescape(value[1]) : null;
 }
 
@@ -17,12 +16,7 @@ const thisNode = {
                  };
 
 // how many zeros (bin) block hash must start with
-const difficulty = 22; // time ~= 2^difficulty
-// the furthest number of blocks back a fork can be started
-// const maxbackfork = 20;
-
-
-
+const difficulty = 8; // time ~= 2^difficulty
 
 // initial set up of using the blockchain
 let blockchaindb; // global used for accessing blockchain
