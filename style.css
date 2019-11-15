@@ -1,12 +1,12 @@
 :root {
-  --bg-clr-dark: 21, 32, 43;
+  --bg-clr-dark: 14, 19, 23;/*21, 32, 43;*/
   --text-clr-dark: 228, 230, 231;
   --bg-clr-light: 250, 250, 255;
   --text-clr-light: 32, 32, 32;
   --accent: 203, 89%, 53%;
   /* default values */
-  --bg-clr: var(--bg-clr-dark);
-  --text-clr: var(--text-clr-dark);
+  --bg-clr: var(--bg-clr-light);
+  --text-clr: var(--text-clr-light);
   --strip-width: 1000px;
 }
 * {
@@ -46,6 +46,7 @@ a {
   cursor: pointer;
 }
 .btn:hover {
+    box-shadow: inset 0px 1px 5px 1px rgba(var(--text-clr), 0.3);
   /* background-image: linear-gradient(0deg, #0004, #0004); */
 }
 input {
@@ -58,7 +59,7 @@ input {
   border-radius: 300px;
   background-color: #0000;
   border-color: rgba(var(--text-clr), 0.1);
-  color: rgb(var(--text-clr));
+  color: inherit;
   outline: none;
   font-family: 'Nunito', sans-serif;
   cursor: text;
@@ -92,7 +93,7 @@ h3 {
 }
 
 .rainbowbg, .rainbowtxt, .btn {
-  background: linear-gradient(120deg, orange, red, purple, #0033cc, limegreen, yellow);
+  background: linear-gradient(120deg, red, purple, #0033cc, limegreen, yellow);
   background-size: 400% 100%;
   animation: bg_shift 10s infinite;
 }
@@ -167,17 +168,18 @@ h3 {
   display: block;
   font-weight: normal;
   margin: 0;
-  vertical-align: middle;
+  /* vertical-align: middle; */
   padding: 5px 30px 5px 15px; /* override others */
   font-size: 20px;
-  color: rgb(var(--text-clr));
+  /* color: rgb(var(--text-clr)); */
   height: 50px;
   line-height: 50px;
   cursor: pointer;
 }
 .infotab:hover {
   /* box-shadow: 0px 0px 5px 2px #00000033; */
-  background-image: linear-gradient(0deg, rgba(var(--text-clr), 0.1), rgba(var(--text-clr), 0.1));
+  background-image: linear-gradient(0deg, #fff1, #fff1);
+  /* background-image: linear-gradient(0deg, rgba(var(--text-clr), 0.1), rgba(var(--text-clr), 0.1)); */
 }
 .cell {
   margin: 20px;
@@ -191,40 +193,47 @@ h3 {
 }
 
 #dash {
-  /* max-width: rgb(var(--strip-width)); */
-  /* margin: 1em auto; */
   background-color: rgb(var(--bg-clr));
-
-  display: flex;
-  /* display: grid;
-  grid-template-rows: [topline] 50% [horiz1] auto [bottomline];
-  grid-template-columns: [leftside] 20% [line1] auto [rightside]; */
 }
 
-/* #dash > div {
-  height: 100vh;
-  overflow: hidden;
-}
-#dash > div > div {
-  padding: 15px;
-} */
 #dash #leftcol {
-  width: 300px;
+  height: 100%; /* Full-height: remove this if you want "auto" height */
+  width: 300px; /* Set the width of the sidebar */
+  position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+  z-index: 1; /* Stay on top */
+  top: 0; /* Stay at the top */
+  left: 0;
+  background-color: #111; /* Black */
+  overflow-x: hidden; /* Disable horizontal scroll */
+  padding-top: 20px;
+  color: #fff;
 }
 #dash #middle {
   overflow: hidden; /* trigger BFC to fit in page */
   display: flex;
-  height: 100vh;
-  width: 100%;
+  height: 100%;
+  /* width: 100%; */
   /* max-width: calc(100vw - 400px); */
   flex-flow: column;
   /* flex: 1 1 auto; */
   border: 1px rgba(var(--text-clr), 0.1);
   border-style: none solid none solid;
+  margin-left: 300px;
+  margin-right: 300px;
 }
 #dash #rightcol {
-  width: 500px;
-  padding: 20px;
+  height: 100%;
+  width: 300px;
+  position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+  z-index: 1; /* Stay on top */
+  top: 0; /* Stay at the top */
+  right: 0;
+  background-color: #111; /* Black */
+  overflow-x: hidden; /* Disable horizontal scroll */
+  padding-top: 20px;
+  color: #fff;
+  box-sizing: border-box;
+  border: 10px solid #0000;
 }
 #dash #sendtpc {
   padding: 5px 15px 20px 15px;
