@@ -73,7 +73,6 @@ request.onsuccess = ()=>{
       cursor.continue();
     }
   };
-  // trans.oncomplete = (() => previewBlockchain());
 }
 
 
@@ -94,7 +93,6 @@ function resync () {
       cursor.continue();
     }
   };
-  // trans.oncomplete = (() => previewBlockchain());
 }
 
 

@@ -27,6 +27,13 @@ io.on('connection', function(socket){
     var index = nodes.indexOf(socket.id); // get index of node, check if exists
     if (index != -1) nodes.splice(index, 1); // remove this node on leave
   });
+  socket.on('olleh', function(){
+    io.emit('olleh', socket.id);
+  });
+  socket.on('hello', function(data){
+    if(data.to === null) io.emit('hello', data);
+    else io.to(data.to).emit('hello', data);
+  });
   socket.on('transaction', function(transactionstring){
     io.emit('transaction', transactionstring); // forward message to all nodes
   });

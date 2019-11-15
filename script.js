@@ -8,18 +8,36 @@ function main() {
   document.getElementById('loginkeydiv').innerHTML = getCookie('loginkey') || '';
   document.getElementById('address').innerHTML = thisNode.name || thisNode.pubkey || 'Not Logged In';
   if(thisNode.pubkey) document.getElementById('addresstab').onclick = ()=>{document.getElementById('wallet').style.display = 'inline-block'};
+  socket.emit('hello', {myname: thisNode.name, mypubkey: thisNode.pubkey})
+  socket.emit('olleh'); // greet other nodes
   setInterval(previewBlockchain, 3000); // update preview every 3s
   setInterval(resync, 30000); // resync every 30s
 }
 
 
+socket.on('hello', function(data){
+  localStorage.setItem(data.mypubkey, data.myname);
+});
+socket.on('olleh', function(respondto){
+  socket.emit('hello', {to:respondto, mypubkey: thisNode.pubkey, myname: thisNode.name});
+});
+
+
+function searchnames() {
+  const namequery = document.getElementById('namequery').value;
+  const searchresults = document.getElementById('namesearchresults');
+  for (var pk in localStorage) {
+    if (Object.prototype.hasOwnProperty.call(localStorage, pk)) {
+      if(localStorage[pk].includes(namequery) || pk.includes(namequery))
+        document.getElementById('namesearchresults').innerHTML += `<div class="pk">${localStorage[pk]}<br>${pk}</div>`;
+    }
+  }
+}
 
 function previewBlockchain() {
   let transaction  = blockchaindb.transaction(['blockchain', 'endblocks'], 'readonly');
   let blockchainos =  transaction.objectStore('blockchain');
   let endblockos   =  transaction.objectStore('endblocks' );
-
-
 
   // fill the blockchain preview div
   blockchainpreviewdiv = document.createElement('div');//document.getElementById('blockchainpreview');
@@ -30,7 +48,7 @@ function previewBlockchain() {
       let block = cursor.value;
       let count = 0;
       blockchainos.get(block.hash).onsuccess = function prevFrom(ev) {
-        if (count > 32) return; // don't display more than 32 back
+        if (count > 16) return; // don't display more than 16 back
         count++;
         let block = ev.target.result;
         if (!block) return;
@@ -43,7 +61,8 @@ function previewBlockchain() {
         ['prevhash', 'transactions', 'proofofwork'].forEach(function(key){
           let element = document.createElement('div');
           element.className = key;
-          element.innerHTML = block[key].replace(/,/g, '<br>');
+          element.innerHTML = block[key].replace(/,/g, ',<br>').replace(/|[0-9]+,/g, '');
+
           blockdiv.appendChild(element);
         });
 
