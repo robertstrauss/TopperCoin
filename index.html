@@ -139,14 +139,14 @@
                              +'You should only be copying this into a place for safekeeping.')) return false;
                            window.getSelection().selectAllChildren(document.getElementById('privatekeydiv'));
                            document.execCommand('copy');">copy to clipboard</button>
-          <div class="blockcode"><code id="privatekeydiv"></code></div>
+          <div class="blockcode"><code id="privatekeydiv" class="private"></code></div>
           <br>
           Login key
           <button type="button" onclick="if(!confirm('Be careful! Do not share this key with anyone. '
                              +'You should only be copying this into a place for safekeeping.')) return false;
                            window.getSelection().selectAllChildren(document.getElementById('loginkeydiv'));
                            document.execCommand('copy');">copy to clipboard</button>
-          <div class="blockcode"><span id="loginkeydiv"></span></div>
+          <div class="blockcode loginkey"><span id="loginkeydiv" class="private"></span></div>
           <br>
           <button type="button" onclick="if (!confirm('Make sure you have your login key saved somewhere, or you won\'t be able to get back into your account.')) return false;
                                          document.cookie = 'name=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
@@ -210,7 +210,7 @@
         <h2>Log in</h2>
           <form onsubmit="return false;">
 
-              <input placeholder="super-secure login key" type="text" id="loginkey"/>
+              <textarea class="private" placeholder="super-secure login key" id="loginkey"></textarea>
 
               <button class="btn" style="width:100%" onclick="login()">Log In</button>
 
@@ -231,7 +231,7 @@
                 (as long as you have it saved somewhere or can remember it).
                 Remember, if someone else gets ahold of this, they will have access to all your money!
               </p>
-              <input placeholder="a unique, unguessable, super-secure key" type="text" id="registerloginkey"/>
+              <textarea class="private" placeholder="a unique, unguessable, super-secure key" id="registerloginkey"></textarea>
 
               <button class="btn" style="width:100%" onclick="register()">Submit</button>
 
