@@ -20,7 +20,7 @@ async function mineBlock(blockstring, dfc, callback) { // difficulty in zeros in
 
 async function fromBlock(lastblock) {
   console.log('starting new block from ', lastblock);
-  let blockstring = lastblock.hash+';miningbonus>1>'+thisNode.address+','; // start with previous block (lastblock) hash
+  let blockstring = lastblock.hash+';miningbonus>1>'+thisNode.pubkey+','; // start with previous block (lastblock) hash
   blockstring +=    transactions.join(','); // dump recorded transactions into block delimited by commas
   // console.log('mining', blockstring);
   // socket.emit('transactionrequest');
@@ -63,7 +63,7 @@ async function fromBlock(lastblock) {
 
 function startMining() {
   // confirm if not logged in
-  if (!(thisNode.address || confirm('You are not logged in, so you will not recieve TPC for mining. Continue?'))) return;
+  if (!(thisNode.pubkey || confirm('You are not logged in, so you will not recieve TPC for mining. Continue?'))) return;
 
 
   thisNode.miner = new Worker('minerthread.js'); // open thread

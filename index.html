@@ -122,7 +122,7 @@
         <!-- <div style="text-align:right;"><button onclick="document.getElementById('about').style.display='none'">X</button></div> -->
         <h2>About TopperCoin</h2>
         <p>
-          TopperCoin is a cryptocurrency, like BitCoin, built by and for LAHS students (HillToppers, thus the name).
+          TopperCoin is a cryptocurrency, like BitCoin, built by and for LAHS students.
           Anyone on the network can make and recieve payments to and from others.
           Or, you can make essentially <b class="rainbowtxt">free money</b> by "mining" for the network.
         </p>
@@ -164,26 +164,32 @@
         <!-- <div style="text-align:right;"><button onclick="document.getElementById('login').style.display='none'">X</button></div> -->
         <h2>Log in</h2>
           <form onsubmit="return false;">
-              <input placeholder="username" id="loginaddress"/>
 
-              <input placeholder="password" type="password" id="loginpassword"/>
+              <input placeholder="super-secure login key" type="text" id="loginkey"/>
 
               <button style="width:100%" onclick="login()">Log In</button>
+
           </form>
       </div>
 
       <div class="modal-content">
         <h2>Register</h2>
           <form onsubmit="return false;">
-              <input placeholder="create username" "type="text" id="registeraddress" pattern="[^>|,;]+"
+            (Optional) create a human readable name to be identified by
+              <input placeholder="display name" type="text" id="registername"/>
+              <!-- pattern="[^>|,;]+"
                             oninvalid="setCustomValidity('cannot include '>', '|', ',', or ';')"
-                            onchange="try{setCustomValidity('')}catch(e){}"/>
-
-              <input placeholder="create password" type="password" id="registerpassword1"/>
-
-              <input placeholder="verify password" type="password" id="registerpassword2"/>
+                            onchange="try{setCustomValidity('')}catch(e){}"/> -->
+              <p>
+                Create a <u><b><i>super</i></b>-secure key</u> to access your account with.
+                It could be something like a phrase you made up or just some keyboard-mashing
+                (as long as you have it saved somewhere or can remember it).
+                Remember, if someone else gets ahold of this, they will have access to all your money!
+              </p>
+              <input placeholder="a unique, unguessable, super-secure key" type="text" id="registerloginkey"/>
 
               <button style="width:100%" onclick="register()">Submit</button>
+
           </form>
       </div>
     </div>

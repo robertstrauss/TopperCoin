@@ -11,9 +11,9 @@ function getCookie(name)
 
 // object containing info specific to the client's node, stored in cookies
 const thisNode = {
-                   address : ((getCookie('address'))),
+                   pubkey  : ((getCookie('pubkey'))),
                    privkey : ((getCookie('privkey'))),
-                   pubkey  : ((getCookie('pubkey' )))
+                   name    : ((getCookie('name'   )))
                  };
 
 // how many zeros (bin) block hash must start with
@@ -155,7 +155,6 @@ socket.on('block', function(blockstring){
  * go through list blockqueue[] and add valid blocks to blockchain
  */
 async function processblockqueue() {
-  // new Promise(async (resolve, reject) => {
     blockstring = blockqueue[0];
     blockqueue.splice(0, 1); // remove single (1) index zero (0)
     console.log('processing blockqueue');
@@ -172,14 +171,14 @@ async function processblockqueue() {
       return processblockqueue();
     }
 
-    let valid = true;
-    (async function validateNext(t) {
-      let trans = newblock.transactions[t];
-      isValidTransaction(trans).then(()=>{
-        validateNext(t+1);
-      }, () => valid=false);
-    })(0);
-    if (!valid) {return processblockqueue();} // abort here, this block is invalid
+    // let valid = true;
+    // (async function validateNext(t) {
+    //   let trans = newblock.transactions[t];
+    //   isValidTransaction(trans).then(()=>{
+    //     validateNext(t+1);
+    //   }, () => valid=false);
+    // })(0);
+    // if (!valid) {return processblockqueue();} // abort here, this block is invalid
 
     // get the blockchain and endblocks ready to read from and write to
     const transaction = blockchaindb.transaction(['blockchain', 'endblocks'], 'readwrite');
@@ -196,60 +195,111 @@ async function processblockqueue() {
     */
 
     // check if the new block connects to any previous block recent enough to allow forks
-    let cursorreq = endblockos.openCursor();
-    cursorreq.onsuccess = (e) => {
+    // let cursorreq = endblockos.openCursor();
+    // cursorreq.onsuccess = (e) => {
+    //
+    //   let cursor = e.target.result;
+    //   if (cursor) {
+    //     let endblock = cursor.value;
+    //     // check if the new block extends an endblock directly
+    //     if (newblock.prevhash === endblock.hash) {
+    //       newblock.length = endblock.length+1; // one farther in the blockchain
+    //       // console.log('accepting block ', newblock);
+    //       endblockos.delete(endblock.hash); // end block is no longer end block
+    //       // endblockos.add(newblock); // new block is
+    //     }
+    //     // check if the new block extends any block within the last <maxbackfork> blocks, starting a new fork.
+    //     for (let backcount=0, lastblock=endblock; backcount < maxbackfork; backcount++) {
+    //       blockchainos.get(lastblock.prevhash).onsuccess = (e) => {
+    //         if (newblock.prevhash === lastblock.hash) {
+    //           newblock.length = lastblock.length+1;
+    //           console.log('accepting block ', newblock);
+    //           endblockos.add(newblock);
+    //           blockchainos.add(newblock); // add new block to blockchain
+    //           // blockchainos.getAll().onsuccess = e => console.log(e.target.result);
+    //           transaction.commit();
+    //           cursor = null; // stop cursor
+    //
+    //           for (let t = 0; t < newblock.transactions.length; t++){
+    //             let trans = newblock.transactions.split(',')[t];
+    //             // remove this transaction from list of unmined transactions
+    //             console.log('transaction in block', trans);
+    //             console.log('transactions waiting', transactions);
+    //             let i = transactions.indexOf(trans);
+    //             console.log('index', i);
+    //             if (i != -1) transactions.splice(i, 1);
+    //           }
+    //
+    //           if (thisNode.miner != null) {
+    //             thisNode.miner.terminate(); // stop mining
+    //             thisNode.miner = new Worker('minerthread.js'); // open thread
+    //             setTimeout(()=>fromBlock(newblock), 1000); // start mining from longest block after 1000s to get Module ready
+    //           }
+    //           // blockchainos.count().onsuccess = console.log;
+    //           // let bblockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+    //           // bblockchainos.getAll().onsuccess = console.log;
+    //         }
+    //         try{
+    //           lastblock = e.target.result.value;
+    //         } catch (TypeError) {console.warn('no previous block'); return;}
+    //       };
+    //     }
+    //     cursor.continue();
+    //   }
+    // };
+    //
+    // cursorreq.oncomplete = processblockqueue; //recurse
 
-      let cursor = e.target.result;
-      if (cursor) {
-        let endblock = cursor.value;
-        // check if the new block extends an endblock directly
-        if (newblock.prevhash === endblock.hash) {
-          newblock.length = endblock.length+1; // one farther in the blockchain
-          // console.log('accepting block ', newblock);
-          endblockos.delete(endblock.hash); // end block is no longer end block
-          // endblockos.add(newblock); // new block is
+
+
+
+
+  // get the block this new block extends from
+  const findparentblock = blockchainos.get(newblock.prevhash);
+  findparentblock.onsuccess = e => {
+    const parentblock = e.target.result;
+    if (parentblock === null) return;
+
+    // verify each transaction
+    const transs = newblock.transactions.split(',');
+    async function verifynexttrans(t) {
+      if (t >= transs.length) return;
+      isValidTransaction(transs[t]).then(() => {
+        // gone through all, all are valid
+        if (t === transs.length-1) {
+          // remove pending transactions
+          transs.forEach((trans) => {
+            // remove transaction if in local list
+            if ((ti = transactions.indexOf(trans)) != -1) transactions.splice(ti);
+          });
+
+          // add new block to local blockchain
+          newblock.length = parentblock.length+1;
+          console.log('accepting block', newblock);
+          try {
+            endblockos.delete(parentblock);
+          } catch (e) {
+            console.log('fork started');
+          }
+          endblockos.add(newblock);
+          blockchainos.add(newblock);
+
+          // restart miner if mining
+          if (thisNode.miner != null) {
+            thisNode.miner.terminate(); // stop mining
+            thisNode.miner = new Worker('minerthread.js'); // open thread
+            setTimeout(()=>fromBlock(newblock), 1000); // start mining from longest block after 1000s to get Module ready
+          }
+
+          return;
         }
-        // check if the new block extends any block within the last <maxbackfork> blocks, starting a new fork.
-        for (let backcount=0, lastblock=endblock; backcount < maxbackfork; backcount++) {
-          blockchainos.get(lastblock.prevhash).onsuccess = (e) => {
-            if (newblock.prevhash === lastblock.hash) {
-              newblock.length = lastblock.length+1;
-              console.log('accepting block ', newblock);
-              endblockos.add(newblock);
-              blockchainos.add(newblock); // add new block to blockchain
-              // blockchainos.getAll().onsuccess = e => console.log(e.target.result);
-              transaction.commit();
-              cursor = null; // stop cursor
-
-              for (let t = 0; t < newblock.transactions.length; t++){
-                let trans = newblock.transactions.split(',')[t];
-                // remove this transaction from list of unmined transactions
-                console.log('transaction in block', trans);
-                console.log('transactions waiting', transactions);
-                let i = transactions.indexOf(trans);
-                console.log('index', i);
-                if (i != -1) transactions.splice(i, 1);
-              }
-
-              if (thisNode.miner != null) {
-                thisNode.miner.terminate(); // stop mining
-                thisNode.miner = new Worker('minerthread.js'); // open thread
-                setTimeout(()=>fromBlock(newblock), 1000); // start mining from longest block after 1000s to get Module ready
-              }
-              // blockchainos.count().onsuccess = console.log;
-              // let bblockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
-              // bblockchainos.getAll().onsuccess = console.log;
-            }
-            try{
-              lastblock = e.target.result.value;
-            } catch (TypeError) {console.warn('no previous block'); return;}
-          };
-        }
-        cursor.continue();
-      }
-    };
-
-    cursorreq.oncomplete = processblockqueue; //recurse
+        return verifynexttrans(t+1);
+      }, () => {
+        console.warn('recieved invalid block (contains invalid transactions)', newblock);
+      });
+    }
+  }
+  findparentblock.oncomplete = () => processblockqueue(); // recurse
 }
 
 
@@ -257,32 +307,21 @@ async function processblockqueue() {
 // validate transactions
 async function isValidTransaction(transactionstring) {
   let isvalid = false;
-  let prom = new Promise(async function (valid, invalid) {
-
+  return new Promise(async function (valid, invalid) {
     const split = transactionstring.split('|'); // transaction, signature
     const transaction = split[0].split('>'); // sender, amount, recipient
-    const sender = transaction[0], amount = transaction[1];
+    const senderpk = transaction[0], amount = transaction[1];
     const hashhHex = await hashHex(split[0], 'SHA-256');
     const hashDec = bigInt(BigInt(['0x', hashhHex].join('')));
-    // two long asynchronous processes: start both with promises before awaiting
-    getPubKey(sender, (pubkeystr)=>{
-      calcBalance(sender, async function(bal){
-        if (!pubkeystr) { // user not yet registered
-          try{
-            pubkeystr = transaction[2].substring(13); // 13 = length of 'mypublickeyis'
-          } catch (TypeError) {
-            return invalid();
-          }
-        }
-        const pubkey = bigInt(BigInt(pubkeystr));
-        let sign = RSA.decrypt(bigInt(BigInt(split[1])), RSA.e, pubkey);
-        let isvalid = (sign.equals(hashDec) && bal >= transaction[1]); // return the validity
-        if (isvalid) return valid();
-        else return invalid();
-      });
+    // long asynchronous processes
+    calcBalance(senderpk, function(bal){
+      const pubkey = bigInt(BigInt(senderpk));
+      let sign = RSA.decrypt(bigInt(BigInt(split[1])), RSA.e, pubkey);
+      let isvalid = (sign.equals(hashDec) && bal >= transaction[1]); // return the validity
+      if (isvalid) return valid();
+      else return invalid();
     });
   });
-  return prom;
 }
 
 
@@ -311,30 +350,30 @@ async function getLongestBlock(callback) {
   }
 }
 
-async function getPubKey(address, callback) { // get the public key of an address in the blockchain
-  // make regexp for finding publickey
-  let re = new RegExp(address+'>0>mypublickeyis([a-zA-Z0-9]+)');
-  // request the blockchain for reading
-  const trans = blockchaindb.transaction(['blockchain'], 'readonly');
-  const blockchainos = trans.objectStore('blockchain');
-  let pubkey = null;
-  blockchainos.openCursor().onsuccess = function(e) { // iterate through blockchain to find publickey announcement
-    let cursor = e.target.result; // cursor holds current block
-    if (cursor) { // if still in the blockchain
-      if ((pk = re.exec(cursor.value.transactions)) != null) { // check for regexp match, and return it if so
-        pubkey = pk[1]
-        return; // stop
-      }
-      // advance to next block
-      cursor.continue();
-    }
-  }
-  trans.oncomplete = ()=>callback(pubkey);
-}
+// async function getPubKey(address, callback) { // get the public key of an address in the blockchain
+//   // make regexp for finding publickey
+//   let re = new RegExp(address+'>0>mypublickeyis([a-zA-Z0-9]+)');
+//   // request the blockchain for reading
+//   const trans = blockchaindb.transaction(['blockchain'], 'readonly');
+//   const blockchainos = trans.objectStore('blockchain');
+//   let pubkey = null;
+//   blockchainos.openCursor().onsuccess = function(e) { // iterate through blockchain to find publickey announcement
+//     let cursor = e.target.result; // cursor holds current block
+//     if (cursor) { // if still in the blockchain
+//       if ((pk = re.exec(cursor.value.transactions)) != null) { // check for regexp match, and return it if so
+//         pubkey = pk[1]
+//         return; // stop
+//       }
+//       // advance to next block
+//       cursor.continue();
+//     }
+//   }
+//   trans.oncomplete = ()=>callback(pubkey);
+// }
 
 
 /** calculate balance of address */
-async function calcBalance(address, callback) {
+async function calcBalance(pubkey, callback) {
   let bal = 0;
   // request the blockchain for reading
   blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
@@ -342,12 +381,12 @@ async function calcBalance(address, callback) {
   curreq.onsuccess = function(e) { // iterate through blockchain to find publickey announcement
     let cursor = e.target.result; // cursor holds current block
     if (cursor) { // if still in the blockchain
-      if (cursor.value.transactions.indexOf(address) >= 0) { // check for regexp match, and return it if so
+      if (cursor.value.transactions.indexOf(pubkey) >= 0) { // check for regexp match, and return it if so
         let transactions = cursor.value.transactions.split(',');
         for (let t = 0; t < transactions.length; t++) {
           let transaction = transactions[t].split('>');
-          if (transaction[0] === address) bal-=parseFloat(transaction[1]);
-          if (transaction[2] === address) bal+=parseFloat(transaction[1]);
+          if (transaction[0] === pubkey) bal-=parseFloat(transaction[1]);
+          if (transaction[2] === pubkey) bal+=parseFloat(transaction[1]);
         }
       }
       // advance to next block
@@ -359,7 +398,7 @@ async function calcBalance(address, callback) {
 }
 
 async function broadcasttransaction(amount, recipient) {
-  let transactionstring = `${thisNode.address}>${amount}>${recipient}`;
+  let transactionstring = `${thisNode.pubkey}>${amount}>${recipient}`;
   let hashh = await hashHex(transactionstring, 'SHA-256');
   let hashd = bigInt(BigInt(['0x', hashh].join('')));
   console.log('dechash', hashd);

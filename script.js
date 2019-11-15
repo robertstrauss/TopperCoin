@@ -1,20 +1,10 @@
 
-
-
-
-
 function main() {
   previewBlockchain();
   getMyBalance();
-  document.getElementById('address').innerHTML = thisNode.address || "Not Logged In";
+  document.getElementById('address').innerHTML = thisNode.name || thisNode.pubkey || "Not Logged In";
   setInterval(previewBlockchain, 3000); // update preview every 3s
   setInterval(resync, 30000); // resync every 30s
-}
-
-function openMiner() {
-  // confirm to continue if not logged in
-  if (!(thisNode.address || confirm('You are not logged in, so you will not recieve TPC for mining. Continue?'))) return;
-  thisNode.miner = window.open('/miner.html', '', 'width=1,height=1');
 }
 
 
@@ -73,38 +63,29 @@ function previewBlockchain() {
 
 async function maketransaction() {
   const amount = document.getElementById('amount').value;
-  const recipient = document.getElementById('recipient').value;
-  getPubKey(recipient, recipPK=>{ // start before waiting on others
-    calcBalance(thisNode.address, async function(bal){
-      // const recipPK = await recipPKprom; // only now wait
-      if (!amount || !recipient) { // left a field empty
-        alert('Fill out all fields.');
-        return false;
-      }
-      if (!thisNode.address) { // not logged in
-        alert('You are not logged in.');
-        return false;
-      }
-      if (bal < amount) { // not enough balance
-        alert('You do not have enough money to send that much.');
-        return false;
-      }
-      // if (!recipPK) {
-      // recipient not in network
-      if (!(recipPK || confirm(`${recipient} is not registered on the network yet. Continue?`))) return false;
-      // }
-      // if(!confirm(`Send ${amount} TPC to ${recipient}?`)) return false; // stop unless they confirm affirmatively
-      broadcasttransaction(amount, recipient);
-      amount.value = ''; // clear fields
-      recipient.value = '';
-    });
+  const recip = document.getElementById('recipient').value;
+  if (!amount || !recipient) // left a field empty
+    return alert('Fill out all fields.');
+  if (!thisNode.pubkey) // not logged in
+    return alert('You are not logged in.');
+  calcBalance(thisNode.pubkey, function(bal){
+
+    if (bal < amount) // not enough balance
+      return alert('You do not have enough money to send that much.');
+
+    // all good, send it
+    broadcasttransaction(amount, recip);
+
+    // clear fields
+    amount.value = '';
+    recipient.value = '';
   });
 }
 
 /** calculate my balance and put it into DOM */
 async function getMyBalance() {
   document.getElementById('tpcbalance').innerHTML = 'Calculating...';
-  calcBalance(thisNode.address, function(bal){
+  calcBalance(thisNode.pubkey, function(bal){
     // console.log(bal, !bal);
     if (bal == null) {
       alert('you are not logged in');
@@ -118,73 +99,46 @@ async function getMyBalance() {
 
 
 async function register() {
-  setTimeout(function(){alert('Registering... This may take a minute.');}, 1); // asynchronous alert
+  alert('Registering... This may take a minute.');
 
-  // verify password
-  let password1 = document.getElementById('registerpassword1').value;
-  let password2 = document.getElementById('registerpassword2').value;
-  if (password1 != password2) {
-    alert('passwords do not match');
-    return false;
-  }
+  const loginkey = document.getElementById('registerloginkey').value;
+  if (loginkey.length < 16)
+    return alert('A login key should be at absolute minimum 16 charachters long.\
+                  This is the only thing between a hacker and all your money!');
 
-  // verify entered address
-  let address = document.getElementById('registeraddress').value;
-  getPubKey(address, async pubkey=>{
-    if (pubkey != null) {
-      console.log('That username is not available');
-      return false;
-    }
+  const name = document.getElementById('registername').value;
 
-    let keys = await RSA.generate(password1); // start generation of RSA keypair seeded from password1 (1024 bit, secure, real)
-    // let RSAKey = cryptico.generateRSAKey(password1, 1024);
-    // let publicKeyString = cryptico.publicKeyString(RSAKey);
 
-    // save info
-    thisNode.address = address;
-    document.cookie = 'address='+thisNode.address.toString();
-    thisNode.privkey = bigInt((keys.d)); // keep secret!
-    document.cookie = 'privkey='+thisNode.privkey.toString();
-    thisNode.pubkey = bigInt((keys.n)); // fixed public exponenet of 65537 (see rsa.js), only need n
-    document.cookie = 'pubkey='+thisNode.pubkey.toString();
 
-    // announce in blockchain
-    // invoke tostring rather than built in to stop from converting to "infinity"
-    broadcasttransaction(0, 'mypublickeyis'+thisNode.pubkey.toString());
-    setTimeout(function(){alert('registered successfully!');}, 1); // async alert
-    document.getElementById('login').style.display = 'none'; // hide registration modal
-  });
+  let keys = await RSA.generate(loginkey); // generate RSA keypair from loginkey
+
+  // save info
+  thisNode.name = name;
+  document.cookie = 'name='+thisNode.name.toString();
+  thisNode.privkey = bigInt((keys.d)); // keep secret!
+  document.cookie = 'privkey='+thisNode.privkey.toString();
+  thisNode.pubkey = bigInt((keys.n)); // fixed public exponent e of 65537 (rsa.js)
+  document.cookie = 'pubkey='+thisNode.pubkey.toString();
+
+  // TODO tell user to save privkey/pubkey or loginkey ###############################################
+
+  window.location.reload();
 }
 
 
 async function login() {
-  setTimeout(function(){alert('Logging in... This may take a minute.');}, 1); // asynchronous alert
+  alert('Logging in... This may take a minute.'); // asynchronous alert
 
   // verify password
-  let password = document.getElementById('loginpassword').value;
-
-  // verify entered address
-  let address = document.getElementById('loginaddress').value;
-  getPubKey(address, async pubkey=>{
-    if (pubkey === null) {
-      console.log('That username is not registered yet');
-      return false;
-    }
-
-    let keys = await RSA.generate(password); // start generation of RSA keypair seeded from password1 (1024 bit, secure, real)
-    // let RSAKey = cryptico.generateRSAKey(password1, 1024);
-    // let publicKeyString = cryptico.publicKeyString(RSAKey);
-
-    // save info
-    thisNode.address = address;
-    document.cookie = 'address='+thisNode.address.toString();
-    thisNode.privkey = bigInt((keys.d)); // keep secret!
-    document.cookie = 'privkey='+thisNode.privkey.toString();
-    thisNode.pubkey = bigInt((keys.n)); // fixed public exponenet of 65537 (see rsa.js), only need n
-    document.cookie = 'pubkey='+thisNode.pubkey.toString();
+  let loginkey = document.getElementById('loginkey').value;
 
 
-    setTimeout(function(){alert('logged in successfully!');}, 1); // async alert
-    document.getElementById('login').style.display = 'none'; // hide registration modal
-  });
+  let keys = await RSA.generate(loginkey); // start generation of RSA keypair seeded from password1 (1024 bit, secure, real)
+
+  thisNode.privkey = bigInt((keys.d)); // keep secret!
+  document.cookie = 'privkey='+thisNode.privkey.toString();
+  thisNode.pubkey = bigInt((keys.n)); // fixed public exponenet of 65537 (see rsa.js), only need n
+  document.cookie = 'pubkey='+thisNode.pubkey.toString();
+
+  window.location.reload();
 }
