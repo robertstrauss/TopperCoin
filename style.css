@@ -117,7 +117,6 @@ h3 {
 .rainbowbg {
   background: linear-gradient(124deg, #ff2400, #e81d1d, #e8b71d, #e3e81d, #1de840, #1ddde8, #2b1de8, #dd00f3, #dd00f3);
   background-size: 8000% 8000%;
-
   -webkit-animation: rainbow 18s ease infinite;
   -z-animation: rainbow 18s ease infinite;
   -o-animation: rainbow 18s ease infinite;
@@ -127,7 +126,13 @@ h3 {
 .pk {
   overflow: hidden;
   text-overflow: ellipsis;
+  padding: 3px;
 }
+.pk:hover {
+    background-image: linear-gradient(0deg, #fff1, #fff1);
+    cursor: pointer;
+}
+
 .blockcode {
   max-height: 75px;
   overflow: auto;
@@ -301,10 +306,10 @@ h3 {
   overflow-x: hidden;
 }
 #blockchainpreview .block .prevhash {
-  color: lightblue;
+  color: rgb(75, 187, 224);
 }
 #blockchainpreview .block .proofofwork {
   vertical-align: middle;
   display: inline-block;
-  color: #77dd77;
+  color: #45df45;
 }

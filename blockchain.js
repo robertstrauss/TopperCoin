@@ -16,11 +16,11 @@ const thisNode = {
                  };
 
 // how many zeros (bin) block hash must start with
-const difficulty = 8; // time ~= 2^difficulty
+const difficulty = 22; // time ~= 2^difficulty
 
 // initial set up of using the blockchain
 let blockchaindb; // global used for accessing blockchain
-let request = indexedDB.open('blockchain3');
+let request = indexedDB.open('blockchain4');
 request.onupgradeneeded = function(e) { // called if the user doesn't have a blockchain database yet
   con.log('initializing blockchain database');
   blockchaindb = request.result; // global way of accessing blockchain

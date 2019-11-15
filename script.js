@@ -26,10 +26,15 @@ socket.on('olleh', function(respondto){
 function searchnames() {
   const namequery = document.getElementById('namequery').value;
   const searchresults = document.getElementById('namesearchresults');
+  searchresults.innerHTML = '';
   for (var pk in localStorage) {
     if (Object.prototype.hasOwnProperty.call(localStorage, pk)) {
       if(localStorage[pk].includes(namequery) || pk.includes(namequery))
-        document.getElementById('namesearchresults').innerHTML += `<div class="pk">${localStorage[pk]}<br>${pk}</div>`;
+        searchresults.innerHTML += 
+            `<div class="pk" onclick="document.getElementById('recipient').value='${pk}';">
+                ${localStorage[pk]}<br>
+                ${pk}
+            </div>`;
     }
   }
 }
@@ -87,7 +92,7 @@ function previewBlockchain() {
 
 async function maketransaction() {
   const amount = document.getElementById('amount').value;
-  const recip = document.getElementById('recipient').value;
+  const recip  = document.getElementById('recipient').value;
   if (!amount || !recipient) // left a field empty
     return alert('Fill out all fields.');
   if (!thisNode.pubkey) // not logged in
@@ -101,8 +106,8 @@ async function maketransaction() {
     broadcasttransaction(amount, recip);
 
     // clear fields
-    amount.value = '';
-    recipient.value = '';
+    document.getElementById('amount').value = '';
+    document.getElementById('recipient').value = '';
   });
 }
 
