@@ -56,30 +56,54 @@ request.onsuccess = ()=>{
 
 
 function resync () {
+  function reqsince(b) {
+    if (!b) return; // avoid infinite recursion loop
+    // send out request for given block b
+    con.log('requesting blockchain since', b.hash);
+    socket.emit('request', {type:'sync', content: b.hash});
+
+    // response with status
+    socket.on('syncresp', (resp)=>{
+      // success
+      if (resp === 'success') return setTimeout(()=>socket.off('syncresp'), 1); // kill listener
+      // otherwise
+      // open blockchain
+      const blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+      // get the previous block, then request since that.
+      blockchainos.get(b.prevhash).onsuccess = e=>reqsince(e.target.result);
+    });
+  }
+
   // request the blockchain since each of local endblocks
-  endblocks.forEach(block=>{
-    con.log('requesting blockchain since', block.hash);
-    socket.emit('request', {type:'blockchain', content:`${block.hash}`});
-  });
+  endblocks.forEach(block=>reqsince(block));
 }
 
 
 
 // reply with blockchain when requested
-socket.on('blockchainrequest', function(req){
-  con.log('blockchain request', req);
+socket.on('syncreq', function(req){
+  con.log('blockchain sync request since', req);
   starthash = req.content;
   blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
   prevhash = blockchainos.index('prevhash');
   prevhash.get(starthash).onsuccess = function respp(e) {
     let block = e.target.result;
     if (block) {
+      socket.emit('response', {to: req.respondto, type: 'syncresp', content: 'success'});
       con.log('responding with block', block);
       socket.emit('response', {to: req.respondto, type: 'block', content: block.prevhash+';'+block.transactions+';'+block.proofofwork});
       prevhash.get(block.hash).onsuccess = respp; // do next block(s)
+    } else {
+      socket.emit('response', {to: req.respondto, type: 'syncresp', content: 'notfound'});
     }
   };
 });
+
+
+
+
+
+
 
 
 

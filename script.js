@@ -1,19 +1,27 @@
 const names = JSON.parse(localStorage.getItem('names')) || {};
 
+// introduce self
+socket.emit('hello', {name: thisNode.name, pubkey: thisNode.pubkey})
+socket.emit('olleh'); // greet other nodes
+
+// intervals
+setInterval(previewBlockchain, 5000); // update preview every 5s
+setInterval(resync, 30000); // resync every 30s
+
+
+// things that need async event to finish or for body load (0.5s delay after body onload)
 function main() {
   previewBlockchain();
   getMyBalance();
   searchnames();
+
+  // html display
   document.getElementById('displayname').value       = thisNode.name || '';
   document.getElementById('publickeydiv').innerHTML  = thisNode.pubkey || '';
   document.getElementById('privatekeydiv').innerHTML = thisNode.privkey || '';
   document.getElementById('loginkeydiv').innerHTML   = thisNode.loginkey || '';
-  document.getElementById('address').innerHTML = thisNode.name || thisNode.pubkey || 'Not Logged In';
-  if(thisNode.pubkey) document.getElementById('addresstab').onclick = ()=>{document.getElementById('wallet').style.display = 'inline-block'};
-  socket.emit('hello', {name: thisNode.name, pubkey: thisNode.pubkey})
-  socket.emit('olleh'); // greet other nodes
-  setInterval(previewBlockchain, 5000); // update preview every 5s
-  setInterval(resync, 30000); // resync every 30s
+  document.getElementById('address').innerHTML       = thisNode.name || thisNode.pubkey || 'Not Logged In';
+  thisNode.pubkey && (document.getElementById('addresstab').onclick = ()=>{document.getElementById('wallet').style.display = 'inline-block'});
 }
 
 // listeners for communicating names
@@ -55,8 +63,9 @@ function previewBlockchain() {
         let bblock = cursor.value;
         const div = document.createElement('div');
         div.innerHTML += `<div class="blockcontent"><div class="transactions">
-                                ${bblock.transactions.replace(/([^>]*)>([^>]+)>([^|]*)\|[^,]*,?/g, "$1 gave $2 TPC to $3<br>")}
-                                </div></div>`;
+                          ${bblock.transactions.replace(/([^>]*)>([^>]+)>([^|]*)\|[^,]*,?/g,
+                                (whole, s,a,r)=>(names[s]||s)+" gave "+a+" TPC to "+(names[r]||r)+"<br>")}
+                          </div></div>`;
         // if ((lengthdiv = document.getElementById(`length${bblock.length}`)) != null) {
         //   lengthdiv.innerHTML += div.innerHTML;
         // } else {

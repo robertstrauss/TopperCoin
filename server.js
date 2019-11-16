@@ -41,10 +41,10 @@ io.on('connection', function(socket){
     io.emit('block', blockstring); // forward message to all nodes
   });
   socket.on('request', function(req){
-    // forward request to three random nodes. give my id to respond to
-    io.to(nodes[Math.round(Math.random()*nodes.length)]).emit(req.type+'request', {content:req.content, respondto:socket.id});
-    io.to(nodes[Math.round(Math.random()*nodes.length)]).emit(req.type+'request', {content:req.content, respondto:socket.id});
-    io.to(nodes[Math.round(Math.random()*nodes.length)]).emit(req.type+'request', {content:req.content, respondto:socket.id});
+    // forward request to ~~three~~ random node~~s~~. give my id to respond to
+    io.to(nodes[Math.round(Math.random()*nodes.length)]).emit(req.type+'req', {content:req.content, respondto:socket.id});
+    // io.to(nodes[Math.round(Math.random()*nodes.length)]).emit(req.type+'req', {content:req.content, respondto:socket.id});
+    // io.to(nodes[Math.round(Math.random()*nodes.length)]).emit(req.type+'req', {content:req.content, respondto:socket.id});
   });
   socket.on('response', function(resp){
     io.to(resp.to).emit(resp.type, resp.content); // forward to just requester
