@@ -9,7 +9,8 @@ const socket = io();
 // }
 
 // object containing info specific to the client's node, stored in cookies
-const thisNode = JSON.parse(localStorage.getItem('nodeinfo')) || {};
+const thisNode  = JSON.parse(localStorage.getItem('nodeinfo') ) || {};
+const endblocks = JSON.parse(localStorage.getItem('endblocks')) || [];
 // {
 //                    pubkey  : localStorage.getItem('pubkey')  || null,
 //                    privkey : localStorage.getItem('privkey') || null,
@@ -21,7 +22,7 @@ const difficulty = 22; // time ~= 2^difficulty
 
 // initial set up of using the blockchain
 let blockchaindb; // global used for accessing blockchain
-let request = indexedDB.open('blockchain22');
+let request = indexedDB.open('blockchain22a');
 request.onupgradeneeded = function(e) { // called if the user doesn't have a blockchain database yet
   con.log('initializing blockchain database');
   blockchaindb = request.result; // global way of accessing blockchain
@@ -35,21 +36,12 @@ request.onupgradeneeded = function(e) { // called if the user doesn't have a blo
 
   con.log('created blockchain object store');
 
-  // object store for just the most recent blocks
-  let ebObjectStore = blockchaindb.createObjectStore('endblocks', { keyPath: 'hash' });
-  ebObjectStore.createIndex('prevhash',    'prevhash',    { unique: false });
-  ebObjectStore.createIndex('transactions','transactions',{ unique: false });
-  ebObjectStore.createIndex('proofofwork', 'proofofwork', { unique: false });
-  ebObjectStore.createIndex('length',      'length',      { unique: false });
-
-  con.log('created endblocks object store');
-
   // genesis block
-  const genesis = {hash: '6fdbb03bb088842ae686afefbe42eb4394d4374d5641d164e62ba22ae369cf26',
-                     prevhash: 'genesis', transactions:'>999999999>11001666236737003471863781910704567116068419957597583941839782326558264484999739371681108528684580876407741425804606311794382574832099003290677645902524504542809704507732379121112859411382290288546627771471401350311007839746272894141706841943317302894861593923182245917367911293853069802985807722607401716264230589409586942854651761065403183850480637814329688850499812945013737407353402424189496813931892715089162144387062537145943965377831040752871925007816297760653496620084702709212234424916926301099420702183856942585137076501003584947736344810789854675049699806884822962332811732839895574891447744884403003129583',
-                     proofofwork: 'genesis', length: 1};
+  const genesis = {hash: 'genesis',
+                     prevhash: '', transactions:'>999999999>11001666236737003471863781910704567116068419957597583941839782326558264484999739371681108528684580876407741425804606311794382574832099003290677645902524504542809704507732379121112859411382290288546627771471401350311007839746272894141706841943317302894861593923182245917367911293853069802985807722607401716264230589409586942854651761065403183850480637814329688850499812945013737407353402424189496813931892715089162144387062537145943965377831040752871925007816297760653496620084702709212234424916926301099420702183856942585137076501003584947736344810789854675049699806884822962332811732839895574891447744884403003129583|',
+                     proofofwork: '', length: 1};
   bcObjectStore.add(genesis);
-  ebObjectStore.add(genesis);
+  endblocks.push(genesis); localStorage.setItem('endblocks', JSON.stringify(endblocks));
   con.log('database initialization complete');
   /**
    * blockchain will be synced
@@ -58,42 +50,17 @@ request.onupgradeneeded = function(e) { // called if the user doesn't have a blo
 }
 request.onsuccess = ()=>{
   blockchaindb = request.result; // set the global variable for accessing blockchain
-
-  // open the database to request from the end
-  let trans = blockchaindb.transaction(['endblocks'], 'readonly');
-  endblockos = trans.objectStore('endblocks');
-
-  // request the blockchain since each of local endblocks
-  endblockos.openCursor().onsuccess = function(event){
-    cursor = event.target.result;
-    if (cursor) {
-      // length of local blockchain: event.target.result
-      // send a request for the blocks after what we have
-      con.log('requesting blockchain since', cursor.value.hash);
-      socket.emit('request', {type:'blockchain', content:`${cursor.value.hash}`});
-      cursor.continue();
-    }
-  };
+  resync();
 }
 
 
 
 function resync () {
-  // open the database to request from the end
-  let trans = blockchaindb.transaction(['endblocks'], 'readonly');
-  endblockos = trans.objectStore('endblocks');
-
   // request the blockchain since each of local endblocks
-  endblockos.openCursor().onsuccess = function(event){
-    cursor = event.target.result;
-    if (cursor) {
-      // length of local blockchain: event.target.result
-      // send a request for the blocks after what we have
-      con.log('requesting blockchain since', cursor.value.hash);
-      socket.emit('request', {type:'blockchain', content:`${cursor.value.hash}`});
-      cursor.continue();
-    }
-  };
+  endblocks.forEach(block=>{
+    con.log('requesting blockchain since', block.hash);
+    socket.emit('request', {type:'blockchain', content:`${block.hash}`});
+  });
 }
 
 
@@ -166,10 +133,9 @@ async function processblockqueue() {
   }
   con.log('block matches difficulty');
 
-  // get the blockchain and endblocks ready to read from and write to
-  const transaction = blockchaindb.transaction(['blockchain', 'endblocks'], 'readwrite');
-  const blockchainos = transaction.objectStore('blockchain'); // full blockchain
-  const endblockos = transaction.objectStore('endblocks') // the most recent blocks
+  // open transaction on blockchain
+  const transaction = blockchaindb.transaction(['blockchain'], 'readwrite');
+  const blockchainos = transaction.objectStore('blockchain'); // full blockchain=
 
   /*
   ###################################################
@@ -204,13 +170,11 @@ async function processblockqueue() {
           // add new block to local blockchain
           newblock.length = parentblock.length+1;
           con.log('accepting block', newblock);
-          try {
-            endblockos.delete(parentblock.hash);
-          } catch (e) {
-            con.log(e);
-            con.log('fork started');
-          }
-          endblockos.add(newblock);
+
+          if ((i = endblocks.indexOf(parentblock))!=-1) endblocks.splice(i, 1);
+          else con.log('fork started');
+
+          endblocks.push(newblock); localStorage.setItem('endblocks', JSON.stringify(endblocks));
           blockchainos.add(newblock);
 
           // restart miner if mining
@@ -258,21 +222,12 @@ async function isValidTransaction(transactionstring) {
 
 // determine the block that is farthest in the blockchain
 async function getLongestBlock(callback) {
-  let blockstring = '';
-  let endblockos  = blockchaindb.transaction(['endblocks'], 'readonly').objectStore('endblocks');
-  let longestblock= {length:0};
-  endblockos.openCursor().onsuccess = function(e) {
-    // iterate through enblocks to find "longest" - one with most behind it
-    let cursor = e.target.result;
-    if (cursor) {
-      let block = cursor.value;
-      if (block.length > longestblock.length) longestblock = block;
-      cursor.continue();
-    }
-    else { // done going through endblocks
-      callback(longestblock);
-    }
-  }
+  let blockchainos  = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+  let longestblock = {length:0};
+  endblocks.forEach(block=>{
+    if (block.length > longestblock.length) longestblock = block;
+  });
+  return longestblock;
 }
 
 /** calculate balance of address */

@@ -12,7 +12,7 @@ function main() {
   if(thisNode.pubkey) document.getElementById('addresstab').onclick = ()=>{document.getElementById('wallet').style.display = 'inline-block'};
   socket.emit('hello', {name: thisNode.name, pubkey: thisNode.pubkey})
   socket.emit('olleh'); // greet other nodes
-  setInterval(previewBlockchain, 3000); // update preview every 3s
+  setInterval(previewBlockchain, 5000); // update preview every 5s
   setInterval(resync, 30000); // resync every 30s
 }
 
@@ -39,51 +39,36 @@ function searchnames() {
 }
 
 function previewBlockchain() {
-  let transaction  = blockchaindb.transaction(['blockchain', 'endblocks'], 'readonly');
-  let blockchainos =  transaction.objectStore('blockchain');
-  let endblockos   =  transaction.objectStore('endblocks' );
+  const transaction = blockchaindb.transaction(['blockchain'], 'readonly');
+  const blockchainos = transaction.objectStore('blockchain');
+
+  const preview = document.createElement('div');
 
   // fill the blockchain preview div
-  blockchainpreviewdiv = document.createElement('div');//document.getElementById('blockchainpreview');
-  let curreq = endblockos.openCursor();
-  curreq.onsuccess = function(e) { // once for each fork (from the endpoints)
-    let cursor = e.target.result;
-    if (cursor) {
-      let block = cursor.value;
-      let count = 0;
-      blockchainos.get(block.hash).onsuccess = function prevFrom(ev) {
-        if (count > 16) return; // don't display more than 16 back
-        count++;
-        let block = ev.target.result;
-        if (!block) return;
-
-        let blockdiv = document.createElement('div'); // create an element for this block
-        blockdiv.className = 'blockcontent'; // of class block
-        blockdiv.href = '/blockchain/'+block.hash; // that links to a page on the block
-
-        // create individual divs for the previous hash, transactions, and proofofwork of the block
-        ['prevhash', 'transactions', 'proofofwork'].forEach(function(key){
-          let element = document.createElement('div');
-          element.className = key;
-          element.innerHTML = block[key].replace(/,/g, ',<br>').replace(/|[0-9]+,/g, '');
-
-          blockdiv.appendChild(element);
-        });
-
-        // try to get already existing div for length
-        let lengthdiv = document.getElementById(`length${block.length}`) || document.createElement('div');
-        lengthdiv.className = 'block';
-        lengthdiv.appendChild(blockdiv);
-        let ldiv = document.createElement('span'); ldiv.innerHTML = block.length;
-        lengthdiv.appendChild(ldiv);
-        blockchainpreviewdiv.appendChild(lengthdiv); // add created html block to the preview
-        blockchainos.get(block.prevhash).onsuccess = prevFrom; // do all previous blocks
-      }; // preview starting from last block
-      cursor.continue();
+  endblocks.forEach(block=>{
+    let count = 0;
+    blockchainos.openCursor(block.hash).onsuccess = (e) => {
+      let cursor = e.target.result;
+      count++
+      // if ((count++) === 0) cursor.continue(block.hash); // start from block
+      if (cursor && count < 16) {
+        let bblock = cursor.value;
+        const div = document.createElement('div');
+        div.innerHTML += `<div class="blockcontent"><div class="transactions">
+                                ${bblock.transactions.replace(/([^>]*)>([^>]+)>([^|]*)\|[^,]*,?/g, "$1 gave $2 TPC to $3<br>")}
+                                </div></div>`;
+        // if ((lengthdiv = document.getElementById(`length${bblock.length}`)) != null) {
+        //   lengthdiv.innerHTML += div.innerHTML;
+        // } else {
+          div.id = `length${bblock.length}`;
+          div.className = 'lengthdiv';
+          preview.appendChild(div);
+        // }
+      }
     }
-  };
+  });
   transaction.oncomplete = () => {
-    document.getElementById('blockchainpreview').innerHTML = blockchainpreviewdiv.innerHTML;
+    document.getElementById('blockchainpreview').innerHTML = preview.innerHTML;
   };
 }
 

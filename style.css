@@ -96,7 +96,7 @@ h3 {
 .rainbowtxt {
   -webkit-background-clip: text;
   background-clip: text;
-  color: transparent;
+  color: transparent !important;
 }
 
 @keyframes colorchange {
@@ -216,7 +216,7 @@ h3 {
   -o-filter: blur(5px);
   -ms-filter: blur(5px);
 }
-.private:focus, .private:hover {
+.private:hover {
   -webkit-filter: none;
   -moz-filter: none;
   -o-filter: none;
@@ -267,8 +267,8 @@ h3 {
   text-align: left;
   overflow-y: auto;
 }
-#blockchainpreview .block {
-  display: flex;
+#blockchainpreview .lengthdiv {
+  display: block;
   box-sizing: border-box;
   width: 100%;
   overflow: auto;
@@ -278,15 +278,8 @@ h3 {
   border-style: none;
   border-bottom-style: solid;
 }
-#blockchainpreview .block > div {
-  flex: 1 1 auto;
-}
-#blockchainpreview .block > span {
-  flex: 0 1 auto;
-}
 #blockchainpreview .blockcontent {
-  overflow: hidden;
-
+  overflow: auto;
 }
 #blockchainpreview .block * {
   padding: 4px;
