@@ -6,14 +6,33 @@
     <title>TopperCoin</title>
     <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
-    <link href="style.css" rel="stylesheet" type="text/css" />
+    <link href="style.css" rel="stylesheet" type="text/css">
+
+
+    <!-- <script src="jquery.min.js"></script> <!- - jquery, a powerful utility - -> -->
+    <script src="https://peterolson.github.io/BigInteger.js/BigInteger.min.js"></script> <!-- bigInt for doing fast calculations with large integers -->
+    <script src="/socket.io/socket.io.js"></script> <!-- for communication with server -->
+    <!-- <script src="cryptico/cryptico.min.js"></script> <!- - for generating rsa keypair -->
+    <script src="cryptorng.js"></script> <!-- for generating cryptographically secure random numbers from a seed -->
+    <script src="rsa.js"></script> <!-- rsa -->
+    <script>
+      let con = {
+        log: ()=>{},
+        warn: ()=>{},
+        error: ()=>{},
+      };
+    </script>
+    <script src="blockchain.js"></script> <!-- Blockchain and other functionality -->
+    <script src="script.js"></script>     <!-- site functionality -->
+    <script src="wasmminer.js"></script>  <!-- emscripten-generated webassembly miner compiled from c -->
+    <script src="autominer.js"></script>  <!-- automatic miner -->
   </head>
   <body onload="setTimeout(main, 500)">
     <div id="dash">
               <div id="leftcol">
-                      <span class="infotab" onclick="document.getElementById('about').style.display='inline-block'"><h1 class="rainbowtxt">
-                        TopperCoin
-                      </h1></span>
+                      <span class="infotab" onclick="document.getElementById('about').style.display='inline-block'">
+                        <h1 class="rainbowtxt">TopperCoin</h1>
+                      </span>
 
                       <!-- login and register -->
                       <span class="infotab" id="addresstab" onclick="document.getElementById('login').style.display = 'inline-block';">
@@ -36,7 +55,7 @@
                       </span>
 
                       <div id="yyyeet" class="cell" onclick="randomfact()">
-                        <b><u>Fact of the day:</u></b>
+                        <b>Fact of the day:</b>
                         <br>
                         <p id="factoftheday"></p>
                         <script>
@@ -45,7 +64,7 @@
                                      "you dont get an error when you index an array it doesnt have",
                                      "you have a bad random generator torsten, i wanna see more cow flatulence", "do you have more in there?",
                                      "damn it", "it almost worked then, though", "i was gonna make trash, but then this was more fun",
-                                     "<b><u>Fact of the day:<br>Fact of the day:<br>Fact of the day:<br>Fact of the day:<br></u></b>",
+                                     "<b>Fact of the day:<br>Fact of the day:<br>Fact of the day:<br>Fact of the day:<br></b>",
                                      "cow go fart, cow go zoom", "█████ ██ █ ██████, ███ ██ ████ ███ ██ ███", "|  ||<br>|| |_"];
                           function randomfact(){
                             let factofday_num = Math.floor(Math.random() * facts.length);
@@ -55,7 +74,7 @@
                         </script>
                       </div>
                       <div id="yyyyeet" class="cell" onclick="randomquote()">
-                        <b><u>Quote of the day:</u></b>
+                        <b>Quote of the day:</b>
                         <br>
                         <p id="quoteoftheday"></p>
                         <script>
@@ -90,33 +109,34 @@
                       <!-- form for making payments -->
                       <div id="sendtpc">
                         <h3>Send Money</h3>
-                      <form id="makepaymentform" onsubmit="return false;">
+                        <form id="makepaymentform" onsubmit="return false;">
 
-                            <input placeholder="amount" type="number" id="amount" step="0.0001" min="0"/>
+                              <input placeholder="amount" type="number" id="amount" step="0.0001" min="0"/>
 
-                            <input placeholder="public key or name" type="text" id="recipient"/>
+                              <input list="names" placeholder="public key or name" type="text" id="recipient"/>
 
-                            <button class="btn" style="width:100%;margin:0" onclick="maketransaction()">Send</button>
+                              <datalist id="names"></datalist>
 
-                      </form>
+                              <button class="btn" onclick="maketransaction()">Send</button>
+
+                        </form>
                       </div>
                       <!-- preview of the blockchain -->
                       <!-- <h3>Blockchain</h3> -->
-                      <div id="bcpreviewontainer" style="flex: 1 1 auto;">
+                      <div id="bcpreviewontainer">
                         <div id="blockchainpreview"></div>
                       </div>
               </div>
 
 
 
-              <div id="rightcol">
+              <!-- <div id="rightcol">
                 <form onsubmit="return false;">
-                  <table style="width:100%"><td><input id="namequery" type="text" placeholder="search for a name..."/></td>
+                  <table><td><input id="namequery" type="text" placeholder="search for a name..."/></td>
                     <td><button class="btn" onclick="searchnames()">Search</button></td></table>
                 </form>
-                <div id="namesearchresults">
-                </div>
-              </div>
+
+              </div> -->
 
     </div>
     <!-- end of dash -->
@@ -164,7 +184,6 @@
     <!-- window of about section -->
     <div id="about" class="modal"><div class="modalc">
       <div class="modal-content">
-        <!-- <div style="text-align:right;"><button class="btn" onclick="document.getElementById('about').style.display='none'">X</button></div> -->
         <h2>About TopperCoin</h2>
         <p>
           TopperCoin is a cryptocurrency, like BitCoin, built by and for LAHS students.
@@ -174,7 +193,7 @@
         <h3>FAQ</h3>
         <ul>
           <li>What is a cryptocurrency?</li>
-            <p>A cryptocurrency is a system of money that is <u>entirely digital</u>.
+            <p>A cryptocurrency is a system of money that is <b>entirely digital</b>.
               Payments are recorded securely on a computer, and it's effectively just as real as normal money.
             </p>
           <li>How do I use it?</li>
@@ -206,13 +225,12 @@
     <!-- modal of login -->
     <div id="login" class="modal">
       <div class="modal-content">
-        <!-- <div style="text-align:right;"><button class="btn" onclick="document.getElementById('login').style.display='none'">X</button></div> -->
         <h2>Log in</h2>
           <form onsubmit="return false;">
 
               <textarea class="private" placeholder="super-secure login key" id="loginkey"></textarea>
 
-              <button class="btn" style="width:100%" onclick="login()">Log In</button>
+              <button class="btn" onclick="login()">Log In</button>
 
           </form>
       </div>
@@ -226,14 +244,14 @@
                             oninvalid="setCustomValidity('cannot include '>', '|', ',', or ';')"
                             onchange="try{setCustomValidity('')}catch(e){}"/> -->
               <p>
-                Create a <u><b><i>super</i></b>-secure key</u> to access your account with.
+                Create a <b><i>super</i></b>-secure key to access your account with.
                 It could be something like a phrase you made up or just some keyboard-mashing
                 (as long as you have it saved somewhere or can remember it).
                 Remember, if someone else gets ahold of this, they will have access to all your money!
               </p>
               <textarea class="private" placeholder="a unique, unguessable, super-secure key" id="registerloginkey"></textarea>
 
-              <button class="btn" style="width:100%" onclick="register()">Submit</button>
+              <button class="btn" onclick="register()">Submit</button>
 
           </form>
       </div>
@@ -243,33 +261,11 @@
     <!-- syncing window -->
     <div id="syncingmodal" class="modal"><div class="modalc">
       <div class="modal-content">
-        <!-- <div style="text-align:right;"><button class="btn" onclick="document.getElementById('syncingmodal').style.display='none'">X</button></div> -->
         <h2>Syncing Blockchain</h2>
         <p>This may take a few minutes. Please be patient.</p>
       </div>
     </div></div>
 
-
-    <!-- <script src="jquery.min.js"></script> <!- - jquery, a powerful utility - -> -->
-    <script src="https://peterolson.github.io/BigInteger.js/BigInteger.min.js"></script> <!-- bigInt for doing fast calculations with large integers -->
-    <script src="/socket.io/socket.io.js"></script> <!-- for communication with server -->
-    <!-- <script src="cryptico/cryptico.min.js"></script> <!- - for generating rsa keypair -->
-    <script src="cryptorng.js"></script> <!-- for generating cryptographically secure random numbers from a seed -->
-    <script src="rsa.js"></script> <!-- rsa -->
-    <script src="style.js"></script> <!-- fancy style things -->
-    <!-- <script src="control/sha.js"></script> <!- - sha256 hashing - -> -->
-    <script>
-      const con = console;
-
-      // con = {
-      //   log: ()=>{},
-      //   warn: ()=>{},
-      //   error: ()=>{}
-      // };
-    </script>
-    <script src="blockchain.js"></script> <!-- Blockchain and other functionality -->
-    <script src="script.js"></script> <!-- UI functionality -->
-    <!-- <script src="webassembly/wasmminer.js"></script> <!- - emscripten-generated webassembly miner compiled from c - -> -->
-    <script src="autominer.js"></script> <!-- automatic miner -->
+    <script src="style.js"></script> <!-- fancy style things (modals, light/dark mode)-->
   </body>
 </html>

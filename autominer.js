@@ -20,19 +20,11 @@ async function mineBlock(blockstring, dfc, callback) { // difficulty in zeros in
 
 async function fromBlock(lastblock) {
   con.log('starting new block from ', lastblock);
-  let blockstring = lastblock.hash+';>1>'+thisNode.pubkey+','; // start with previous block (lastblock) hash
+  let blockstring = lastblock.hash+';>1>'+(thisNode.pubkey||'')+'|,'; // start with previous block (lastblock) hash
   blockstring +=    transactions.join(','); // dump recorded transactions into block delimited by commas
 
-  thisNode.miner.postMessage({blockstring: blockstring, dfc: difficulty}); // send data for mining
-  thisNode.miner.addEventListener('message', async (e)=>{ // miner thread responds with result (minedblock)
-    con.log('thread mined block', e.data);
-    let minedblock = e.data;
-    // add it to personal blockchain
-    let mbsplit = minedblock.split(';');
-    let mbhash = await hashHex(minedblock, 'SHA-256');
-    let mb = {hash: mbhash, prevhash: mbsplit[0], transactions: mbsplit[1], proofofwork: mbsplit[2], length: lastblock.length+1};
-    socket.emit('block', minedblock);
-  });
+  thisNode.miner.postMessage([blockstring, difficulty]); // send data for mining
+  thisNode.miner.addEventListener('message', e => socket.emit('block', blockstring+';'+e.data)); // emit block when done
 }
 
 function startMining() {

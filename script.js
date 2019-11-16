@@ -1,40 +1,39 @@
+const names = JSON.parse(localStorage.getItem('names')) || {};
 
 function main() {
   previewBlockchain();
   getMyBalance();
-  document.getElementById('displayname').value = thisNode.name || '';
-  document.getElementById('publickeydiv').innerHTML = thisNode.pubkey || '';
+  searchnames();
+  document.getElementById('displayname').value       = thisNode.name || '';
+  document.getElementById('publickeydiv').innerHTML  = thisNode.pubkey || '';
   document.getElementById('privatekeydiv').innerHTML = thisNode.privkey || '';
-  document.getElementById('loginkeydiv').innerHTML = getCookie('loginkey') || '';
+  document.getElementById('loginkeydiv').innerHTML   = thisNode.loginkey || '';
   document.getElementById('address').innerHTML = thisNode.name || thisNode.pubkey || 'Not Logged In';
   if(thisNode.pubkey) document.getElementById('addresstab').onclick = ()=>{document.getElementById('wallet').style.display = 'inline-block'};
-  socket.emit('hello', {myname: thisNode.name, mypubkey: thisNode.pubkey})
+  socket.emit('hello', {name: thisNode.name, pubkey: thisNode.pubkey})
   socket.emit('olleh'); // greet other nodes
   setInterval(previewBlockchain, 3000); // update preview every 3s
   setInterval(resync, 30000); // resync every 30s
 }
 
-
+// listeners for communicating names
 socket.on('hello', function(data){
-  localStorage.setItem(data.mypubkey, data.myname);
+  names[data.pubkey] = data.name;
+  localStorage.setItem('names', JSON.stringify(names));
 });
 socket.on('olleh', function(respondto){
-  socket.emit('hello', {to:respondto, mypubkey: thisNode.pubkey, myname: thisNode.name});
+  thisNode.pubkey && socket.emit('hello', {to:respondto, pubkey: thisNode.pubkey, name: thisNode.name});
 });
 
 
 function searchnames() {
-  const namequery = document.getElementById('namequery').value;
-  const searchresults = document.getElementById('namesearchresults');
+  // const namequery = document.getElementById('namequery').value;
+  const searchresults = document.getElementById('names');
   searchresults.innerHTML = '';
-  for (var pk in localStorage) {
-    if (Object.prototype.hasOwnProperty.call(localStorage, pk)) {
-      if(localStorage[pk].includes(namequery) || pk.includes(namequery))
-        searchresults.innerHTML += 
-            `<div class="pk" onclick="document.getElementById('recipient').value='${pk}';">
-                ${localStorage[pk]}<br>
-                ${pk}
-            </div>`;
+  for (var pk in names) {
+    if (Object.prototype.hasOwnProperty.call(names, pk)) {
+      // if(localStorage[pk].includes(namequery) || pk.includes(namequery))
+        searchresults.innerHTML += `<option value="${pk}">${names[pk]}</option>`;
     }
   }
 }
@@ -129,8 +128,8 @@ async function getMyBalance() {
 
 async function register() {
   const loginkey = document.getElementById('registerloginkey').value;
-  if (loginkey.length < 16)
-    return alert('A login key should be at absolute minimum 16 charachters long. '
+  if (loginkey.length < 20)
+    return alert('A login key should be at absolute minimum 20 charachters long. '
                   +'This is the only thing between a hacker and all your money!');
 
   const name = document.getElementById('registername').value;
@@ -139,13 +138,11 @@ async function register() {
   let keys = await RSA.generate(loginkey); // generate RSA keypair from loginkey
 
   // save info
-  thisNode.name   = name;
-  thisNode.privkey= bigInt((keys.d)); // keep secret!
-  thisNode.pubkey = bigInt((keys.n)); // fixed public exponent e of 65537 (rsa.js)
-  document.cookie = 'name='    +thisNode.name.toString();
-  document.cookie = 'privkey=' +thisNode.privkey.toString();
-  document.cookie = 'pubkey='  +thisNode.pubkey.toString();
-  document.cookie = 'loginkey='+loginkey.toString();
+  thisNode.name    = name;
+  thisNode.privkey = bigInt((keys.d)); // keep secret!
+  thisNode.pubkey  = bigInt((keys.n)); // fixed public exponent e of 65537 (rsa.js)
+  thisNode.loginkey= loginkey;
+  localStorage.setItem('nodeinfo', JSON.stringify(thisNode));
 
   // alert(`Make sure to save this key.\n--------\n${loginkey}\n--------\nIt\'s the only way to access your money!`);
 
@@ -162,11 +159,10 @@ async function login() {
 
   let keys = await RSA.generate(loginkey); // start generation of RSA keypair seeded from password1 (1024 bit, secure, real)
 
-  thisNode.privkey= bigInt((keys.d)); // keep secret!
-  thisNode.pubkey = bigInt((keys.n)); // fixed public exponenet of 65537 (see rsa.js), only need n
-  document.cookie = 'privkey=' +thisNode.privkey.toString();
-  document.cookie = 'pubkey='  +thisNode.pubkey.toString();
-  document.cookie = 'loginkey='+loginkey.toString();
+  thisNode.privkey = bigInt((keys.d)); // keep secret!
+  thisNode.pubkey  = bigInt((keys.n)); // fixed public exponenet of 65537 (see rsa.js), only need n
+  thisNode.loginkey= loginkey;
+  localStorage.setItem('nodeinfo', JSON.stringify(thisNode));
 
   window.location.reload();
 }

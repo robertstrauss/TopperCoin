@@ -2,25 +2,26 @@
 const socket = io();
 
 // for getting cookies
-function getCookie(name) {
-  let re = new RegExp(name + "=([^;]+)");
-  let value = re.exec(document.cookie);
-  return (value != null) ? unescape(value[1]) : null;
-}
+// function getCookie(name) {
+//   let re = new RegExp(name + "=([^;]+)");
+//   let value = re.exec(document.cookie);
+//   return (value != null) ? unescape(value[1]) : null;
+// }
 
 // object containing info specific to the client's node, stored in cookies
-const thisNode = {
-                   pubkey  : ((getCookie('pubkey'))),
-                   privkey : ((getCookie('privkey'))),
-                   name    : ((getCookie('name'   )))
-                 };
+const thisNode = JSON.parse(localStorage.getItem('nodeinfo')) || {};
+// {
+//                    pubkey  : localStorage.getItem('pubkey')  || null,
+//                    privkey : localStorage.getItem('privkey') || null,
+//                    name    : localStorage.getItem('name'   ) || null
+//                  };
 
 // how many zeros (bin) block hash must start with
 const difficulty = 22; // time ~= 2^difficulty
 
 // initial set up of using the blockchain
 let blockchaindb; // global used for accessing blockchain
-let request = indexedDB.open('blockchain4');
+let request = indexedDB.open('blockchain22');
 request.onupgradeneeded = function(e) { // called if the user doesn't have a blockchain database yet
   con.log('initializing blockchain database');
   blockchaindb = request.result; // global way of accessing blockchain

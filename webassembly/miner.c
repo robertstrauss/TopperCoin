@@ -53,5 +53,5 @@ char* mineBlock(const char* block, const unsigned int bdifficulty){
     if (zcount >= ddifficulty && hash[ddifficulty] < rdiff) going = 0; // stop loop, it is found
     nproofofwork += 1; // increment numeric proof of work
   }
-  return minedblock;
+  return proofofwork;
 }

@@ -1,18 +1,16 @@
 :root {
-  --bg-clr-dark: 14, 19, 23;/*21, 32, 43;*/
+  --bg-clr-dark: 15, 25, 40;/*21, 32, 43;*/
   --text-clr-dark: 228, 230, 231;
   --bg-clr-light: 250, 250, 255;
   --text-clr-light: 32, 32, 32;
   --accent: 203, 89%, 53%;
   /* default values */
-  --bg-clr: var(--bg-clr-light);
-  --text-clr: var(--text-clr-light);
+  --bg-clr: var(--bg-clr-dark);
+  --text-clr: var(--text-clr-dark);
   --strip-width: 1000px;
 }
 * {
   transition: 0.15s;
-  /* background-color: hsl(var(--accent)) !important;
-  color: hsl(var(--accent)) !important; */
 }
 body {
   font-family: 'Nunito', Sans-Serif;
@@ -22,14 +20,12 @@ body {
   background-color: rgb(var(--bg-clr));
 }
 a {
-  color: hsl(var(--accent));
   margin: 5px;
   padding: 10px;
   padding-top: 1px;
   padding-bottom: 1px;
   font-weight: 600;
   cursor: pointer;
-  border: 1px solid hsl(var(--accent));
 }
 .btn {
   min-width: 20px;
@@ -38,7 +34,6 @@ a {
   margin: 1px;
   border: 0;
   border-radius: 300px;
-  background-color: hsl(var(--accent));
   color: rgb(var(--bg-clr));
   outline: none;
   box-sizing:border-box;
@@ -47,7 +42,6 @@ a {
 }
 .btn:hover {
     box-shadow: inset 0px 1px 5px 1px rgba(var(--text-clr), 0.3);
-  /* background-image: linear-gradient(0deg, #0004, #0004); */
 }
 input {
   box-sizing: border-box;
@@ -55,7 +49,7 @@ input {
   width: 100%;
   padding: 8px;
   margin: 1px;
-  border: 1px solid #0000;
+  border: 1px solid;
   border-radius: 300px;
   background-color: #0000;
   border-color: rgba(var(--text-clr), 0.1);
@@ -72,11 +66,9 @@ input:focus {
   background-image: linear-gradient(0deg, rgba(var(--text-clr), 0.1), rgba(var(--text-clr), 0.1));
 }
 h1 {
-  /* color: hsl(var(--accent)); */
   font-size: 36px;
   line-height: 1;
   margin: auto;
-  /* animation: rainbow_text 6s infinite; */
 }
 
 h2 {
@@ -93,35 +85,53 @@ h3 {
 }
 
 .rainbowbg, .rainbowtxt, .btn {
-  background: linear-gradient(120deg, red, purple, #0033cc, limegreen, yellow);
-  background-size: 400% 100%;
-  animation: bg_shift 10s infinite;
+  /* background: linear-gradient(120deg, orange, red, darkorchid, dodgerblue, limegreen, yellow, orange, red);
+  background-size: 1000% 100%;
+  animation: bg_shift 5s infinite; */
+  animation: colorchange 5s infinite;
+  animation-timing-function: linear;
 }
 
 /* things that have rainbow text */
 .rainbowtxt {
   -webkit-background-clip: text;
   background-clip: text;
-  color: transparent !important;
+  color: transparent;
+}
+
+@keyframes colorchange {
+  0% {
+    background-color: orange;
+  }
+  15% {
+    background-color: red;
+  }
+  35% {
+    background-color: darkorchid;
+  }
+  50% {
+    background-color: dodgerblue;
+  }
+  70% {
+    background-color: limegreen;
+  }
+  85% {
+    background-color: yellow;
+  }
+  100% {
+    background-color: orange;
+  }
 }
 
 @keyframes bg_shift {
-  0%,100% {
+  0% {
     background-position: 0 0;
   }
-  50% {
+  100% {
     background-position: 100% 0;
   }
 }
 
-.rainbowbg {
-  background: linear-gradient(124deg, #ff2400, #e81d1d, #e8b71d, #e3e81d, #1de840, #1ddde8, #2b1de8, #dd00f3, #dd00f3);
-  background-size: 8000% 8000%;
-  -webkit-animation: rainbow 18s ease infinite;
-  -z-animation: rainbow 18s ease infinite;
-  -o-animation: rainbow 18s ease infinite;
-    animation: rainbow 18s ease infinite;
-}
 
 .pk {
   overflow: hidden;
@@ -152,7 +162,7 @@ h3 {
   width: 100%; /* Full width */
   height: 100%; /* Full height */
   overflow: auto; /* scroll down to see whole modal */
-  background-color: #000a; /* Black w/ opacity */
+  background-color: rgba(var(--text-clr), 0.2); /* Black w/ opacity */
 }
 
 .modal-content {
@@ -173,19 +183,19 @@ h3 {
   display: block;
   font-weight: normal;
   margin: 0;
-  /* vertical-align: middle; */
   padding: 5px 30px 5px 15px; /* override others */
   font-size: 20px;
-  /* color: rgb(var(--text-clr)); */
+  color: rgb(var(--text-clr));
   height: 50px;
   line-height: 50px;
   cursor: pointer;
 }
 .infotab:hover {
-  /* box-shadow: 0px 0px 5px 2px #00000033; */
-  background-image: linear-gradient(0deg, #fff1, #fff1);
-  /* background-image: linear-gradient(0deg, rgba(var(--text-clr), 0.1), rgba(var(--text-clr), 0.1)); */
+  background-image: linear-gradient(0deg, rgba(var(--text-clr), 0.1), rgba(var(--text-clr), 0.1));
 }
+/* .infotab > * {
+} */
+
 .cell {
   margin: 20px;
   padding: 20px;
@@ -194,7 +204,7 @@ h3 {
 }
 .cell:hover {
   cursor: pointer;
-  background-image: linear-gradient(0deg, #0001, #0001);
+  background-image: linear-gradient(0deg, rgba(var(--text-clr), 0.1), rgba(var(--text-clr), 0.1));
 }
 
 .private {
@@ -225,38 +235,20 @@ h3 {
   z-index: 1; /* Stay on top */
   top: 0; /* Stay at the top */
   left: 0;
-  background-color: #111; /* Black */
+  background-color: rgb(var(--bg-clr)); /* Black */
   overflow-x: hidden; /* Disable horizontal scroll */
-  padding-top: 20px;
-  color: #fff;
+  color: rgb(var(--text-clr));
+  border-right: 1px solid rgba(var(--text-clr), 0.2);
 }
 #dash #middle {
   overflow: hidden; /* trigger BFC to fit in page */
   display: flex;
   height: 100%;
-  /* width: 100%; */
-  /* max-width: calc(100vw - 400px); */
   flex-flow: column;
-  /* flex: 1 1 auto; */
   border: 1px rgba(var(--text-clr), 0.1);
-  border-style: none solid none solid;
   margin-left: 250px;
-  margin-right: 250px;
 }
-#dash #rightcol {
-  height: 100%;
-  width: 250px;
-  position: fixed; /* Fixed Sidebar (stay in place on scroll) */
-  z-index: 1; /* Stay on top */
-  top: 0; /* Stay at the top */
-  right: 0;
-  background-color: #111; /* Black */
-  overflow-x: hidden; /* Disable horizontal scroll */
-  padding-top: 20px;
-  color: #fff;
-  box-sizing: border-box;
-  border: 10px solid #0000;
-}
+
 #dash #sendtpc {
   padding: 5px 15px 20px 15px;
   border-bottom: 3px solid rgba(var(--text-clr), 0.5);
@@ -269,16 +261,10 @@ h3 {
   overflow-y: auto;
 }
 #blockchainpreview {
-  /* font-family: "Courier New", Courier, monospace; */
-  /* display: inline-block; */
   white-space: nowrap;
   width: 100%;
   justify-content: center;
   text-align: left;
-  /* border: 5px solid grey; */
-  /* border-radius: 5px; */
-  /* background-color: black; */
-  /* color: white; */
   overflow-y: auto;
 }
 #blockchainpreview .block {

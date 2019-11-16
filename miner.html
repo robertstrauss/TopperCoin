@@ -65,9 +65,18 @@
     <script src="/socket.io/socket.io.js"></script> <!-- for communication with server -->
     <script src="cryptorng.js"></script> <!-- for generating cryptographically secure random numbers from a seed -->
     <script src="rsa.js"></script> <!-- rsa -->
-    <script src="style.js"></script> <!-- fancy style things -- >
+    <!-- <script src="style.js"></script> <!- - fancy style things - - > -->
     <script src="control/sha.js"></script> <!-- sha256 hashing -->
     <!-- mostly blockchain stuff -->
+    <script>
+      const con = console;
+
+      // con = {
+      //   log: ()=>{},
+      //   warn: ()=>{},
+      //   error: ()=>{}
+      // };
+    </script>
     <script src="blockchain.js"></script>
     <script src="wasmminer.js"></script> <!-- emscripten-generated webassembly miner compiled from c -->
     <script src="autominer.js"></script> <!-- automatic miner -->
