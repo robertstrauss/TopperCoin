@@ -53,29 +53,30 @@ function previewBlockchain() {
   const preview = document.createElement('div');
 
   // fill the blockchain preview div
-  endblocks.forEach(block=>{
+  for (let [hash, block] of Object.entries(endblocks)){
     let count = 0;
-    blockchainos.openCursor(block.hash).onsuccess = (e) => {
-      let cursor = e.target.result;
-      count++
-      // if ((count++) === 0) cursor.continue(block.hash); // start from block
-      if (cursor && count < 16) {
-        let bblock = cursor.value;
+    blockchainos.get(hash).onsuccess = function reprev(e) {
+      const bblock = e.target.result;
+      if (!bblock || count++ > 16) return;
+        // let bblock = cursor.value;
         const div = document.createElement('div');
-        div.innerHTML += `<div class="blockcontent"><div class="transactions">
+        div.innerHTML += `<div class="blockcontent">${bblock.hash}<div class="transactions">
                           ${bblock.transactions.replace(/([^>]*)>([^>]+)>([^|]*)\|[^,]*,?/g,
                                 (whole, s,a,r)=>(names[s]||s)+" gave "+a+" TPC to "+(names[r]||r)+"<br>")}
                           </div></div>`;
         // if ((lengthdiv = document.getElementById(`length${bblock.length}`)) != null) {
         //   lengthdiv.innerHTML += div.innerHTML;
         // } else {
-          div.id = `length${bblock.length}`;
-          div.className = 'lengthdiv';
-          preview.appendChild(div);
+        div.id = `length${bblock.length}`;
+        div.className = 'lengthdiv';
+        preview.appendChild(div);
         // }
-      }
+        // const transaction = blockchaindb.transaction(['blockchain'], 'readonly');
+        // const blockchainos = transaction.objectStore('blockchain');
+        // cursor.continue(bblock.prevhash);
+        blockchainos.get(bblock.prevhash).onsuccess = reprev;
     }
-  });
+  }
   transaction.oncomplete = () => {
     document.getElementById('blockchainpreview').innerHTML = preview.innerHTML;
   };

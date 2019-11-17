@@ -33,7 +33,7 @@ function startMining() {
 
 
   thisNode.miner = new Worker('minerthread.js'); // open thread
-  setTimeout(()=>getLongestBlock(fromBlock), 1000); // start mining from longest block after 1000s to get Module ready
+  setTimeout(()=>fromBlock(getLongestBlock()), 1000); // start mining from longest block after 1000s to get Module ready
 
   // change the mining button
   let minebtn = document.getElementById('miningstatus');

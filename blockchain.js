@@ -10,7 +10,7 @@ const socket = io();
 
 // object containing info specific to the client's node, stored in cookies
 const thisNode  = JSON.parse(localStorage.getItem('nodeinfo') ) || {};
-const endblocks = JSON.parse(localStorage.getItem('endblocks')) || [];
+const endblocks = JSON.parse(localStorage.getItem('endblocks')) || {};
 // {
 //                    pubkey  : localStorage.getItem('pubkey')  || null,
 //                    privkey : localStorage.getItem('privkey') || null,
@@ -25,7 +25,7 @@ let blockchaindb; // global used for accessing blockchain
 let request = indexedDB.open('blockchain22a');
 request.onupgradeneeded = function(e) { // called if the user doesn't have a blockchain database yet
   con.log('initializing blockchain database');
-  blockchaindb = request.result; // global way of accessing blockchain
+  blockchaindb = request.result;
 
   // create objectstore for the full blockchain
   let bcObjectStore = blockchaindb.createObjectStore('blockchain', { keyPath: 'hash' });
@@ -41,7 +41,9 @@ request.onupgradeneeded = function(e) { // called if the user doesn't have a blo
                      prevhash: '', transactions:'>999999999>11001666236737003471863781910704567116068419957597583941839782326558264484999739371681108528684580876407741425804606311794382574832099003290677645902524504542809704507732379121112859411382290288546627771471401350311007839746272894141706841943317302894861593923182245917367911293853069802985807722607401716264230589409586942854651761065403183850480637814329688850499812945013737407353402424189496813931892715089162144387062537145943965377831040752871925007816297760653496620084702709212234424916926301099420702183856942585137076501003584947736344810789854675049699806884822962332811732839895574891447744884403003129583|',
                      proofofwork: '', length: 1};
   bcObjectStore.add(genesis);
-  endblocks.push(genesis); localStorage.setItem('endblocks', JSON.stringify(endblocks));
+  endblocks[genesis.hash] = genesis;
+  // delete endblocks[genesis.hash].hash; // redundant property
+  localStorage.setItem('endblocks', JSON.stringify(endblocks));
   con.log('database initialization complete');
   /**
    * blockchain will be synced
@@ -49,10 +51,9 @@ request.onupgradeneeded = function(e) { // called if the user doesn't have a blo
    */
 }
 request.onsuccess = ()=>{
-  blockchaindb = request.result; // set the global variable for accessing blockchain
+  blockchaindb = request.result;
   resync();
 }
-
 
 
 function resync () {
@@ -65,7 +66,7 @@ function resync () {
     // response with status
     socket.on('syncresp', (resp)=>{
       // success
-      if (resp === 'success') return setTimeout(()=>socket.off('syncresp'), 1); // kill listener
+      if (resp === 'success') return socket.off('syncresp'); // kill listener
       // otherwise
       // open blockchain
       const blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
@@ -75,7 +76,7 @@ function resync () {
   }
 
   // request the blockchain since each of local endblocks
-  endblocks.forEach(block=>reqsince(block));
+  for (let [hash,block] of Object.entries(endblocks)) reqsince(block);
 }
 
 
@@ -84,15 +85,18 @@ function resync () {
 socket.on('syncreq', function(req){
   con.log('blockchain sync request since', req);
   starthash = req.content;
-  blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+  const blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
   prevhash = blockchainos.index('prevhash');
-  prevhash.get(starthash).onsuccess = function respp(e) {
-    let block = e.target.result;
+  prevhash.get(starthash).onsuccess = function reresp(e){
+    const block = e.target.result;
     if (block) {
       socket.emit('response', {to: req.respondto, type: 'syncresp', content: 'success'});
       con.log('responding with block', block);
       socket.emit('response', {to: req.respondto, type: 'block', content: block.prevhash+';'+block.transactions+';'+block.proofofwork});
-      prevhash.get(block.hash).onsuccess = respp; // do next block(s)
+      // cursor.continue(block.hash); // do next block(s)
+      // have to re open, closed automatically
+      const blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+      blockchainos.index('prevhash').get(block.hash).onsuccess = reresp;
     } else {
       socket.emit('response', {to: req.respondto, type: 'syncresp', content: 'notfound'});
     }
@@ -148,8 +152,8 @@ async function processblockqueue() {
   // check if block matches difficulty
   const hash = await hashHex(blockstring, 'SHA-256'); // take bin sha256 hash of entire block
   const bhash = await hashBin(blockstring, 'SHA-256');
-  let split = blockstring.split(';');
-  let newblock = {hash: hash, prevhash: split[0], transactions: split[1], proofofwork: split[2]};
+  const split = blockstring.split(';');
+  const newblock = {hash: hash, prevhash: split[0], transactions: split[1], proofofwork: split[2]};
 
   if (!bhash.startsWith(Array(difficulty+1).join('0'))) {// check if hash of block starts with zeros according to difficulty
     con.log('invalid block (doesn\'t match difficulty)', blockstring);
@@ -159,7 +163,9 @@ async function processblockqueue() {
 
   // open transaction on blockchain
   const transaction = blockchaindb.transaction(['blockchain'], 'readwrite');
-  const blockchainos = transaction.objectStore('blockchain'); // full blockchain=
+  const blockchainos = transaction.objectStore('blockchain'); // full blockchain
+
+  transaction.oncomplete = ()=>processblockqueue();
 
   /*
   ###################################################
@@ -170,12 +176,19 @@ async function processblockqueue() {
   ###################################################
   */
 
+  // check if we already have the block
+  const notalready = blockchainos.get(newblock.hash);
   // get the block this new block extends from
   const findparentblock = blockchainos.get(newblock.prevhash);
+
+  notalready.onsuccess = e=>{
+    if (e.target.result) // already have the block
+      findparentblock.onsuccess = null;
+  }
+
   findparentblock.onsuccess = e => {
-    const parentblock = e.target.result;
-    con.log('parentblock', parentblock);
-    if (parentblock === null) return;
+    const parentblock = e.target.result
+    if (!parentblock) return;
 
     // verify each transaction
     const transs = newblock.transactions.split(',');
@@ -195,10 +208,14 @@ async function processblockqueue() {
           newblock.length = parentblock.length+1;
           con.log('accepting block', newblock);
 
-          if ((i = endblocks.indexOf(parentblock))!=-1) endblocks.splice(i, 1);
-          else con.log('fork started');
+          if (endblocks.hasOwnProperty(parentblock.hash))
+            delete endblocks[parentblock.hash];
+          else
+            con.log('fork started');
 
-          endblocks.push(newblock); localStorage.setItem('endblocks', JSON.stringify(endblocks));
+          endblocks[newblock.hash] = newblock;
+          // delete endblocks[newblock.hash].hash;
+          localStorage.setItem('endblocks', JSON.stringify(endblocks));
           blockchainos.add(newblock);
 
           // restart miner if mining
@@ -245,12 +262,11 @@ async function isValidTransaction(transactionstring) {
 
 
 // determine the block that is farthest in the blockchain
-async function getLongestBlock(callback) {
-  let blockchainos  = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+function getLongestBlock(callback) {
   let longestblock = {length:0};
-  endblocks.forEach(block=>{
+  for (let [hash,block] of Object.entries(endblocks)) {
     if (block.length > longestblock.length) longestblock = block;
-  });
+  }
   return longestblock;
 }
 
