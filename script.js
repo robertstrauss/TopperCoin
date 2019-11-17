@@ -22,6 +22,9 @@ function main() {
   document.getElementById('loginkeydiv').innerHTML   = thisNode.loginkey || '';
   document.getElementById('address').innerHTML       = thisNode.name || thisNode.pubkey || 'Not Logged In';
   thisNode.pubkey && (document.getElementById('addresstab').onclick = ()=>{document.getElementById('wallet').style.display = 'inline-block'});
+
+  // sync
+  resync();
 }
 
 // listeners for communicating names
@@ -60,15 +63,16 @@ function previewBlockchain() {
       if (!bblock || count++ > 16) return;
         // let bblock = cursor.value;
         const div = document.createElement('div');
-        div.innerHTML += `<div class="blockcontent">${bblock.hash}<div class="transactions">
+        div.innerHTML += `<div class="blockcontent" title="${bblock.hash}"><div class="transactions">
                           ${bblock.transactions.replace(/([^>]*)>([^>]+)>([^|]*)\|[^,]*,?/g,
-                                (whole, s,a,r)=>(names[s]||s)+" gave "+a+" TPC to "+(names[r]||r)+"<br>")}
+                                (whole, s,a,r)=>"<span title='"+whole+"'>"+(names[s]||s)+" gave "+a+" TPC to "+(names[r]||r)+"</span>")}
                           </div></div>`;
         // if ((lengthdiv = document.getElementById(`length${bblock.length}`)) != null) {
         //   lengthdiv.innerHTML += div.innerHTML;
         // } else {
         div.id = `length${bblock.length}`;
         div.className = 'lengthdiv';
+        div.title = bblock.length;
         preview.appendChild(div);
         // }
         // const transaction = blockchaindb.transaction(['blockchain'], 'readonly');
