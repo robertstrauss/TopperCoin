@@ -18,11 +18,11 @@ const endblocks = JSON.parse(localStorage.getItem('endblocks')) || {};
 //                  };
 
 // how many zeros (bin) block hash must start with
-const difficulty = 22; // time ~= 2^difficulty
+const difficulty = 20; // time ~= 2^difficulty
 
 // initial set up of using the blockchain
 let blockchaindb; // global used for accessing blockchain
-let request = indexedDB.open('blockchain22a');
+let request = indexedDB.open('blockchaind20');
 request.onupgradeneeded = function(e) { // called if the user doesn't have a blockchain database yet
   con.log('initializing blockchain database');
   blockchaindb = request.result;
@@ -76,7 +76,8 @@ function resync () {
   }
 
   // request the blockchain since each of local endblocks
-  for (let [hash,block] of Object.entries(endblocks)) reqsince(block);
+  // for (let [hash,block] of Object.entries(endblocks))
+  reqsince(getLongestBlock());
 }
 
 
@@ -95,7 +96,7 @@ socket.on('syncreq', function(req){
       socket.emit('response', {to: req.respondto, type: 'block', content: block.prevhash+';'+block.transactions+';'+block.proofofwork});
       // cursor.continue(block.hash); // do next block(s)
       // have to re open, closed automatically
-      const blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+      // const blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
       blockchainos.index('prevhash').get(block.hash).onsuccess = reresp;
     } else {
       socket.emit('response', {to: req.respondto, type: 'syncresp', content: 'notfound'});
@@ -275,22 +276,22 @@ async function calcBalance(pubkey, callback) {
   let bal = 0;
   // request the blockchain for reading
   blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
-  let curreq = blockchainos.openCursor();
-  curreq.onsuccess = function(e) { // iterate through blockchain to find publickey announcement
-    let cursor = e.target.result; // cursor holds current block
-    if (cursor) { // if still in the blockchain
-      if (cursor.value.transactions.indexOf(pubkey) >= 0) { // check for regexp match, and return it if so
-        let transactions = cursor.value.transactions.split(',');
+  let req = blockchainos.get(getLongestBlock().hash); // calculate on the longest fork
+  req.onsuccess = function recalc (e) { // iterate through blockchain to find publickey announcement
+    const block = e.target.result; // cursor holds current block
+    if (block) { // if in the blockchain
+      if (block.transactions.indexOf(pubkey) >= 0) { // check for regexp match, and return it if so
+        let transactions = block.transactions.split(',');
         for (let t = 0; t < transactions.length; t++) {
-          let transaction = transactions[t].split('>');
+          let transaction = transactions[t].split('|')[0].split('>');
           if (transaction[0] === pubkey) bal-=parseFloat(transaction[1]);
           if (transaction[2] === pubkey) bal+=parseFloat(transaction[1]);
         }
       }
-      // advance to next block
-      cursor.continue();
-    } else { // finished iterating through blockchain
-      callback(bal);
+      // next block back
+      blockchainos.get(block.prevhash).onsuccess = recalc;
+    } else {
+      callback(bal)
     }
   }
 }
@@ -299,11 +300,9 @@ async function broadcasttransaction(amount, recipient) {
   let transactionstring = `${thisNode.pubkey}>${amount}>${recipient}`;
   let hashh = await hashHex(transactionstring, 'SHA-256');
   let hashd = bigInt(BigInt(['0x', hashh].join('')));
-  con.log('dechash', hashd);
   let signature = RSA.encrypt(hashd, thisNode.pubkey, thisNode.privkey).toString(); // sign by encrypting with priv key
-  con.log('signature', signature);
-  con.log('once.emit');
   socket.emit('transaction', transactionstring + '|' + signature);
+  con.log('emit transaction', transactionstring + '|' + signature);
 }
 
 

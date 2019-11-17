@@ -56,31 +56,32 @@ function previewBlockchain() {
   const preview = document.createElement('div');
 
   // fill the blockchain preview div
-  for (let [hash, block] of Object.entries(endblocks)){
-    let count = 0;
-    blockchainos.get(hash).onsuccess = function reprev(e) {
-      const bblock = e.target.result;
-      if (!bblock || count++ > 16) return;
-        // let bblock = cursor.value;
-        const div = document.createElement('div');
-        div.innerHTML += `<div class="blockcontent" title="${bblock.hash}"><div class="transactions">
-                          ${bblock.transactions.replace(/([^>]*)>([^>]+)>([^|]*)\|[^,]*,?/g,
-                                (whole, s,a,r)=>"<span title='"+whole+"'>"+(names[s]||s)+" gave "+a+" TPC to "+(names[r]||r)+"</span>")}
-                          </div></div>`;
-        // if ((lengthdiv = document.getElementById(`length${bblock.length}`)) != null) {
-        //   lengthdiv.innerHTML += div.innerHTML;
-        // } else {
-        div.id = `length${bblock.length}`;
-        div.className = 'lengthdiv';
-        div.title = bblock.length;
-        preview.appendChild(div);
-        // }
-        // const transaction = blockchaindb.transaction(['blockchain'], 'readonly');
-        // const blockchainos = transaction.objectStore('blockchain');
-        // cursor.continue(bblock.prevhash);
-        blockchainos.get(bblock.prevhash).onsuccess = reprev;
-    }
+  // for (let [hash, block] of Object.entries(endblocks)){
+  const starthash = getLongestBlock().hash;
+  let count = 0;
+  blockchainos.get(starthash).onsuccess = function reprev(e) {
+    const bblock = e.target.result;
+    if (!bblock || count++ > 16) return;
+      // let bblock = cursor.value;
+      const div = document.createElement('div');
+      div.innerHTML += `<div class="blockcontent" title="${bblock.hash}"><div class="transactions">
+                        ${bblock.transactions.replace(/([^>]*)>([^>]+)>([^|]*)\|[^,]*,?/g,
+                              (whole, s,a,r)=>"<span title='"+whole+"'>"+(names[s]||s)+" gave "+a+" TPC to "+(names[r]||r)+"</span>")}
+                        </div></div>`;
+      // if ((lengthdiv = document.getElementById(`length${bblock.length}`)) != null) {
+      //   lengthdiv.innerHTML += div.innerHTML;
+      // } else {
+      div.id = `length${bblock.length}`;
+      div.className = 'lengthdiv';
+      div.title = bblock.length;
+      preview.appendChild(div);
+      // }
+      // const transaction = blockchaindb.transaction(['blockchain'], 'readonly');
+      // const blockchainos = transaction.objectStore('blockchain');
+      // cursor.continue(bblock.prevhash);
+      blockchainos.get(bblock.prevhash).onsuccess = reprev;
   }
+  // }
   transaction.oncomplete = () => {
     document.getElementById('blockchainpreview').innerHTML = preview.innerHTML;
   };
