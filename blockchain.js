@@ -22,7 +22,7 @@ const difficulty = 20; // time ~= 2^difficulty
 
 // initial set up of using the blockchain
 let blockchaindb; // global used for accessing blockchain
-let request = indexedDB.open('blockchaind20');
+let request = indexedDB.open('blockchaind20p');
 request.onupgradeneeded = function(e) { // called if the user doesn't have a blockchain database yet
   con.log('initializing blockchain database');
   blockchaindb = request.result;
@@ -163,7 +163,7 @@ async function processblockqueue() {
   con.log('block matches difficulty');
 
   // open transaction on blockchain
-  const transaction = blockchaindb.transaction(['blockchain'], 'readwrite');
+  const transaction = blockchaindb.transaction(['blockchain'], 'readonly');
   const blockchainos = transaction.objectStore('blockchain'); // full blockchain
 
   transaction.oncomplete = ()=>processblockqueue();
@@ -209,15 +209,17 @@ async function processblockqueue() {
           newblock.length = parentblock.length+1;
           con.log('accepting block', newblock);
 
-          if (endblocks.hasOwnProperty(parentblock.hash))
+          if (endblocks[parentblock.hash])
             delete endblocks[parentblock.hash];
           else
             con.log('fork started');
 
+
+          blockchaindb.transaction(['blockchain'], 'readwrite').objectStore('blockchain').add(newblock);
+
           endblocks[newblock.hash] = newblock;
           // delete endblocks[newblock.hash].hash;
           localStorage.setItem('endblocks', JSON.stringify(endblocks));
-          blockchainos.add(newblock);
 
           // restart miner if mining
           if (thisNode.miner != null) {
@@ -246,7 +248,8 @@ async function isValidTransaction(transactionstring) {
     if (transactionstring === '' || transactionstring === null) return valid();
     const split = transactionstring.split('|'); // transaction, signature
     const transaction = split[0].split('>'); // sender, amount, recipient
-    const senderpk = transaction[0], amount = transaction[1];
+    const senderpk = transaction[0], amount = parseFloat(transaction[1]);
+    if (isNaN(amount) || amount < 0) return invalid();
     const hashhHex = await hashHex(split[0], 'SHA-256');
     const hashDec = bigInt(BigInt(['0x', hashhHex].join('')));
     // long asynchronous processes

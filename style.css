@@ -179,14 +179,14 @@ h3 {
 .infotab {
   white-space: nowrap;
   text-overflow: ellipsis;
-  overflow-x: hidden;
+  overflow: hidden;
   display: block;
   font-weight: normal;
   margin: 0;
   padding: 5px 30px 5px 15px; /* override others */
   font-size: 20px;
   color: rgb(var(--text-clr));
-  height: 50px;
+  max-height: 50px;
   line-height: 50px;
   cursor: pointer;
 }

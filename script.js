@@ -66,7 +66,7 @@ function previewBlockchain() {
       const div = document.createElement('div');
       div.innerHTML += `<div class="blockcontent" title="${bblock.hash}"><div class="transactions">
                         ${bblock.transactions.replace(/([^>]*)>([^>]+)>([^|]*)\|[^,]*,?/g,
-                              (whole, s,a,r)=>"<span title='"+whole+"'>"+(names[s]||s)+" gave "+a+" TPC to "+(names[r]||r)+"</span>")}
+                              (whole, s,a,r)=>"<span title='"+whole+"'>"+(names[s]||s)+" gave "+a+" TPC to "+(names[r]||r)+"</span><br>")}
                         </div></div>`;
       // if ((lengthdiv = document.getElementById(`length${bblock.length}`)) != null) {
       //   lengthdiv.innerHTML += div.innerHTML;
