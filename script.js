@@ -68,9 +68,7 @@ function previewBlockchain() {
                         ${bblock.transactions.replace(/([^>]*)>([^>]+)>([^|]*)\|[^,]*,?/g,
                               (whole, s,a,r)=>"<span title='"+whole+"'>"+(names[s]||s)+" gave "+a+" TPC to "+(names[r]||r)+"</span><br>")}
                         </div></div>`;
-      // if ((lengthdiv = document.getElementById(`length${bblock.length}`)) != null) {
-      //   lengthdiv.innerHTML += div.innerHTML;
-      // } else {
+                        
       div.id = `length${bblock.length}`;
       div.className = 'lengthdiv';
       div.title = bblock.length;

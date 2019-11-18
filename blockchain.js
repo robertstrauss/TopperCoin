@@ -183,8 +183,10 @@ async function processblockqueue() {
   const findparentblock = blockchainos.get(newblock.prevhash);
 
   notalready.onsuccess = e=>{
-    if (e.target.result) // already have the block
+    if (e.target.result) {// already have the block
+      con.log('already have block');
       findparentblock.onsuccess = null;
+    }
   }
 
   findparentblock.onsuccess = e => {
