@@ -58,15 +58,16 @@ request.onsuccess = ()=>{
 
 function resync () {
   function reqsince(b) {
-    if (!b) return; // avoid infinite recursion loop
+    // if (!b) return; // avoid infinite recursion loop
     // send out request for given block b
     con.log('requesting blockchain since', b.hash);
     socket.emit('request', {type:'sync', content: b.hash});
 
     // response with status
-    socket.on('syncresp', (resp)=>{
+    socket.on('respstat', (resp)=>{
+      con.log('response status', resp, b.hash);
       // success
-      if (resp === 'success') return socket.off('syncresp'); // kill listener
+      if (resp === 'success') return socket.off('respstat'); // kill listener
       // otherwise
       // open blockchain
       const blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
@@ -87,19 +88,24 @@ socket.on('syncreq', function(req){
   con.log('blockchain sync request since', req);
   starthash = req.content;
   const blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+  blockchainos.get(starthash).onsuccess = function stat(e) {
+    if (!e.target.result) socket.emit('response', {to: req.respondto, type: 'respstat', content:'notfound'});
+    else socket.emit('response', {to: req.respondto, type: 'respstat', content:'success'});
+  };
   prevhash = blockchainos.index('prevhash');
   prevhash.get(starthash).onsuccess = function reresp(e){
     const block = e.target.result;
+    con.log('got', block);
     if (block) {
-      socket.emit('response', {to: req.respondto, type: 'syncresp', content: 'success'});
+      // socket.emit('response', {to: req.respondto, type: 'syncresp', content: 'success'});
       con.log('responding with block', block);
       socket.emit('response', {to: req.respondto, type: 'block', content: block.prevhash+';'+block.transactions+';'+block.proofofwork});
-      // cursor.continue(block.hash); // do next block(s)
       // have to re open, closed automatically
-      // const blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+      const blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+      con.log('recursing to block', block.hash);
       blockchainos.index('prevhash').get(block.hash).onsuccess = reresp;
     } else {
-      socket.emit('response', {to: req.respondto, type: 'syncresp', content: 'notfound'});
+      // socket.emit('response', {to: req.respondto, type: 'syncresp', content: 'notfound'});
     }
   };
 });
@@ -183,13 +189,15 @@ async function processblockqueue() {
   const findparentblock = blockchainos.get(newblock.prevhash);
 
   notalready.onsuccess = e=>{
-    if (e.target.result) // already have the block
+    if (e.target.result) {// already have the block
       findparentblock.onsuccess = null;
+      con.log('already have block');
+    }
   }
 
   findparentblock.onsuccess = e => {
     const parentblock = e.target.result
-    if (!parentblock) return;
+    if (!parentblock) {con.log('doesnt have parent');return;};
 
     // verify each transaction
     const transs = newblock.transactions.split(',');
@@ -232,7 +240,7 @@ async function processblockqueue() {
         }
         return verifynexttrans(t+1);
       }, () => {
-        con.warn('recieved invalid block (contains invalid transactions)', newblock);
+        con.warn('block contains invalid transaction');
       });
     }
     verifynexttrans(0);

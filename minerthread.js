@@ -10,6 +10,6 @@ onmessage = async (e)=>{
     minedBlock = e.data[0] + ';' + proofofwork.toString(16);
     hash = await hashBin(minedBlock, 'SHA-256');
   } while (!hash.startsWith(start));
-  
+
   postMessage(minedBlock);
 };
