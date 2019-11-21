@@ -56,59 +56,93 @@ request.onsuccess = ()=>{
 }
 
 
-function resync () {
-  function reqsince(b) {
-    // if (!b) return; // avoid infinite recursion loop
-    // send out request for given block b
-    con.log('requesting blockchain since', b.hash);
-    socket.emit('request', {type:'sync', content: b.hash});
 
-    // response with status
-    socket.on('respstat', (resp)=>{
-      con.log('response status', resp, b.hash);
-      // success
-      if (resp === 'success') return socket.off('respstat'); // kill listener
-      // otherwise
-      // open blockchain
-      const blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
-      // get the previous block, then request since that.
-      blockchainos.get(b.prevhash).onsuccess = e=>reqsince(e.target.result);
-    });
-  }
 
-  // request the blockchain since each of local endblocks
-  // for (let [hash,block] of Object.entries(endblocks))
-  reqsince(getLongestBlock());
+
+
+function resync() {
+  socket.emit('status', endblocks);
 }
+
+
+socket.on('status', m=>{
+  const ends = m.content;
+  const blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+  const prevhash = blockchainos.index('prevhash');
+  function reresp(e) {
+    if ((b = e.target.result)) {
+      socket.emit('response', {to:m.from, content:b.prevhash+';'+b.transactions+';'+b.proofofwork, type:'block'})
+      prevhash.get(b.hash).onsuccess = reresp;
+    }
+  }
+  let behind = false; // wether to sync afterwards (peer is ahead)
+  for ([hash, endb] of Object.entries(ends)) {
+    blockchainos.get(hash).onsuccess = e=>{
+      let block = e.target.result;
+      if (!block) // i am behind the node im talking to
+        return (behind = true); // sync back when done
+      prevhash.get(block.hash).onsuccess = reresp; // get next, recurse respond
+    };
+  }
+  if (behind) socket.emit('status', endblocks); // sync up if behind
+});
+
+
+
+
+// function resync () {
+//   function reqsince(b) {
+//     // if (!b) return; // avoid infinite recursion loop
+//     // send out request for given block b
+//     con.log('requesting blockchain since', b.hash);
+//     socket.emit('request', {type:'sync', content: b.hash});
+
+//     // response with status
+//     socket.on('respstat', (resp)=>{
+//       con.log('response status', resp, b.hash);
+//       // success
+//       if (resp === 'success') return socket.off('respstat'); // kill listener
+//       // otherwise
+//       // open blockchain
+//       const blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+//       // get the previous block, then request since that.
+//       blockchainos.get(b.prevhash).onsuccess = e=>reqsince(e.target.result);
+//     });
+//   }
+
+//   // request the blockchain since each of local endblocks
+//   // for (let [hash,block] of Object.entries(endblocks))
+//   reqsince(getLongestBlock());
+// }
 
 
 
 // reply with blockchain when requested
-socket.on('syncreq', function(req){
-  con.log('blockchain sync request since', req);
-  starthash = req.content;
-  const blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
-  blockchainos.get(starthash).onsuccess = function stat(e) {
-    if (!e.target.result) socket.emit('response', {to: req.respondto, type: 'respstat', content:'notfound'});
-    else socket.emit('response', {to: req.respondto, type: 'respstat', content:'success'});
-  };
-  prevhash = blockchainos.index('prevhash');
-  prevhash.get(starthash).onsuccess = function reresp(e){
-    const block = e.target.result;
-    con.log('got', block);
-    if (block) {
-      // socket.emit('response', {to: req.respondto, type: 'syncresp', content: 'success'});
-      con.log('responding with block', block);
-      socket.emit('response', {to: req.respondto, type: 'block', content: block.prevhash+';'+block.transactions+';'+block.proofofwork});
-      // have to re open, closed automatically
-      const blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
-      con.log('recursing to block', block.hash);
-      blockchainos.index('prevhash').get(block.hash).onsuccess = reresp;
-    } else {
-      // socket.emit('response', {to: req.respondto, type: 'syncresp', content: 'notfound'});
-    }
-  };
-});
+// socket.on('syncreq', function(req){
+//   con.log('blockchain sync request since', req);
+//   starthash = req.content;
+//   const blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+//   blockchainos.get(starthash).onsuccess = function stat(e) {
+//     if (!e.target.result) socket.emit('response', {to: req.respondto, type: 'respstat', content:'notfound'});
+//     else socket.emit('response', {to: req.respondto, type: 'respstat', content:'success'});
+//   };
+//   prevhash = blockchainos.index('prevhash');
+//   prevhash.get(starthash).onsuccess = function reresp(e){
+//     const block = e.target.result;
+//     con.log('got', block);
+//     if (block) {
+//       // socket.emit('response', {to: req.respondto, type: 'syncresp', content: 'success'});
+//       con.log('responding with block', block);
+//       socket.emit('response', {to: req.respondto, type: 'block', content: block.prevhash+';'+block.transactions+';'+block.proofofwork});
+//       // have to re open, closed automatically
+//       const blockchainos = blockchaindb.transaction(['blockchain'], 'readonly').objectStore('blockchain');
+//       con.log('recursing to block', block.hash);
+//       blockchainos.index('prevhash').get(block.hash).onsuccess = reresp;
+//     } else {
+//       // socket.emit('response', {to: req.respondto, type: 'syncresp', content: 'notfound'});
+//     }
+//   };
+// });
 
 
 
@@ -157,6 +191,8 @@ async function processblockqueue() {
 
 
   // check if block matches difficulty
+//   let md = forge.sha256.create();
+//   md.update(blockstring);
   const hash = await hashHex(blockstring, 'SHA-256'); // take bin sha256 hash of entire block
   const bhash = await hashBin(blockstring, 'SHA-256');
   const split = blockstring.split(';');

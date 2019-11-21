@@ -123,7 +123,7 @@
                       <!-- form for making payments -->
                       <div id="sendtpc">
                         <fieldset>
-                          <legend>Send Money</legend>
+                          <legend>Send Toppercoin</legend>
                           <form id="makepaymentform" onsubmit="return false;">
 
                                 <input placeholder="amount" type="number" id="amount" step="0.0001" min="0"/>
@@ -132,7 +132,7 @@
 
                                 <datalist id="names"></datalist>
 
-                                <button class="btn" onclick="maketransaction()">Send</button>
+                                <input type="submit" class="btn" onclick="maketransaction()" value="Send" />
 
                           </form>
                         </fieldset>
@@ -189,7 +189,11 @@
                                          window.location.reload();
                                          ">Log Out</button><br>
           <br>
-          <button class="btn" onclick="thisNode.name=document.getElementById('displayname').value;localStorage.setItem('nodeinfo',JSON.stringify(thisNode));window.location.reload()">Save</button>
+          <input type="submit" class="btn" onclick="
+                thisNode.name=document.getElementById('displayname').value;
+                localStorage.setItem('nodeinfo',JSON.stringify(thisNode));
+                window.location.reload()
+            " value="Save" />
         </form>
       </div>
     </div></div>
@@ -237,7 +241,7 @@
 
     <!-- modal of login -->
     <div id="login" class="modal">
-      <div class="modal-content">
+      <!-- <div class="modal-content">
         <h2>Log in</h2>
           <form onsubmit="return false;">
 
@@ -246,27 +250,35 @@
               <button class="btn" onclick="login()" id="loginbutton">Log In</button>
 
           </form>
-      </div>
+      </div> -->
 
       <div class="modal-content">
-        <h2>Register</h2>
+      <fieldset>
+        <legend>Register or Log In</legend>
           <form onsubmit="return false;">
-            (Optional) create a human readable name to be identified by
-              <input placeholder="display name" type="text" id="registername"/>
+              <!-- <legend>Set display name to be identified by</legend> -->
+              <input type="text" placeholder="Set display name (optional)" id="setdisplayname"/>
               <!-- pattern="[^>|,;]+"
                             oninvalid="setCustomValidity('cannot include '>', '|', ',', or ';')"
                             onchange="try{setCustomValidity('')}catch(e){}"/> -->
-              <p>
-                Create a <b><i>super</i></b>-secure key to access your account with.
+            <!-- <fieldset> -->
+                <!-- a <b><i>super</i></b>-secure key to access your account with.
                 It could be something like a phrase you made up or just some keyboard-mashing
                 (as long as you have it saved somewhere or can remember it).
-                Remember, if someone else gets ahold of this, they will have access to all your money!
-              </p>
-              <textarea class="private" placeholder="a unique, unguessable, super-secure key" id="registerloginkey"></textarea>
-
-              <button class="btn" onclick="register()" id="registerbutton">Submit</button>
+                Remember, if someone else gets ahold of this, they will have access to all your money! -->
+              
+              <input type="password" placeholder="Enter login key, or create one" id="loginkey"/>
+              <a onclick="
+               loginkeyinput = document.getElementById('loginkey');
+               if (loginkeyinput.type === 'password') loginkeyinput.type='text';
+               else loginkeyinput.type = 'password';
+              ">show/hide</a>
+              <h6>If you are creating a key, make sure to make it unique and hard for anyone else to guess.</h6>
+            <!-- </fieldset> -->
+              <input type="submit" class="btn" id="loginbutton" value="Submit" onclick="login()"/>
 
           </form>
+      </fieldset>
       </div>
     </div>
 

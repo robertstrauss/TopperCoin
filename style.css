@@ -21,19 +21,18 @@ body {
   background-color: rgb(var(--bg-clr));
 }
 a {
-  margin: 5px;
-  padding: 10px;
-  padding-top: 1px;
-  padding-bottom: 1px;
-  font-weight: 600;
   cursor: pointer;
+  text-decoration: underline;
+  color: blue;
+}
+a:visited {
+  color: purple;
 }
 fieldset {
   border-radius: 4px;
 }
 button, textarea {
   color: black;
-  border-radius: 4px;
 }
 .btn {
   min-width: 20px;
@@ -91,7 +90,10 @@ h3 {
   font-size: 20px;
   color: rgb(var(--text-clr));
 }
-
+h6 {
+  padding: 0;
+  margin: 1px 0 5px 0;
+}
 .rainbowbg, .rainbowtxt, .btn {
   animation: colorchange 5s infinite;
   animation-timing-function: linear;

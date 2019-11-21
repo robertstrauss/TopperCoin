@@ -1,9 +1,10 @@
-var express = require('express');
-var app = express();
-var http = require('http').createServer(app);
-var io = require('socket.io')(http);
-var path = require('path');
-var fs = require('fs');
+const express = require('express');
+const app = express();
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
+const path = require('path');
+// const fs = require('fs');
+// const helmet = require('helmet');
 
 
 
@@ -40,9 +41,9 @@ io.on('connection', function(socket){
   socket.on('block', function(blockstring){
     io.emit('block', blockstring); // forward message to all nodes
   });
-  socket.on('request', function(req){
+  socket.on('status', function(ends){
     // forward request to ~~three~~ random node~~s~~. give my id to respond to
-    io.to(nodes[Math.round(Math.random()*nodes.length)]).emit(req.type+'req', {content:req.content, respondto:socket.id});
+    io.to(nodes[Math.round(Math.random()*nodes.length)]).emit('status', {content:ends, from:socket.id});
     // io.to(nodes[Math.round(Math.random()*nodes.length)]).emit(req.type+'req', {content:req.content, respondto:socket.id});
     // io.to(nodes[Math.round(Math.random()*nodes.length)]).emit(req.type+'req', {content:req.content, respondto:socket.id});
   });

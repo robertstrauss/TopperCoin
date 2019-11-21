@@ -124,43 +124,46 @@ async function getMyBalance() {
 
 
 
-async function register() {
-  const loginkey = document.getElementById('registerloginkey').value;
+async function login() {
+  const loginkey = document.getElementById('loginkey').value;
   if (loginkey.length < 20)
     return alert('A login key should be at absolute minimum 20 charachters long. '
                   +'This is the only thing between a hacker and all your money!');
 
-  const name = document.getElementById('registername').value;
+  const name = document.getElementById('setdisplayname').value;
 
-  document.getElementById('registerbutton').innerHTML = 'Registering...';
-  let keys = await RSA.generate(loginkey); // generate RSA keypair from loginkey
+  document.getElementById('loginbutton').value = 'Working...';
+//   return;
+  return setTimeout(async ()=>{
+    let keys = await RSA.generate(loginkey); // generate RSA keypair from loginkey
 
-  // save info
-  thisNode.name    = name;
-  thisNode.privkey = bigInt((keys.d)); // keep secret!
-  thisNode.pubkey  = bigInt((keys.n)); // fixed public exponent e of 65537 (rsa.js)
-  thisNode.loginkey= loginkey;
-  localStorage.setItem('nodeinfo', JSON.stringify(thisNode));
+    // save info
+    thisNode.name    = name;
+    thisNode.privkey = bigInt((keys.d)); // keep secret!
+    thisNode.pubkey  = bigInt((keys.n)); // fixed public exponent e of 65537 (rsa.js)
+    thisNode.loginkey= loginkey;
+    localStorage.setItem('nodeinfo', JSON.stringify(thisNode));
 
-  // alert(`Make sure to save this key.\n--------\n${loginkey}\n--------\nIt\'s the only way to access your money!`);
+    // alert(`Make sure to save this key.\n--------\n${loginkey}\n--------\nIt\'s the only way to access your money!`);
 
-  window.location.reload();
+    window.location.reload();
+  }, 10); // asynchronously
 }
 
 
-async function login() {
-  document.getElementById('loginbutton').innerHTML = 'Registering...';
+// async function login() {
+//   document.getElementById('loginbutton').innerHTML = 'Registering...';
 
-  // verify password
-  let loginkey = document.getElementById('loginkey').value;
+//   // verify password
+//   let loginkey = document.getElementById('loginkey').value;
 
 
-  let keys = await RSA.generate(loginkey); // start generation of RSA keypair seeded from password1 (1024 bit, secure, real)
+//   let keys = await RSA.generate(loginkey); // start generation of RSA keypair seeded from password1 (1024 bit, secure, real)
 
-  thisNode.privkey = bigInt((keys.d)); // keep secret!
-  thisNode.pubkey  = bigInt((keys.n)); // fixed public exponenet of 65537 (see rsa.js), only need n
-  thisNode.loginkey= loginkey;
-  localStorage.setItem('nodeinfo', JSON.stringify(thisNode));
+//   thisNode.privkey = bigInt((keys.d)); // keep secret!
+//   thisNode.pubkey  = bigInt((keys.n)); // fixed public exponenet of 65537 (see rsa.js), only need n
+//   thisNode.loginkey= loginkey;
+//   localStorage.setItem('nodeinfo', JSON.stringify(thisNode));
 
-  window.location.reload();
-}
+//   window.location.reload();
+// }
