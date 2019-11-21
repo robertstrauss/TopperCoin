@@ -190,8 +190,13 @@ async function processblockqueue() {
 
   notalready.onsuccess = e=>{
     if (e.target.result) {// already have the block
+<<<<<<< HEAD
       findparentblock.onsuccess = null;
       con.log('already have block');
+=======
+      con.log('already have block');
+      findparentblock.onsuccess = null;
+>>>>>>> 202eadfa36ee02baeb588dd79085ad77c5bdeee8
     }
   }
 
