@@ -45,12 +45,18 @@ async function hashBin(message, algorithim) {
 async function seededBigRandomPrime(seed) {
   // return new Promise(async (resolve, reject) => {
     let hash1, hash2, bigDec;
-    hash2 = await hashHex(seed, 'SHA-512');
+    md = forge.sha512.create();
+    md.update(seed);
+    hash2 = md.digest().toHex();
+    // hash2 = await hashHex(seed, 'SHA-512');
     // const min = bigInt(6074001000).shiftLeft(bits - 33);  // min ≈ √2 × 2^(bits - 1)
     // const max = bigInt.one.shiftLeft(bits).minus(1);  // max = 2^(bits) - 1
     for (;;) {
       hash1 = hash2;
-      hash2 = await hashHex(hash1, 'SHA-512');
+      md = forge.sha512.create();
+      md.update(hash1);
+      hash2 = md.digest().toHex();
+      // hash2 = await hashHex(hash1, 'SHA-512');
       bigDec = bigInt(BigInt('0x'+hash1+hash2)); // using BigInt web API, and bigInteger.js
       if (bigDec.isProbablePrime(256)) {
         // resolve(bigDec);

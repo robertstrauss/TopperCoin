@@ -11,6 +11,7 @@
 }
 * {
   transition: 0.15s;
+  color: rgb(var(--text-clr));
 }
 body {
   font-family: 'Nunito', Sans-Serif;
@@ -27,13 +28,20 @@ a {
   font-weight: 600;
   cursor: pointer;
 }
+fieldset {
+  border-radius: 4px;
+}
+button, textarea {
+  color: black;
+  border-radius: 4px;
+}
 .btn {
   min-width: 20px;
   width: 100%;
   padding: 8px;
   margin: 1px;
   border: 0;
-  border-radius: 300px;
+  border-radius: 4px;
   color: rgb(var(--bg-clr));
   outline: none;
   box-sizing:border-box;
@@ -50,7 +58,7 @@ input {
   padding: 8px;
   margin: 1px;
   border: 1px solid;
-  border-radius: 300px;
+  border-radius: 4px;
   background-color: #0000;
   border-color: rgba(var(--text-clr), 0.1);
   color: inherit;
@@ -59,7 +67,7 @@ input {
   cursor: text;
 }
 input:hover {
-  background-image: linear-gradient(0deg, rgba(var(--text-clr), 0.1), rgba(var(--text-clr), 0.05));
+  background-image: linear-gradient(0deg, rgba(var(--text-clr), 0.05), rgba(var(--text-clr), 0.05));
 }
 input:focus {
   border-color: hsl(var(--accent));
@@ -85,9 +93,6 @@ h3 {
 }
 
 .rainbowbg, .rainbowtxt, .btn {
-  /* background: linear-gradient(120deg, orange, red, darkorchid, dodgerblue, limegreen, yellow, orange, red);
-  background-size: 1000% 100%;
-  animation: bg_shift 5s infinite; */
   animation: colorchange 5s infinite;
   animation-timing-function: linear;
 }
@@ -100,7 +105,7 @@ h3 {
 }
 
 @keyframes colorchange {
-  0% {
+  /* 0% {
     background-color: orange;
   }
   15% {
@@ -120,17 +125,12 @@ h3 {
   }
   100% {
     background-color: orange;
-  }
+  } */
+  0% {background-color:yellow}
+  50% {background-color:limegreen}
+  100% {background-color:yellow}
 }
 
-@keyframes bg_shift {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 100% 0;
-  }
-}
 
 
 .pk {
@@ -222,6 +222,57 @@ h3 {
   -o-filter: none;
   -ms-filter: none;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #dash {

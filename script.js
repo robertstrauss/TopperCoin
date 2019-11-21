@@ -91,7 +91,7 @@ async function maketransaction() {
   const amount = document.getElementById('amount').value;
   const recip  = document.getElementById('recipient').value;
   if (!amount || !recipient) // left a field empty
-    return alert('Fill out all fields.');
+    return;
   if (!thisNode.pubkey) // not logged in
     return alert('You are not logged in.');
   calcBalance(thisNode.pubkey, function(bal){
@@ -132,7 +132,7 @@ async function register() {
 
   const name = document.getElementById('registername').value;
 
-  alert('Registering... This may take a minute.');
+  document.getElementById('registerbutton').innerHTML = 'Registering...';
   let keys = await RSA.generate(loginkey); // generate RSA keypair from loginkey
 
   // save info
@@ -149,7 +149,7 @@ async function register() {
 
 
 async function login() {
-  alert('Logging in... This may take a minute.'); // asynchronous alert
+  document.getElementById('loginbutton').innerHTML = 'Registering...';
 
   // verify password
   let loginkey = document.getElementById('loginkey').value;
