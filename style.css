@@ -95,7 +95,7 @@ h6 {
   margin: 1px 0 5px 0;
 }
 .rainbowbg, .rainbowtxt, .btn {
-  animation: colorchange 5s infinite;
+  animation: colorchange 3s infinite;
   animation-timing-function: linear;
 }
 
@@ -178,6 +178,9 @@ h6 {
   border-radius: 10px;
 }
 
+.infotab img {
+  vertical-align: middle;
+}
 .infotab {
   white-space: nowrap;
   text-overflow: ellipsis;
