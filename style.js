@@ -7,11 +7,15 @@ lightdarkmode.addEventListener('click', function() {
       getComputedStyle(docelem).getPropertyValue('--bg-clr-dark').trim()) {
         docelem.style.setProperty('--bg-clr',  getComputedStyle(docelem).getPropertyValue('--bg-clr-light'));
         docelem.style.setProperty('--text-clr',  getComputedStyle(docelem).getPropertyValue('--text-clr-light'));
-        lightdarkmode.innerHTML = '<img src="sun.svg"/> Light Mode'; // ☽
+        document.getElementById('darktab').style.display = 'inline-block';
+        document.getElementById('lighttab').style.display = 'none';
+        // lightdarkmode.innerHTML = '<img src="sun.svg"/> Light Mode'; // ☽
   } else {
     docelem.style.setProperty('--bg-clr',  getComputedStyle(docelem).getPropertyValue('--bg-clr-dark'));
     docelem.style.setProperty('--text-clr',  getComputedStyle(docelem).getPropertyValue('--text-clr-dark'));
-    lightdarkmode.innerHTML = '<img src="moon.svg"/> Dark Mode'; // ☼  ❂  🌔
+    // lightdarkmode.innerHTML = '<img src="moon.svg"/> Dark Mode'; // ☼  ❂  🌔
+    document.getElementById('lighttab').style.display = 'inline-block';
+    document.getElementById('darktab').style.display = 'none';
   }
 });
 
